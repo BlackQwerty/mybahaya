@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyBahaya — Live Map</title>
+  <meta name="description" content="Live map interface for tracking and monitoring incidents." />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- MapLibre -->
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
+
+  <link rel="stylesheet" href="../css/shared.css" />
+  <link rel="stylesheet" href="../css/map.css" />
+</head>
+
+<body class="map-page">
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="home.html" class="navbar-brand" aria-label="MyBahaya Home">
+      <div class="brand-icon"><i class="ph ph-shield-warning"></i></div>
+      <span class="brand-name">MyBahaya</span>
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="home.html"><i class="ph ph-house"></i> Home</a></li>
+      <li><a href="report.html"><i class="ph ph-clipboard-text"></i> Reports</a></li>
+      <li><a href="map.html" class="active"><i class="ph ph-map-trifold"></i> Map</a></li>
+      <li><a href="analytics.html"><i class="ph ph-chart-line-up"></i> Analytics</a></li>
+      <li><a href="users.html" class="admin-only"><i class="ph ph-users-three"></i> Users</a></li>
+    </ul>
+    <div class="navbar-right">
+      <div class="avatar-btn" role="button" aria-label="User profile" tabindex="0">
+        <i class="ph ph-user-circle"></i>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Fullscreen Map Container -->
+  <div id="full-map" class="full-map-container"></div>
+  <!-- Overlay tint for glass effect over map -->
+  <div class="map-overlay-tint"></div>
+
+  <!-- Interactive Overlays -->
+  <div class="map-ui fade-in">
+
+    <!-- Left Panels (Tools & Filters) -->
+    <div class="map-left-panels">
+
+      <!-- Layers Control -->
+      <div class="glass-card map-panel">
+        <h3 class="panel-title">Map Layers</h3>
+        <div class="toggle-row">
+          <span>Thermal View</span>
+          <label class="switch"><input type="checkbox" id="layer-thermal"><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <span>CCTV Feeds</span>
+          <label class="switch"><input type="checkbox" id="layer-cctv"><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <span>Safe Zones</span>
+          <label class="switch"><input type="checkbox" id="layer-safe" checked><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="glass-card map-panel">
+        <h3 class="panel-title">Active Filters</h3>
+        <div class="filter-pills">
+          <button class="map-pill active">Critical</button>
+          <button class="map-pill">Medics</button>
+          <button class="map-pill">Fire</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panels (Stats & Activity) -->
+    <div class="map-right-panels">
+      <div class="glass-card map-panel" style="width: 300px;">
+        <h3 class="panel-title">Sector Statistics</h3>
+
+        <div class="map-stats-grid">
+          <div>
+            <p class="stat-label">Response Time</p>
+            <p class="stat-value">4.2 <span style="font-size:12px;opacity:0.6">min</span></p>
+          </div>
+          <div>
+            <p class="stat-label">Active Units</p>
+            <p class="stat-value">18</p>
+          </div>
+        </div>
+
+        <div class="threat-level-box mt-3">
+          <div class="d-flex justify-between" style="font-size:10px;margin-bottom:4px;color:rgba(255,255,255,0.6)">
+            <span>THREAT LEVEL</span>
+            <span style="color:var(--accent-rose)">MODERATE (42%)</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: 42%; background: var(--accent-rose)"></div>
+          </div>
+        </div>
+
+        <h3 class="panel-title" style="margin-top:20px;margin-bottom:10px">Recent Activity</h3>
+        <div class="map-activity-list">
+          <div class="map-act-item">
+            <div class="act-dot" style="background:var(--accent-rose)"></div>
+            <div>
+              <p class="act-title">Assistance Requested</p>
+              <p class="act-sub">Subway St. 1A • 2m ago</p>
+            </div>
+          </div>
+          <div class="map-act-item">
+            <div class="act-dot" style="background:var(--accent-green)"></div>
+            <div>
+              <p class="act-title">Unit 04 Deployed</p>
+              <p class="act-sub">North Perimeter • 15m ago</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Camera Feed Widget -->
+        <div class="cctv-widget glass-card">
+          <div class="cctv-header">
+            <span style="color:var(--accent-rose)"><i class="ph ph-record ph-fill pulse-record"></i> LIVE CAM 08</span>
+          </div>
+          <div class="cctv-bg">
+            <i class="ph ph-video-camera" style="font-size:32px;opacity:0.3"></i>
+          </div>
+          <div class="cctv-footer">
+            <p style="font-weight:600;font-size:12px">Main Square North</p>
+            <p style="font-size:10px;color:rgba(255,255,255,0.5)">34 Units Detected</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom Controls -->
+    <div class="map-bottom-controls">
+      <div class="zoom-controls glass-card">
+        <button id="zoom-in"><i class="ph ph-plus"></i></button>
+        <button id="zoom-out"><i class="ph ph-minus"></i></button>
+      </div>
+      <button class="btn btn-glass icon-btn" id="locate-me"><i class="ph ph-crosshair"></i></button>
+      <button class="btn btn-primary" id="toggle-3d" style="border-radius:100px;padding:0 24px;height:48px"><i
+          class="ph ph-stack"></i> 3D View</button>
+    </div>
+
+  </div>
+
+  <div class="fab-container">
+    <div class="fab-menu" id="fab-menu" role="menu">
+      <a href="#" class="fab-menu-item" id="fab-settings" role="menuitem">
+        <i class="ph ph-gear"></i> Settings
+      </a>
+      <button class="fab-menu-item danger" id="fab-logout" role="menuitem">
+        <i class="ph ph-sign-out"></i> Log Out
+      </button>
+    </div>
+    <button class="fab-btn" id="fab-btn" aria-label="Open menu" aria-expanded="false">
+      <i class="ph ph-list"></i>
+    </button>
+  </div>
+
+  <script src="../js/shared.js"></script>
+  <script src="../js/map.js"></script>
+</body>
+
+</html>

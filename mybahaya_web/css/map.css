@@ -1,0 +1,138 @@
+/* ============================================================
+   map.css — Map Page Styles
+   ============================================================ */
+
+.map-page { overflow: hidden; }
+.map-page .page-wrapper { padding-top: 64px; } /* Override shared padding to make full height */
+
+.full-map-container {
+  position: fixed; top: 64px; left: 0; right: 0; bottom: 0;
+  background: var(--bg-deep); z-index: 1;
+}
+.map-overlay-tint {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(circle at center, transparent 40%, rgba(10,10,18,0.7) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* ── UI Overlays ── */
+.map-ui {
+  position: fixed; top: 64px; left: 0; right: 0; bottom: 0; z-index: 10;
+  pointer-events: none; /* Let clicks pass to map */
+  padding: var(--gap-lg);
+  display: flex; justify-content: space-between;
+}
+.map-ui > * { pointer-events: auto; } /* Re-enable clicks for UI elements */
+
+.map-panel {
+  padding: 16px; margin-bottom: var(--gap-md);
+  background: rgba(15,15,26,0.6);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.panel-title {
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 8px;
+}
+
+/* ── Left Panel Controls ── */
+.map-left-panels { width: 260px; }
+.toggle-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 12px;
+}
+.toggle-row:last-child { margin-bottom: 0; }
+
+/* Switch Toggle */
+.switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(255,255,255,0.1); transition: .3s; border-radius: 34px;
+}
+.slider:before {
+  position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px;
+  background-color: white; transition: .3s; border-radius: 50%;
+}
+input:checked + .slider { background-color: var(--accent-primary); }
+input:checked + .slider:before { transform: translateX(18px); }
+
+/* Pills */
+.filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.map-pill {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  padding: 6px 14px; border-radius: 20px; color: rgba(255,255,255,0.6);
+  font-size: 12px; cursor: pointer; transition: all 0.2s;
+}
+.map-pill:hover { background: rgba(255,255,255,0.1); }
+.map-pill.active { background: rgba(124,108,248,0.2); border-color: var(--accent-primary); color: white; }
+
+/* ── Right Panel Stats ── */
+.map-right-panels { margin-left: auto; }
+.map-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.progress-bar-bg { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 2px; }
+
+.map-activity-list { display: flex; flex-direction: column; gap: 12px; }
+.map-act-item { display: flex; gap: 10px; align-items: flex-start; }
+.act-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; box-shadow: 0 0 8px currentColor; }
+.act-title { font-size: 13px; font-weight: 500; color: white; }
+.act-sub { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+/* CCTV Widget */
+.cctv-widget { margin-top: 20px; overflow: hidden; padding: 0; border: none; }
+.cctv-header { position: absolute; top: 10px; left: 10px; font-size: 10px; font-weight: 700; z-index: 2; }
+.pulse-record { animation: pulseRecord 1s infinite alternate; }
+@keyframes pulseRecord { 0% { opacity: 1; } 100% { opacity: 0.3; } }
+.cctv-bg {
+  height: 120px; background: #000 url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.1"/></svg>');
+  display: flex; align-items: center; justify-content: center; position: relative;
+}
+.cctv-footer { padding: 12px; background: rgba(15,15,26,0.9); }
+
+/* ── Bottom Controls ── */
+.map-bottom-controls {
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 16px; align-items: center;
+}
+.zoom-controls {
+  display: flex; flex-direction: column; padding: 4px; gap: 4px; border-radius: 24px;
+}
+.zoom-controls button {
+  width: 36px; height: 36px; border-radius: 50%; background: transparent; border: none; color: white; font-size: 18px; cursor: pointer; transition: background 0.2s;
+}
+.zoom-controls button:hover { background: rgba(255,255,255,0.1); }
+.icon-btn { width: 48px; height: 48px; border-radius: 50%; padding: 0; justify-content: center; font-size: 20px; }
+
+/* ── Custom Maplibregl Marker styling ── */
+.glass-marker {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px 6px 6px; border-radius: 30px;
+  background: rgba(10,10,18,0.8); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1); color: white;
+  cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  transition: transform 0.2s;
+}
+.glass-marker:hover { transform: scale(1.05) translateY(-2px); z-index: 100; }
+.gm-icon {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 12px;
+}
+.gm-label { font-size: 11px; font-weight: 600; white-space: nowrap; }
+
+/* MapLibre overrides */
+.maplibregl-popup-content {
+  background: rgba(20,20,30,0.9) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  color: white !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+}
+.maplibregl-popup-tip { border-top-color: rgba(20,20,30,0.9) !important; }
+.maplibregl-popup-close-button { color: rgba(255,255,255,0.6) !important; right: 8px !important; top: 8px !important; }
+.maplibregl-popup-close-button:hover { background: transparent !important; color: white !important; }

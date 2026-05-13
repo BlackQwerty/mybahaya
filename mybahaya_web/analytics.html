@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyBahaya — Analytics</title>
+  <meta name="description" content="Detailed incident analytics and system intelligence." />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../css/shared.css" />
+  <link rel="stylesheet" href="../css/analytics.css" />
+</head>
+
+<body>
+  <div class="mesh-bg" aria-hidden="true"></div>
+
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="home.html" class="navbar-brand" aria-label="MyBahaya Home">
+      <div class="brand-icon"><i class="ph ph-shield-warning"></i></div>
+      <span class="brand-name">MyBahaya</span>
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="home.html"><i class="ph ph-house"></i> Home</a></li>
+      <li><a href="report.html"><i class="ph ph-clipboard-text"></i> Reports</a></li>
+      <li><a href="map.html"><i class="ph ph-map-trifold"></i> Map</a></li>
+      <li><a href="analytics.html" class="active"><i class="ph ph-chart-line-up"></i> Analytics</a></li>
+      <li><a href="users.html" class="admin-only"><i class="ph ph-users-three"></i> Users</a></li>
+    </ul>
+    <div class="navbar-right">
+      <div class="avatar-btn" role="button" aria-label="User profile" tabindex="0">
+        <i class="ph ph-user-circle"></i>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-wrapper" id="main-content">
+    <div class="analytics-container">
+
+      <!-- Header -->
+      <div class="page-header fade-in">
+        <div>
+          <p class="page-eyebrow"><span class="dot"
+              style="background:var(--accent-primary);box-shadow:0 0 8px var(--accent-primary)"></span> Intelligence Hub</p>
+          <h1 class="page-title">System <span class="gradient-text">Analytics</span></h1>
+        </div>
+        <div class="header-actions">
+          <select class="glass-input" style="width: auto" aria-label="Timeframe">
+            <option>Last 30 Days</option>
+            <option>Last 7 Days</option>
+            <option>Today</option>
+          </select>
+          <button class="btn btn-primary"
+            style="background:var(--accent-rose);box-shadow:0 4px 16px rgba(240,95,126,0.3)">
+            Export Data
+          </button>
+        </div>
+      </div>
+
+      <!-- Top Row -->
+      <div class="grid-top fade-in fade-in-delay-1">
+
+        <!-- KPIs -->
+        <div class="kpi-column">
+          <div class="glass-card stat-card kpi-card">
+            <p class="stat-label">Incident Velocity</p>
+            <p class="stat-value">12.4 <span style="font-size:14px;color:rgba(255,255,255,0.5)">/hr</span></p>
+            <p class="stat-change up"><i class="ph ph-trend-up"></i> 6.2% vs prev. week</p>
+          </div>
+          <div class="glass-card stat-card kpi-card">
+            <p class="stat-label">Avg. Response Time</p>
+            <p class="stat-value">04:12</p>
+            <p class="stat-change down"><i class="ph ph-trend-down"></i> -12s improvement</p>
+          </div>
+        </div>
+
+        <!-- Heatmap Mock -->
+        <div class="glass-card heatmap-card">
+          <div class="section-header">
+            <h2 class="section-title">Incident Density Heatmap</h2>
+            <div class="heat-controls">
+              <button class="btn-icon"><i class="ph ph-magnifying-glass-plus"></i></button>
+              <button class="btn-icon"><i class="ph ph-lightbulb"></i></button>
+            </div>
+          </div>
+          <div class="heatmap-mock">
+            <!-- Simulated heatmap using CSS gradients -->
+            <div class="heat-blob" style="top:30%;left:40%;width:100px;height:100px;background:var(--accent-rose)">
+            </div>
+            <div class="heat-blob" style="top:60%;left:70%;width:150px;height:150px;background:var(--accent-amber)">
+            </div>
+            <div class="heat-blob" style="top:20%;left:80%;width:80px;height:80px;background:var(--accent-primary)">
+            </div>
+
+            <div class="code-overlay">
+              <p>COORD: 102.2095, 2.3849</p>
+              <p>DENSITY: 0.84</p>
+              <p>RISK_IDX: HIGH</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Main Chart Row -->
+      <div class="grid-main fade-in fade-in-delay-2">
+
+        <div class="glass-card trend-card">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Trend Frequency Analysis</h2>
+              <p style="font-size:11px;color:rgba(255,255,255,0.4)">Predictive modeling for upcoming cycles</p>
+            </div>
+            <div class="chart-legend" style="font-size:10px">
+              <span style="color:var(--accent-rose)"><i class="ph ph-minus"></i> ACTUAL</span>
+              <span style="color:rgba(255,255,255,0.3)"><i class="ph ph-minus" style="stroke-dasharray: 2 2"></i>
+                PROJECTED</span>
+            </div>
+          </div>
+          <div class="chart-wrapper" style="height:250px">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+
+        <div class="side-metrics">
+          <div class="glass-card alert-dist-card">
+            <h2 class="section-title" style="font-size:11px;margin-bottom:16px">Alert Distribution</h2>
+
+            <div class="dist-item">
+              <div class="dist-head"><span>Structural Failure</span><span>42%</span></div>
+              <div class="dist-bar">
+                <div class="fill" style="width:42%;background:var(--accent-rose)"></div>
+              </div>
+            </div>
+            <div class="dist-item">
+              <div class="dist-head"><span>Atmospheric Hazard</span><span>28%</span></div>
+              <div class="dist-bar">
+                <div class="fill" style="width:28%;background:var(--accent-amber)"></div>
+              </div>
+            </div>
+            <div class="dist-item">
+              <div class="dist-head"><span>Security Breach</span><span>18%</span></div>
+              <div class="dist-bar">
+                <div class="fill" style="width:18%;background:var(--accent-secondary)"></div>
+              </div>
+            </div>
+            <div class="dist-item">
+              <div class="dist-head"><span>Other</span><span>12%</span></div>
+              <div class="dist-bar">
+                <div class="fill" style="width:12%;background:rgba(255,255,255,0.3)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card forecast-card">
+            <h2 class="section-title" style="font-size:12px"><i class="ph ph-sparkle"></i> AI Risk Forecast</h2>
+            <p class="forecast-text">Expected 14% increase in <span style="color:var(--accent-rose)">Grid Sigma</span>
+              incidents due to seasonal atmospheric shifts. Recommend increasing drone patrols.</p>
+            <button class="btn btn-glass" style="width:100%;justify-content:center;font-size:10px;margin-top:12px">VIEW
+              DETAILED FORECAST</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Anomalies Table -->
+      <div class="glass-card table-card fade-in fade-in-delay-3">
+        <div class="section-header" style="margin-bottom: 0; padding: var(--gap-md) var(--gap-lg)">
+          <h2 class="section-title" style="font-size:12px;letter-spacing:1px;text-transform:uppercase">Recent Anomalies
+          </h2>
+          <a href="#" style="font-size:11px;color:rgba(255,255,255,0.5);text-decoration:none">View Audit Log →</a>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="glass-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Incident ID</th>
+                <th>Entity</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Probability</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-family:monospace;font-size:11px">14:22:05</td>
+                <td style="font-weight:600">#INC-8892</td>
+                <td>Downtown Sector 4</td>
+                <td><span class="badge badge-critical">HIGH</span></td>
+                <td>Resolved</td>
+                <td style="font-family:monospace">99.2%</td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:11px">14:10:33</td>
+                <td style="font-weight:600">#INC-8891</td>
+                <td>Industrial Port</td>
+                <td><span class="badge badge-warning">MEDIUM</span></td>
+                <td>Active</td>
+                <td style="font-family:monospace">76.4%</td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:11px">13:50:12</td>
+                <td style="font-weight:600">#INC-8889</td>
+                <td>Substation Bravo</td>
+                <td><span class="badge badge-warning"
+                    style="color:var(--accent-green);border-color:var(--accent-green)">LOW</span></td>
+                <td>Archived</td>
+                <td style="font-family:monospace">12.0%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="fab-container">
+    <div class="fab-menu" id="fab-menu" role="menu">
+      <button class="fab-menu-item danger" id="fab-logout" role="menuitem">
+        <i class="ph ph-sign-out"></i> Log Out
+      </button>
+    </div>
+    <button class="fab-btn" id="fab-btn" aria-label="Open menu">
+      <i class="ph ph-list"></i>
+    </button>
+  </div>
+
+  <script src="../js/shared.js"></script>
+  <script src="../js/analytics.js"></script>
+</body>
+
+</html>

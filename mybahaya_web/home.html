@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyBahaya — Home</title>
+  <meta name="description"
+    content="MyBahaya incident monitoring dashboard — real-time overview of active reports, emergencies, and analytics." />
+
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Shared + Page CSS -->
+  <link rel="stylesheet" href="../css/shared.css" />
+  <link rel="stylesheet" href="../css/home.css" />
+</head>
+
+<body>
+  <!-- Animated background mesh -->
+  <div class="mesh-bg" aria-hidden="true"></div>
+
+  <!-- ── Navigation ── -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="home.html" class="navbar-brand" aria-label="MyBahaya Home">
+      <div class="brand-icon"><i class="ph ph-shield-warning"></i></div>
+      <span class="brand-name">MyBahaya</span>
+    </a>
+
+    <ul class="nav-links" role="list">
+      <li><a href="home.html" id="nav-home"><i class="ph ph-house"></i> Home</a></li>
+      <li><a href="report.html" id="nav-report"><i class="ph ph-clipboard-text"></i> Reports</a></li>
+      <li><a href="map.html" id="nav-map"><i class="ph ph-map-trifold"></i> Map</a></li>
+      <li><a href="analytics.html" id="nav-analytics"><i class="ph ph-chart-line-up"></i> Analytics</a></li>
+      <li><a href="users.html" id="nav-users" class="admin-only"><i class="ph ph-users-three"></i> Users</a></li>
+    </ul>
+
+    <div class="navbar-right">
+      <div class="avatar-btn" role="button" aria-label="User profile" tabindex="0">
+        <i class="ph ph-user-circle"></i>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Page Content ── -->
+  <main class="page-wrapper" id="main-content">
+    <div class="home-container">
+
+      <!-- Left Column: Stats + Analytics -->
+      <div class="home-left">
+
+        <!-- Hero Greeting -->
+        <div class="hero-section fade-in">
+          <p class="hero-eyebrow"><span class="dot"></span> Live Monitoring</p>
+          <h1 class="hero-title">Incident <span class="gradient-text">Overview</span></h1>
+          <p class="hero-sub">Real-time situational awareness for Alor Gajah, Melaka</p>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="glass-card stat-card fade-in fade-in-delay-1" id="stat-total">
+            <div class="stat-icon-wrap" style="color:var(--accent-primary)">
+              <div class="glass-icon"><i class="ph ph-clipboard-text"></i></div>
+            </div>
+            <p class="stat-label">Total Reports</p>
+            <p class="stat-value" id="val-total">1,248</p>
+            <p class="stat-change up"><i class="ph ph-trend-up"></i> +12% this month</p>
+          </div>
+
+          <div class="glass-card stat-card fade-in fade-in-delay-2" id="stat-emergency">
+            <div class="stat-icon-wrap" style="color:var(--accent-rose)">
+              <div class="glass-icon" style="background:rgba(240,95,126,0.15);border-color:rgba(240,95,126,0.3)">
+                <i class="ph ph-siren"></i>
+              </div>
+            </div>
+            <p class="stat-label">Active Emergencies</p>
+            <p class="stat-value" id="val-emergency" style="color:var(--accent-rose)">24</p>
+            <p class="stat-change down"><i class="ph ph-trend-down"></i> -3 since yesterday</p>
+          </div>
+
+          <div class="glass-card stat-card fade-in fade-in-delay-3" id="stat-high">
+            <div class="stat-icon-wrap" style="color:var(--accent-amber)">
+              <div class="glass-icon" style="background:rgba(245,166,35,0.15);border-color:rgba(245,166,35,0.3)">
+                <i class="ph ph-warning-circle"></i>
+              </div>
+            </div>
+            <p class="stat-label">High Priority</p>
+            <p class="stat-value" id="val-high" style="color:var(--accent-amber)">87</p>
+            <p class="stat-change up"><i class="ph ph-trend-up"></i> +5 today</p>
+          </div>
+        </div>
+
+        <!-- Incident Distribution Chart -->
+        <div class="glass-card chart-card fade-in fade-in-delay-4">
+          <div class="section-header">
+            <h2 class="section-title"><span class="dot"></span> Incident Distribution</h2>
+            <div class="chart-legend" id="chart-legend"></div>
+          </div>
+          <p class="chart-sub">Real-time analytical trends for the last 24 hours</p>
+          <div class="chart-wrapper">
+            <canvas id="incidentChart" aria-label="Incident distribution bar chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="glass-card activity-card fade-in fade-in-delay-5">
+          <div class="section-header">
+            <h2 class="section-title"><span class="dot"
+                style="background:var(--accent-primary);box-shadow:0 0 8px var(--accent-primary)"></span> Recent Activity</h2>
+            <a href="report.html" class="btn btn-glass" style="font-size:var(--fs-xs);padding:6px 14px">
+              View All <i class="ph ph-arrow-right"></i>
+            </a>
+          </div>
+          <ul class="activity-list" id="activity-list" role="list"></ul>
+        </div>
+
+      </div><!-- /home-left -->
+
+      <!-- Right Column: Live Map -->
+      <div class="home-right">
+        <div class="glass-card map-preview-card fade-in fade-in-delay-2">
+          <div class="section-header">
+            <h2 class="section-title"><span class="dot"
+                style="background:var(--accent-primary);box-shadow:0 0 8px var(--accent-primary)"></span> Live Map — Alor
+              Gajah</h2>
+            <a href="map.html" class="btn btn-glass" style="font-size:var(--fs-xs);padding:6px 14px">
+              Full Map <i class="ph ph-arrows-out"></i>
+            </a>
+          </div>
+          <div id="home-map" class="home-map-container" aria-label="Live incident map"></div>
+          <div class="map-overlay-badges">
+            <span class="badge badge-critical"><i class="ph ph-dot-outline ph-fill"></i> 5 Critical</span>
+            <span class="badge badge-warning"><i class="ph ph-dot-outline ph-fill"></i> 12 Warning</span>
+            <span class="badge badge-success"><i class="ph ph-dot-outline ph-fill"></i> 38 Resolved</span>
+          </div>
+        </div>
+      </div><!-- /home-right -->
+
+    </div><!-- /home-container -->
+  </main>
+
+  <!-- ── Floating Action Button ── -->
+  <div class="fab-container" role="complementary" aria-label="Quick actions">
+    <div class="fab-menu" id="fab-menu" role="menu">
+      <a href="#" class="fab-menu-item" id="fab-settings" role="menuitem">
+        <i class="ph ph-gear"></i> Settings
+      </a>
+      <button class="fab-menu-item danger" id="fab-logout" role="menuitem">
+        <i class="ph ph-sign-out"></i> Log Out
+      </button>
+    </div>
+    <button class="fab-btn" id="fab-btn" aria-label="Open menu" aria-expanded="false" aria-controls="fab-menu">
+      <i class="ph ph-list"></i>
+    </button>
+  </div>
+
+  <script src="../js/shared.js"></script>
+  <script src="../js/home.js"></script>
+</body>
+
+</html>
