@@ -38,7 +38,6 @@ class MyBahayaApp extends StatelessWidget {
   }
 }
 
-/// Main navigator that controls the flow between all app screens
 class AppNavigator extends StatefulWidget {
   const AppNavigator({super.key});
 
@@ -47,55 +46,91 @@ class AppNavigator extends StatefulWidget {
 }
 
 class _AppNavigatorState extends State<AppNavigator> {
-  int _currentScreen = 0; // 0-based index of current screen
+  int _currentScreen = 0;
 
-  void _navigate(int index) => setState(() => _currentScreen = index);
+  final List<Map<String, String>> _onboardingData = [
+    {
+      'title': 'There was a fire ?',
+      'subtitle':
+          'Instant alerts for fire incidents near you. Stay informed, stay safe.',
+      'image': 'assets/images/onboarding/onb_fire.png',
+    },
+    {
+      'title': 'Someone had an accident ?',
+      'subtitle':
+          'Report accidents instantly. Help reach those in need faster.',
+      'image': 'assets/images/onboarding/onb_accident.png',
+    },
+    {
+      'title': 'See someone in danger ?',
+      'subtitle':
+          'Your report could save lives. Be the eyes of your community.',
+      'image': 'assets/images/onboarding/onb_danger.png',
+    },
+  ];
+
+  void _navigate(int index) {
+    if (index == _currentScreen) return;
+    setState(() => _currentScreen = index);
+  }
 
   @override
   Widget build(BuildContext context) {
-    // All screens in order: 0=Onboard1, 1=Onboard2, 2=Welcome, 3=Onboard3,
-    // 4=Auth, 5=Home, 6=Alerts, 7=Map, 8=Report, 9=Settings
+    // All screens in order:
+    // 0=Onboard1, 1=Onboard2, 2=Welcome, 3=Onboard3, 4=Auth, 5=HomeDashboard, 6=Alerts, 7=Map, 8=Report, 9=Settings
     final screens = [
-      // Page 1 – Onboarding (fire)
+      // Page 1 – Onboarding: Fire
       OnboardingScreen(
-        title: 'There was a fire ?',
+        title: _onboardingData[0]['title']!,
+        subtitle: _onboardingData[0]['subtitle']!,
         buttonText: 'GET STARTED',
-        pageIndex: 0,
+        imageAsset: _onboardingData[0]['image']!,
         onPressed: () => _navigate(1),
+        pageIndex: 0,
       ),
-      // Page 2 – Onboarding (accident)
+      // Page 2 – Onboarding: Accident
       OnboardingScreen(
-        title: 'Someone had an accident & need help?',
+        title: _onboardingData[1]['title']!,
+        subtitle: _onboardingData[1]['subtitle']!,
         buttonText: 'NEXT',
-        pageIndex: 1,
+        imageAsset: _onboardingData[1]['image']!,
         onPressed: () => _navigate(2),
+        pageIndex: 1,
       ),
       // Page 3 – Welcome
       WelcomeScreen(
         onSignIn: () => _navigate(4),
         onSignUp: () => _navigate(4),
       ),
-      // Page 4 – Onboarding (danger)
+      // Page 4 – Onboarding: Danger
       OnboardingScreen(
-        title: 'See someone in danger ?',
-        buttonText: 'NEXT',
-        pageIndex: 2,
+        title: _onboardingData[2]['title']!,
+        subtitle: _onboardingData[2]['subtitle']!,
+        buttonText: 'GET STARTED',
+        imageAsset: _onboardingData[2]['image']!,
         onPressed: () => _navigate(4),
+        pageIndex: 2,
       ),
       // Auth (Sign In / Sign Up)
       AuthScreen(
-        onSuccess: () => _navigate(5), // Navigate to HomeDashboard (index 5)
+        onSuccess: () => _navigate(5),
       ),
-      // Main App Dashboard (Handles Map, Report, Home, Alerts, Settings)
+      // Main App Dashboard
       const MainLayout(),
     ];
 
     return GlassBackdropScope(
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 350),
+        duration: const Duration(milliseconds: 400),
         transitionBuilder: (child, animation) => FadeTransition(
           opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
-          child: child,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.05, 0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+            child: child,
+          ),
         ),
         child: KeyedSubtree(
           key: ValueKey(_currentScreen),
