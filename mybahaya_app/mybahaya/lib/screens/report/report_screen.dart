@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/app_header.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -15,7 +17,7 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF341515),
+      backgroundColor: AppTheme.solidBg,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -23,9 +25,11 @@ class _ReportScreenState extends State<ReportScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(),
+              const AppHeader(title: 'Report'),
               const SizedBox(height: 20),
               _buildLocationBadge(),
+              const SizedBox(height: 20),
+              _buildMediaUpload(),
               const SizedBox(height: 20),
               _buildMediaUpload(),
               const SizedBox(height: 24),
@@ -35,49 +39,6 @@ class _ReportScreenState extends State<ReportScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return SizedBox(
-      height: 75,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.saved_search_rounded,
-                color: Colors.white,
-                size: 28,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'MyBahaya',
-                style: GoogleFonts.sourceSerif4(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-          Container(
-            width: 43,
-            height: 43,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withOpacity(0.1),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-            ),
-            child: const Icon(
-              Icons.person_rounded,
-              color: Colors.white70,
-              size: 24,
-            ),
-          ),
-        ],
       ),
     );
   }

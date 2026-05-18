@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_header.dart';
 
 class LiveAlertsScreen extends StatefulWidget {
   const LiveAlertsScreen({super.key});
@@ -23,9 +24,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopBar(),
-              const SizedBox(height: 20),
-              _buildScreenHeader(),
+              const AppHeader(title: 'Live Alerts'),
               const SizedBox(height: 20),
               _buildSearchBar(),
               const SizedBox(height: 20),
@@ -35,77 +34,6 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTopBar() {
-    return SizedBox(
-      height: 75,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.saved_search_rounded,
-                color: Colors.white,
-                size: 28,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'MyBahaya',
-                style: GoogleFonts.sourceSerif4(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-          GestureDetector(
-            onTap: () {},
-            child: Container(
-              width: 43,
-              height: 43,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.1),
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
-              ),
-              child: const Icon(
-                Icons.person_rounded,
-                color: Colors.white70,
-                size: 24,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScreenHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Live Alerts',
-          style: GoogleFonts.inter(
-            fontSize: 26,
-            fontWeight: FontWeight.w800,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'Real-time safety intelligence for your current vicinity.',
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            color: Colors.white.withOpacity(0.5),
-            height: 1.4,
-          ),
-        ),
-      ],
     );
   }
 

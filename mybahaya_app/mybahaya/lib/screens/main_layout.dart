@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'home/home_dashboard.dart';
 import 'map/map_screen.dart';
@@ -27,7 +28,7 @@ class _MainLayoutState extends State<MainLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF341515),
+      backgroundColor: AppTheme.solidBg,
       extendBody: true,
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: MyBahayaNavBar(
