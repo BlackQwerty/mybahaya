@@ -2,6 +2,118 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Mascot Lifebuoy Painter (High fidelity drawn placeholder for the logo)
+// ─────────────────────────────────────────────────────────────────────────────
+class _MascotPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final radius = size.width * 0.35;
+
+    final paintWhite = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    final paintRed = Paint()
+      ..color = const Color(0xFFB22222)
+      ..style = PaintingStyle.fill;
+
+    final paintOutline = Paint()
+      ..color = Colors.white.withOpacity(0.8)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.3)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+
+    // 1. Draw shadow under mascot feet
+    canvas.drawOval(
+      Rect.fromLTRB(cx - radius * 0.7, cy + radius * 1.1, cx + radius * 0.7, cy + radius * 1.3),
+      shadowPaint,
+    );
+
+    // 2. Draw little legs / feet at the bottom
+    final pathLegs = Path()
+      ..moveTo(cx - radius * 0.3, cy + radius * 0.6)
+      ..lineTo(cx - radius * 0.35, cy + radius * 1.1)
+      ..lineTo(cx - radius * 0.5, cy + radius * 1.15)
+      ..lineTo(cx - radius * 0.25, cy + radius * 1.15)
+      ..lineTo(cx - radius * 0.15, cy + radius * 0.6)
+      ..close()
+      ..moveTo(cx + radius * 0.3, cy + radius * 0.6)
+      ..lineTo(cx + radius * 0.35, cy + radius * 1.1)
+      ..lineTo(cx + radius * 0.5, cy + radius * 1.15)
+      ..lineTo(cx + radius * 0.25, cy + radius * 1.15)
+      ..lineTo(cx + radius * 0.15, cy + radius * 0.6)
+      ..close();
+    canvas.drawPath(pathLegs, paintWhite);
+    canvas.drawPath(pathLegs, paintOutline);
+
+    // 3. Draw little arms on the sides
+    final pathArms = Path()
+      // Left arm
+      ..moveTo(cx - radius * 0.8, cy - radius * 0.1)
+      ..quadraticBezierTo(cx - radius * 1.2, cy - radius * 0.05, cx - radius * 1.25, cy + radius * 0.2)
+      ..quadraticBezierTo(cx - radius * 1.2, cy + radius * 0.4, cx - radius * 0.9, cy + radius * 0.5)
+      ..lineTo(cx - radius * 0.8, cy + radius * 0.35)
+      ..close()
+      // Right arm
+      ..moveTo(cx + radius * 0.8, cy - radius * 0.1)
+      ..quadraticBezierTo(cx + radius * 1.2, cy - radius * 0.05, cx + radius * 1.25, cy + radius * 0.2)
+      ..quadraticBezierTo(cx + radius * 1.2, cy + radius * 0.4, cx + radius * 0.9, cy + radius * 0.5)
+      ..lineTo(cx + radius * 0.8, cy + radius * 0.35)
+      ..close();
+    canvas.drawPath(pathArms, paintWhite);
+    canvas.drawPath(pathArms, paintOutline);
+
+    // 4. Draw lifebuoy circular base (White body)
+    canvas.drawCircle(Offset(cx, cy), radius, paintWhite);
+    canvas.drawCircle(Offset(cx, cy), radius, paintOutline);
+
+    // 5. Draw 4 red straps (top, bottom, left, right)
+    final clipPath = Path()..addOval(Rect.fromCircle(center: Offset(cx, cy), radius: radius));
+    canvas.save();
+    canvas.clipPath(clipPath);
+
+    // Top strap
+    canvas.drawRect(Rect.fromLTWH(cx - radius * 0.25, cy - radius, radius * 0.5, radius * 0.45), paintRed);
+    // Bottom strap
+    canvas.drawRect(Rect.fromLTWH(cx - radius * 0.25, cy + radius * 0.55, radius * 0.5, radius * 0.45), paintRed);
+    // Left strap
+    canvas.drawRect(Rect.fromLTWH(cx - radius, cy - radius * 0.25, radius * 0.45, radius * 0.5), paintRed);
+    // Right strap
+    canvas.drawRect(Rect.fromLTWH(cx + radius * 0.55, cy - radius * 0.25, radius * 0.45, radius * 0.5), paintRed);
+
+    canvas.restore();
+
+    // Re-outline the lifebuoy ring
+    canvas.drawCircle(Offset(cx, cy), radius, paintOutline);
+
+    // 6. Draw lifebuoy inner hollow center (grey/dark background)
+    final hollowPaint = Paint()
+      ..color = const Color(0xFF1E0C0C)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(cx, cy), radius * 0.5, hollowPaint);
+    canvas.drawCircle(Offset(cx, cy), radius * 0.5, paintOutline);
+
+    // 7. Draw inner target/eye shield
+    canvas.drawCircle(Offset(cx, cy), radius * 0.3, paintRed);
+    canvas.drawCircle(Offset(cx, cy), radius * 0.3, paintOutline);
+
+    // Draw little center dot/eye
+    canvas.drawCircle(Offset(cx, cy), radius * 0.1, paintWhite);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Welcome Screen
+// ─────────────────────────────────────────────────────────────────────────────
 class WelcomeScreen extends StatelessWidget {
   final VoidCallback onSignIn;
   final VoidCallback onSignUp;
@@ -20,90 +132,104 @@ class WelcomeScreen extends StatelessWidget {
         color: AppTheme.solidBg,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 40),
-                _buildLogo(),
-                const SizedBox(height: 24),
-                Text(
-                  'WELCOME TO',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white.withOpacity(0.4),
-                    letterSpacing: 4,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'MyBahaya',
-                  style: GoogleFonts.playfairDisplay(
-                    fontSize: 42,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: 1,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  height: 2,
-                  width: 80,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Colors.transparent,
-                        Color(0xFFB22222),
-                        Colors.transparent,
-                      ],
+                const Spacer(flex: 1),
+
+                // ── Logo Section ──
+                Center(
+                  child: SizedBox(
+                    width: 130,
+                    height: 130,
+                    child: Image.asset(
+                      'assets/images/logos/logo.png',
+                      // Fallback dynamically to custom painted mascot if assets are not loaded yet
+                      errorBuilder: (context, error, stackTrace) {
+                        return CustomPaint(
+                          painter: _MascotPainter(),
+                          size: const Size(130, 130),
+                        );
+                      },
                     ),
-                    borderRadius: BorderRadius.circular(1),
                   ),
                 ),
-                const SizedBox(height: 28),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: Container(
-                            padding: const EdgeInsets.all(28),
-                            color: Colors.white.withOpacity(0.05),
-                            child: Column(
-                              children: [
-                                _featureItem(
-                                    Icons.security_rounded,
-                                    'Real-Time Alerts',
-                                    'Get instant notifications about dangers in your area'),
-                                const SizedBox(height: 18),
-                                _featureItem(
-                                    Icons.map_rounded,
-                                    'Interactive Map',
-                                    'View incident locations with real-time updates'),
-                                const SizedBox(height: 18),
-                                _featureItem(
-                                    Icons.report_problem_rounded,
-                                    'Easy Reporting',
-                                    'Report incidents with photos and location data'),
-                                const SizedBox(height: 18),
-                                _featureItem(
-                                    Icons.privacy_tip_rounded,
-                                    'Anonymous & Safe',
-                                    'Your identity is protected at all times'),
-                              ],
-                            ),
-                          ),
+
+                const SizedBox(height: 36),
+
+                // ── Titles ──
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'WELCOME',
+                        style: GoogleFonts.playfairDisplay(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 2.0,
                         ),
-                        const SizedBox(height: 32),
-                        _buildPrimaryButton('Sign In', onSignIn),
-                        const SizedBox(height: 12),
-                        _buildSecondaryButton('Create Account', onSignUp),
-                      ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'TO',
+                        style: GoogleFonts.playfairDisplay(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white.withOpacity(0.8),
+                          letterSpacing: 3.0,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'MyBahaya',
+                        style: GoogleFonts.playfairDisplay(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 36),
+
+                // ── Detailed Description Paragraph ──
+                Expanded(
+                  flex: 5,
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Text(
+                      'Hello and thank you for all users and especially Malaysians. This app is to acknowledge people about all kind of dangers and a faster reporting with evidence while keeping the reporter privacy and identity while helping those who in trouble getting help faster and safer. A strict legal action will be taken for users who create fake reports and scamming.\n\nStay Safe and "Kita Jaga Kita".',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.5,
+                        color: const Color(0xFFACA494),
+                        height: 1.6,
+                        letterSpacing: 0.2,
+                      ),
                     ),
                   ),
                 ),
+
+                const Spacer(flex: 1),
+
+                // ── Buttons Row (Side-by-Side Pill-shaped outlines) ──
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildWelcomeButton('Sign In', onSignIn),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildWelcomeButton('Sign Up', onSignUp),
+                    ),
+                  ],
+                ),
+                
                 const SizedBox(height: 16),
               ],
             ),
@@ -113,185 +239,29 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLogo() {
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withOpacity(0.05),
-        border: Border.all(color: Colors.white.withOpacity(0.25), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.maroonLight.withOpacity(0.3),
-            blurRadius: 30,
-            spreadRadius: 5,
-          ),
-        ],
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 90,
-            height: 90,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppTheme.maroonGlow.withOpacity(0.4),
-                width: 1,
-              ),
-            ),
-          ),
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AppTheme.maroonGlow.withOpacity(0.9),
-                  AppTheme.maroonPrimary,
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.maroonGlow.withOpacity(0.5),
-                  blurRadius: 18,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.shield_rounded,
-              color: Colors.white,
-              size: 30,
-            ),
-          ),
-          Positioned(
-            top: 32,
-            left: 38,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _featureItem(IconData icon, String title, String desc) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: AppTheme.maroonLight.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: AppTheme.maroonGlow, size: 18),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                desc,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: Colors.white.withOpacity(0.5),
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPrimaryButton(String text, VoidCallback onPressed) {
+  // ── Outlined Pill Welcome Buttons ──
+  Widget _buildWelcomeButton(String label, VoidCallback onTap) {
     return SizedBox(
-      width: double.infinity,
-      height: 58,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(29),
-          ),
-          padding: EdgeInsets.zero,
-        ),
-        child: Ink(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFB22222), Color(0xFF8B1A1A)],
-            ),
-            borderRadius: BorderRadius.circular(29),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFB22222).withOpacity(0.5),
-                blurRadius: 24,
-                spreadRadius: -4,
-              ),
-            ],
-          ),
-          child: Container(
-            alignment: Alignment.center,
-            child: Text(
-              text,
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.5,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSecondaryButton(String text, VoidCallback onPressed) {
-    return SizedBox(
-      width: double.infinity,
-      height: 58,
+      height: 48,
       child: OutlinedButton(
-        onPressed: onPressed,
+        onPressed: onTap,
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.white,
-          side: const BorderSide(color: Colors.white24, width: 1.5),
+          side: BorderSide(
+            color: Colors.white.withOpacity(0.8),
+            width: 1.2,
+          ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(29),
+            borderRadius: BorderRadius.circular(24),
           ),
           padding: EdgeInsets.zero,
         ),
         child: Text(
-          text,
+          label,
           style: GoogleFonts.inter(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
-            letterSpacing: 1.5,
+            letterSpacing: 0.5,
           ),
         ),
       ),

@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_bar.dart';
+import '../../widgets/app_header.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -70,6 +72,7 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       backgroundColor: AppTheme.solidBg,
       extendBody: true,
+      appBar: MyBahayaAppBar(),
       body: Stack(
         children: [
           // ── BASE LAYER: MAP VIEWER ──────────────────────────────────────────
@@ -122,82 +125,42 @@ class _MapScreenState extends State<MapScreen> {
                 ],
               ),
 
-          // ── TOP NAVIGATION APP BAR (Matches App Structure) ──────────────────
+          // ── TOP NAVIGATION APP BAR HEADER overlay ──────────────────
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             child: Container(
-              height: 110,
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    AppTheme.solidBg.withOpacity(0.95),
+                    AppTheme.solidBg.withOpacity(0.92),
                     AppTheme.solidBg.withOpacity(0.00),
                   ],
                 ),
               ),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppTheme.maroonPrimary,
-                        ),
-                        child: const Icon(
-                          Icons.shield_outlined,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'MyBahaya',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.maroonGlow,
-                        ),
-                      ),
-                      const Spacer(),
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.white.withOpacity(0.1),
-                        child: const Icon(
-                          Icons.person_rounded,
-                          color: Colors.white70,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              child: const AppHeader(title: 'Map Overview'),
             ),
           ),
 
-          // ── SLIDER/HUD CONTROLLER PANEL (Sleek Compact Width Boundary) ──────
+          // ── SLIDER/HUD CONTROLLER PANEL (Flexible Width Boundary Fix) ──────
           Positioned(
-            top: 105,
+            top: 125, // Adjusted from 165 to perfectly clear the non-SafeArea header
             left: 20,
             child: SizedBox(
-              width: 175,
+              width: 190, // 1. Increased from 175 to prevent the inner width crash
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 12,
+                    ), // 2. Optimized padding
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.40),
                       borderRadius: BorderRadius.circular(16),
@@ -250,6 +213,8 @@ class _MapScreenState extends State<MapScreen> {
                           onTap: () {},
                         ),
                         const SizedBox(height: 12),
+
+                        // 3. Replaced fixed row widths with natural space distribution
                         _metricRow(
                           title: 'Local Risk',
                           value: '3.8',
@@ -394,10 +359,7 @@ class _IncidentMarker extends StatelessWidget {
   final String severity;
   final String type;
 
-  const _IncidentMarker({
-    required this.severity,
-    required this.type,
-  });
+  const _IncidentMarker({required this.severity, required this.type});
 
   @override
   Widget build(BuildContext context) {
@@ -411,12 +373,7 @@ class _IncidentMarker extends StatelessWidget {
         shape: BoxShape.circle,
         color: color.withOpacity(0.15),
         border: Border.all(color: color, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.3),
-            blurRadius: 8,
-          ),
-        ],
+        boxShadow: [BoxShadow(color: color.withOpacity(0.3), blurRadius: 8)],
       ),
       child: Icon(icon, color: color, size: 16),
     );

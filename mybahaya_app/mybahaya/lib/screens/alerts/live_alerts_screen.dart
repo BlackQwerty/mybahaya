@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_header.dart';
+import '../../widgets/app_bar.dart';
 
 class LiveAlertsScreen extends StatefulWidget {
   const LiveAlertsScreen({super.key});
@@ -16,22 +17,19 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen> {
     return Scaffold(
       backgroundColor: AppTheme.solidBg,
       extendBody: true,
+      appBar: MyBahayaAppBar(),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        child: Container(
-          color: AppTheme.solidBg,
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const AppHeader(title: 'Live Alerts'),
-              const SizedBox(height: 20),
-              _buildSearchBar(),
-              const SizedBox(height: 20),
-              _buildAlertCards(),
-              const SizedBox(height: 100),
-            ],
-          ),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 130),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const AppHeader(title: 'Live Alerts'),
+            const SizedBox(height: 24),
+            _buildSearchBar(),
+            const SizedBox(height: 24),
+            _buildAlertCards(),
+          ],
         ),
       ),
     );

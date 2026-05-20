@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mybahaya/widgets/app_bar.dart';
 import '../../theme/app_theme.dart';
+import '../profile/profile_screen.dart';
 import '../../widgets/app_header.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -15,342 +17,321 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _safeZoneEntry = true;
   bool _ghostMode = false;
   bool _hideUsername = false;
-  bool _autoShareLocation = true;
+
+  // Exact theme color tokens from the user request
+  static const Color nudeColor = Color(0xFFACA494);
+  static const Color pinkColor = Color(0xFFFFABBB);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.solidBg,
-      extendBody: true,
-      body: Container(
-        color: AppTheme.solidBg,
-        child: SafeArea(
-          bottom: false,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const AppHeader(title: 'Settings'),
-                const SizedBox(height: 28),
+      extendBody:
+          true, // Let the background scroll seamlessly below the nav bar
+      appBar: const MyBahayaAppBar(),
 
-                // ── Section 1 — User Profile Card ─────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Edit Profile',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.90),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2C1B1B),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          leading: const CircleAvatar(
-                            radius: 28,
-                            backgroundColor: AppTheme.maroonPrimary,
-                            child: Icon(
-                              Icons.person_rounded,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          ),
-                          title: Text(
-                            'Bro Kirk',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                          subtitle: Text(
-                            'p.........@gmail.com',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: Colors.white.withOpacity(0.50),
-                            ),
-                          ),
-                          trailing: Icon(
-                            Icons.chevron_right_rounded,
-                            color: Colors.white.withOpacity(0.30),
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 28),
-
-                // ── Section 2 — Notifications Toggles ─────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Notifications',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.90),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2C1B1B),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          children: [
-                            _settingTile(
-                              title: 'Emergency Alerts',
-                              subtitle:
-                                  'Critical danger proximity notifications',
-                              icon: Icons.warning_rounded,
-                              iconColor: AppTheme.alertRed,
-                              value: _emergencyAlerts,
-                              onChanged: (v) =>
-                                  setState(() => _emergencyAlerts = v),
-                            ),
-                            _navDivider(),
-                            _settingTile(
-                              title: 'Safe-Zone Entry',
-                              subtitle: 'Chime when entering verified safe zones',
-                              icon: Icons.shield_rounded,
-                              iconColor: AppTheme.alertGreen,
-                              value: _safeZoneEntry,
-                              onChanged: (v) =>
-                                  setState(() => _safeZoneEntry = v),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 28),
-
-                // ── Section 3 — Privacy Controls ──────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Privacy Controls',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.90),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2C1B1B),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          children: [
-                            _settingTile(
-                              title: 'Ghost Mode',
-                              subtitle: 'Hide your real-time position from others',
-                              icon: Icons.visibility_off_rounded,
-                              iconColor: const Color(0xFF9B59B6),
-                              value: _ghostMode,
-                              onChanged: (v) =>
-                                  setState(() => _ghostMode = v),
-                            ),
-                            _navDivider(),
-                            _settingTile(
-                              title: 'Hide Username',
-                              subtitle: 'Hides your username from others',
-                              icon: Icons.person_off_rounded,
-                              iconColor: const Color(0xFF007AFF),
-                              value: _hideUsername,
-                              onChanged: (v) =>
-                                  setState(() => _hideUsername = v),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 28),
-
-                // ── Section 4 — Account Utilities ─────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Account',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.90),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2C1B1B),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          children: [
-                            _utilityTile(
-                              'Change Password',
-                              Icons.lock_reset_rounded,
-                            ),
-                            _navDivider(),
-                            _utilityTile(
-                              'Help & Support',
-                              Icons.help_outline_rounded,
-                              iconColor: AppTheme.maroonGlow,
-                            ),
-                            _navDivider(),
-                            _utilityTile(
-                              'Logout',
-                              Icons.logout_rounded,
-                              iconColor: AppTheme.alertRed,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ── Bottom safety spacer — clears liquid-glass nav bar ──
-                const SizedBox(height: 120),
-              ],
-            ),
-          ),
+      // FIX: Removed the outer SafeArea wrapper from here
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          20,
+          20,
+          20,
+          130, // Increased to 130 to give your premium custom buttons clear padding from the nav bar
         ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+              // ── Header Title & Subtitle ──
+              const AppHeader(title: 'Settings'),
+              const SizedBox(height: 32),
+
+              // ── Section 1: Edit Profile ──
+              _buildSectionHeader(
+                icon: Icons.person_outline_rounded,
+                label: 'Edit Profile',
+              ),
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF422E2E).withOpacity(0.55),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white.withOpacity(0.06)),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                  leading: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFF0F4C81).withOpacity(0.2),
+                      border: Border.all(
+                        color: pinkColor.withOpacity(0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/logos/logo.png',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.person_rounded,
+                            color: pinkColor,
+                            size: 28,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  title: Text(
+                    'Bro Kirk',
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: pinkColor,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      'p---------@gmail.com',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: pinkColor.withOpacity(0.7),
+                      ),
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right_rounded,
+                    color: Colors.white54,
+                    size: 24,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfileScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 28),
+
+              // ── Section 2: Notifications Toggles ──
+              _buildSectionHeader(
+                icon: Icons.notifications_none_rounded,
+                label: 'Notifications Toggles',
+              ),
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF422E2E).withOpacity(0.55),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white.withOpacity(0.06)),
+                ),
+                child: Column(
+                  children: [
+                    _buildToggleRow(
+                      title: 'Emergency Alerts',
+                      subtitle: 'Critical danger proximity notifications',
+                      value: _emergencyAlerts,
+                      onChanged: (v) => setState(() => _emergencyAlerts = v),
+                    ),
+                    _buildDivider(),
+                    _buildToggleRow(
+                      title: 'Safe-Zone Entry',
+                      subtitle: 'Chime when entering verified safe zones',
+                      value: _safeZoneEntry,
+                      onChanged: (v) => setState(() => _safeZoneEntry = v),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+
+              // ── Section 3: Privacy Controls ──
+              _buildSectionHeader(
+                icon: Icons.security_rounded,
+                label: 'Privacy Controls',
+              ),
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF422E2E).withOpacity(0.55),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white.withOpacity(0.06)),
+                ),
+                child: Column(
+                  children: [
+                    _buildToggleRow(
+                      title: 'Ghost Mode',
+                      subtitle: 'Hide your real-time position from others',
+                      value: _ghostMode,
+                      onChanged: (v) => setState(() => _ghostMode = v),
+                    ),
+                    _buildDivider(),
+                    _buildToggleRow(
+                      title: 'Hide Username',
+                      subtitle: 'Hides your username from others',
+                      value: _hideUsername,
+                      onChanged: (v) => setState(() => _hideUsername = v),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+
+              // ── Section 4: Log Out & Utilities ──
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF422E2E).withOpacity(0.55),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white.withOpacity(0.06)),
+                ),
+                child: _buildActionRow(
+                  title: 'Log Out',
+                  icon: Icons.logout_rounded,
+                  color: pinkColor,
+                  onTap: () {},
+                ),
+              ),
+            ],
+          ),
       ),
     );
   }
 
-  // ─── Setting toggle tile ───────────────────────────────────────
-  Widget _settingTile({
+  // ── Section Header Widget ──
+  Widget _buildSectionHeader({required IconData icon, required String label}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        children: [
+          Icon(icon, color: pinkColor, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: nudeColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Custom Toggle Row Widget ──
+  Widget _buildToggleRow({
     required String title,
     required String subtitle,
-    required IconData icon,
-    required Color iconColor,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: iconColor, size: 18),
-          ),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: pinkColor,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   subtitle,
                   style: GoogleFonts.inter(
                     fontSize: 11,
-                    color: Colors.white.withOpacity(0.40),
+                    color: nudeColor.withOpacity(0.7),
+                    height: 1.3,
                   ),
                 ),
               ],
             ),
           ),
-          Switch.adaptive(
-            value: value,
-            onChanged: onChanged,
-            activeColor: Colors.greenAccent[700] ?? Colors.green,
-            activeTrackColor: Colors.green.withOpacity(0.8),
-            inactiveThumbColor: Colors.white.withOpacity(0.3),
-            inactiveTrackColor: Colors.white.withOpacity(0.08),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ─── Utility list tile ─────────────────────────────────────────
-  Widget _utilityTile(String title, IconData icon, {Color? iconColor}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: (iconColor ?? Colors.white).withOpacity(0.06),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              icon,
-              color: iconColor ?? Colors.white70,
-              size: 18,
-            ),
-          ),
           const SizedBox(width: 12),
-          Text(
-            title,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
+          // High-fidelity custom Switch to match the mockup exactly
+          GestureDetector(
+            onTap: () => onChanged(!value),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 44,
+              height: 24,
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color:
+                    value
+                        ? const Color(0xFFB22222).withOpacity(0.2)
+                        : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.85),
+                  width: 1.5,
+                ),
+              ),
+              alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+              child: Container(
+                width: 16,
+                height: 16,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+              ),
             ),
-          ),
-          const Spacer(),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: Colors.white.withOpacity(0.25),
-            size: 18,
           ),
         ],
       ),
     );
   }
 
-  // ─── Divider ───────────────────────────────────────────────────
-  Widget _navDivider() => Container(
-        height: 1,
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        color: Colors.white.withOpacity(0.06),
-      );
+  // ── Action Row Widget (For Log Out) ──
+  Widget _buildActionRow({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      leading: Icon(icon, color: color, size: 20),
+      title: Text(
+        title,
+        style: GoogleFonts.playfairDisplay(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
+      ),
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        color: color.withOpacity(0.5),
+        size: 20,
+      ),
+      onTap: onTap,
+    );
+  }
+
+  // ── Custom Divider Widget ──
+  Widget _buildDivider() {
+    return Container(
+      height: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      color: Colors.white.withOpacity(0.06),
+    );
+  }
 }
