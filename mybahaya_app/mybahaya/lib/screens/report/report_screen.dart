@@ -5,6 +5,11 @@ import '../../theme/app_theme.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bar.dart';
 
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
+import '../../services/api_service.dart';
+
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
 
@@ -16,10 +21,112 @@ class _ReportScreenState extends State<ReportScreen> {
   String? selectedCategory;
   final TextEditingController descriptionController = TextEditingController();
 
+  File? _selectedImage;
+  bool _isLoading = false;
+  String? _errorMessage;
+  Position? _currentPosition;
+
   // Unified color tokens
   static const Color nudeColor = Color(0xFFACA494);
   static const Color pinkColor = Color(0xFFFFABBB);
   static const Color burgundyColor = Color(0xFFB22222);
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
+    }
+    if (permission == LocationPermission.deniedForever) return;
+
+    final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    if (mounted) {
+      setState(() {
+        _currentPosition = position;
+      });
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedImage = File(picked.path);
+        _errorMessage = null;
+      });
+    }
+  }
+
+  Future<void> _submitReport() async {
+    if (selectedCategory == null) {
+      setState(() => _errorMessage = 'Please select a hazard category');
+      return;
+    }
+    if (_selectedImage == null) {
+      setState(() => _errorMessage = 'Please upload an image for evidence');
+      return;
+    }
+    if (_currentPosition == null) {
+      await _getCurrentLocation();
+      if (_currentPosition == null) {
+        setState(() => _errorMessage = 'Location is required. Please enable location permissions.');
+        return;
+      }
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await ApiService.submitReport(
+        imageFile: _selectedImage!,
+        category: selectedCategory!,
+        latitude: _currentPosition!.latitude,
+        longitude: _currentPosition!.longitude,
+        details: descriptionController.text.trim(),
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Report submitted successfully!',
+              style: GoogleFonts.inter(color: Colors.white),
+            ),
+            backgroundColor: const Color(0xFF422E2E),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pop(context); // Return to previous screen
+      }
+    } catch (e) {
+      setState(() => _errorMessage = 'Failed to submit report. Please check your connection.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +152,22 @@ class _ReportScreenState extends State<ReportScreen> {
             _buildMediaUpload(),
             const SizedBox(height: 28),
             _buildFormInputs(),
+            
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  _errorMessage!,
+                  style: GoogleFonts.inter(
+                    color: AppTheme.alertRed,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+            
             const SizedBox(height: 32),
             _buildReportButton(),
           ],
@@ -54,6 +177,7 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   Widget _buildLocationBadge() {
+    final hasLocation = _currentPosition != null;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
@@ -64,14 +188,14 @@ class _ReportScreenState extends State<ReportScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.location_on_rounded,
-            color: Colors.greenAccent,
+          Icon(
+            hasLocation ? Icons.location_on_rounded : Icons.location_searching_rounded,
+            color: hasLocation ? Colors.greenAccent : nudeColor,
             size: 16,
           ),
           const SizedBox(width: 8),
           Text(
-            'Current Location Active',
+            hasLocation ? 'Current Location Active' : 'Locating...',
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -84,53 +208,61 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   Widget _buildMediaUpload() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-        child: Container(
-          width: double.infinity,
-          height: 160,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withOpacity(0.08),
-                Colors.white.withOpacity(0.03),
-              ],
+    return GestureDetector(
+      onTap: _pickImage,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Container(
+            width: double.infinity,
+            height: 160,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withOpacity(0.08),
+                  Colors.white.withOpacity(0.03),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withOpacity(0.06)),
             ),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withOpacity(0.06)),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.add_a_photo_rounded,
-                color: pinkColor.withOpacity(0.8),
-                size: 40,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Capture or Upload Media',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white70,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Supports JPEG, PNG, or MP4 up to 50MB',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  color: nudeColor.withOpacity(0.6),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+            child: _selectedImage != null
+                ? Image.file(
+                    _selectedImage!,
+                    fit: BoxFit.cover,
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.add_a_photo_rounded,
+                        color: pinkColor.withOpacity(0.8),
+                        size: 40,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Capture or Upload Media',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white70,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Supports JPEG, PNG up to 50MB',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: nudeColor.withOpacity(0.6),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),
@@ -257,25 +389,36 @@ class _ReportScreenState extends State<ReportScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(26),
-          onTap: () {},
+          onTap: _isLoading ? null : _submitReport,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.warning_amber_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'REPORT INCIDENT',
-                style: GoogleFonts.playfairDisplay(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              if (_isLoading)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              else ...[
+                const Icon(
+                  Icons.warning_amber_rounded,
                   color: Colors.white,
-                  letterSpacing: 1.0,
+                  size: 20,
                 ),
-              ),
+                const SizedBox(width: 8),
+                Text(
+                  'REPORT INCIDENT',
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ],
             ],
           ),
         ),

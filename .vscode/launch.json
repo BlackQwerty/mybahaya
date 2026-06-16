@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "MybahayaBackendApplication",
+            "request": "launch",
+            "mainClass": "com.shukri.mybahaya.MybahayaBackendApplication",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
