@@ -27,6 +27,8 @@ dependencies:
   smooth_page_indicator: ^1.2.0+3
   glass_liquid_navbar: ^0.2.0
   shared_preferences: ^2.5.5
+  image_picker: ^1.1.2
+  firebase_storage: ^12.3.5
 
 flutter:
   uses-material-design: true

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mybahaya/widgets/app_bar.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../theme/app_theme.dart';
 import '../profile/profile_screen.dart';
 import '../../widgets/app_header.dart';
+import '../../services/user_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -52,74 +54,105 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 label: 'Edit Profile',
               ),
               const SizedBox(height: 12),
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF422E2E).withOpacity(0.55),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white.withOpacity(0.06)),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 12,
-                  ),
-                  leading: Container(
-                    width: 56,
-                    height: 56,
+
+              // Stream real user data from Firestore
+              StreamBuilder<UserProfile?>(
+                stream: UserService.profileStream(),
+                builder: (context, snapshot) {
+                  final profile = snapshot.data;
+                  final username = profile?.username ?? '—';
+                  final email = profile?.email ?? '—';
+                  final photoUrl = profile?.photoUrl;
+
+                  return Container(
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: const Color(0xFF0F4C81).withOpacity(0.2),
-                      border: Border.all(
-                        color: pinkColor.withOpacity(0.3),
-                        width: 1.5,
-                      ),
+                      color: const Color(0xFF422E2E).withOpacity(0.55),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: Colors.white.withOpacity(0.06)),
                     ),
-                    child: ClipOval(
-                      child: Image.asset(
-                        'assets/images/logos/logo.png',
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
-                            Icons.person_rounded,
-                            color: pinkColor,
-                            size: 28,
-                          );
-                        },
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 12,
                       ),
-                    ),
-                  ),
-                  title: Text(
-                    'Bro Kirk',
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: pinkColor,
-                    ),
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      'p---------@gmail.com',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: pinkColor.withOpacity(0.7),
+                      leading: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF0F4C81).withOpacity(0.2),
+                          border: Border.all(
+                            color: pinkColor.withOpacity(0.3),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: ClipOval(
+                          child: photoUrl != null && photoUrl.isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: photoUrl,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => const Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1.5,
+                                      color: pinkColor,
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(
+                                        Icons.person_rounded,
+                                        color: pinkColor,
+                                        size: 28,
+                                      ),
+                                )
+                              : Image.asset(
+                                  'assets/images/logos/logo.png',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(
+                                      Icons.person_rounded,
+                                      color: pinkColor,
+                                      size: 28,
+                                    );
+                                  },
+                                ),
+                        ),
                       ),
-                    ),
-                  ),
-                  trailing: const Icon(
-                    Icons.chevron_right_rounded,
-                    color: Colors.white54,
-                    size: 24,
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ProfileScreen(),
+                      title: Text(
+                        username,
+                        style: GoogleFonts.playfairDisplay(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: pinkColor,
+                        ),
                       ),
-                    );
-                  },
-                ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          email,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: pinkColor.withOpacity(0.7),
+                          ),
+                        ),
+                      ),
+                      trailing: const Icon(
+                        Icons.chevron_right_rounded,
+                        color: Colors.white54,
+                        size: 24,
+                      ),
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ProfileScreen(),
+                          ),
+                        );
+                        // Rebuild after returning so the avatar/name refreshes
+                        if (mounted) setState(() {});
+                      },
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 28),
 

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/app_header.dart';
+import '../../services/user_service.dart';
 
 class HomeDashboard extends StatefulWidget {
   const HomeDashboard({super.key});
@@ -60,8 +61,17 @@ class _HomeDashboardState extends State<HomeDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Standardized Greeting App Header ──
-            const AppHeader(title: 'Hello, Ahmad'),
+            // ── Greeting with real username from Firestore ──
+            StreamBuilder<UserProfile?>(
+              stream: UserService.profileStream(),
+              builder: (context, snapshot) {
+                final username = snapshot.data?.username;
+                final greeting = (username != null && username.isNotEmpty)
+                    ? 'Hello, $username'
+                    : 'Hello';
+                return AppHeader(title: greeting);
+              },
+            ),
             const SizedBox(height: 24),
 
             // ── Location Chip ──

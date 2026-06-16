@@ -1,8 +1,91 @@
 rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {userId} (Firebase Auth UID)
+// Fields:
+//   - username:  string (required, 1–40 chars)
+//   - email:     string (required, valid email format)
+//   - phone:     string (optional, 0–20 chars)
+//   - photoUrl:  string (optional, must start with https://)
+//   - createdAt: timestamp (required on create, immutable)
+//
+// ===============================================================
+
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ── Helper Functions ──────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+
+    function isValidEmail(email) {
+      return email is string &&
+             email.matches("^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUrl(url) {
+      return url is string && url.matches("^https://.*");
+    }
+
+    // ── Domain Validator ──────────────────────────────────────
+    // Called on both create and update to enforce schema integrity.
+    function isValidUserData(data) {
+      return
+        // username: required, 1–40 chars
+        data.username is string &&
+        data.username.size() >= 1 &&
+        data.username.size() <= 40 &&
+
+        // email: required, valid format, max 254 chars
+        data.email is string &&
+        isValidEmail(data.email) &&
+        data.email.size() <= 254 &&
+
+        // phone: optional, if present must be string ≤ 20 chars
+        (!('phone' in data) ||
+          (data.phone is string && data.phone.size() <= 20)) &&
+
+        // photoUrl: optional, if present must be a valid https URL ≤ 512 chars
+        (!('photoUrl' in data) ||
+          (isValidUrl(data.photoUrl) && data.photoUrl.size() <= 512)) &&
+
+        // No extra fields beyond the allowed schema
+        data.keys().hasOnly(['username', 'email', 'phone', 'photoUrl', 'createdAt']);
+    }
+
+    // ── users/{userId} ────────────────────────────────────────
+    match /users/{userId} {
+      // Only the document owner can read their own profile (contains PII)
+      allow read: if isOwner(userId);
+
+      // Owner can create their own document; createdAt must be server time
+      allow create: if isOwner(userId) &&
+                       isValidUserData(request.resource.data) &&
+                       request.resource.data.createdAt == request.time;
+
+      // Owner can update; createdAt and email must remain immutable
+      allow update: if isOwner(userId) &&
+                       isValidUserData(request.resource.data) &&
+                       request.resource.data.createdAt == resource.data.createdAt &&
+                       request.resource.data.email == resource.data.email;
+
+      // Deletion not allowed from client
+      allow delete: if false;
+    }
+
+    // Deny all other paths by default
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

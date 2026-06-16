@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'theme/app_theme.dart';
@@ -84,19 +85,32 @@ class _AppNavigatorState extends State<AppNavigator> {
     }
 
     // Set up auth changes listener to dynamically handle auto-login and sign-out globally
-    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((User? user) {
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+      bool hasProfile = false;
+      if (user != null) {
+        try {
+          final snap = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+          hasProfile = snap.exists;
+        } catch (_) {
+          // If firestore read fails (e.g. permission or network), default to false/sign out
+          hasProfile = false;
+        }
+        if (!hasProfile) {
+          await FirebaseAuth.instance.signOut();
+          user = null;
+        }
+      }
+
       if (!mounted) return;
       setState(() {
         _initialized = true;
-        if (user != null) {
-          // If logged in, go straight to Main Layout / Dashboard
-          _currentScreen = 5;
+        if (!_isOnboarded) {
+          _currentScreen = 0; // Force Onboarding Screen 1
         } else {
-          // If signed out, check onboarding status
-          if (_isOnboarded) {
-            _currentScreen = 3; // WelcomeScreen
+          if (user != null) {
+            _currentScreen = 5; // Welcome/Main Dashboard
           } else {
-            _currentScreen = 0; // Onboarding Screen 1
+            _currentScreen = 3; // WelcomeScreen
           }
         }
       });
@@ -126,9 +140,15 @@ class _AppNavigatorState extends State<AppNavigator> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('onboarding_completed', true);
     } catch (_) {}
+    if (!mounted) return;
     setState(() {
       _isOnboarded = true;
-      _currentScreen = 3; // WelcomeScreen
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        _currentScreen = 5; // Main Layout
+      } else {
+        _currentScreen = 3; // WelcomeScreen
+      }
     });
   }
 
