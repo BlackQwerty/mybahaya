@@ -7,6 +7,16 @@
             "request": "launch",
             "mainClass": "com.shukri.mybahaya.MybahayaBackendApplication",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-MybahayaBackendApplication<mybahaya-backend>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.shukri.mybahaya.MybahayaBackendApplication",
+            "projectName": "mybahaya-backend",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

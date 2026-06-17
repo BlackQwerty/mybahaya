@@ -116,7 +116,7 @@ class _ReportScreenState extends State<ReportScreen> {
         Navigator.pop(context); // Return to previous screen
       }
     } catch (e) {
-      setState(() => _errorMessage = 'Failed to submit report. Please check your connection.');
+      setState(() => _errorMessage = e.toString().replaceFirst('Exception: ', ''));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
