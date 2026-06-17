@@ -1,0 +1,17 @@
+services:
+  mybahaya-backend:
+    build: .
+    image: mybahaya-backend:latest
+    container_name: mybahaya-backend
+    restart: unless-stopped          # auto-restarts on crash or server reboot
+    ports:
+      - "8080:8080"                  # host:container
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - FIREBASE_SERVICE_ACCOUNT_PATH=/secrets/firebase-service-account.json
+    volumes:
+      # Mount the service account key from host into the container
+      - /etc/mybahaya-service-account.json:/secrets/firebase-service-account.json:ro
+    env_file:
+      - .env

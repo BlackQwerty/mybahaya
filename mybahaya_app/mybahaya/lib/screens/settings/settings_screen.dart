@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mybahaya/widgets/app_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../theme/app_theme.dart';
 import '../profile/profile_screen.dart';
 import '../../widgets/app_header.dart';
@@ -231,7 +232,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: 'Log Out',
                   icon: Icons.logout_rounded,
                   color: pinkColor,
-                  onTap: () {},
+                  onTap: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        backgroundColor: const Color(0xFF2A1A1A),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        title: Text(
+                          'Log Out',
+                          style: GoogleFonts.playfairDisplay(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        content: Text(
+                          'Are you sure you want to log out?',
+                          style: GoogleFonts.inter(color: Colors.white70),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: Text(
+                              'Cancel',
+                              style: GoogleFonts.inter(color: Colors.white54),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: Text(
+                              'Log Out',
+                              style: GoogleFonts.inter(
+                                color: pinkColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true) {
+                      await FirebaseAuth.instance.signOut();
+                      // Auth state listener in main.dart automatically navigates to welcome screen
+                    }
+                  },
                 ),
               ),
             ],

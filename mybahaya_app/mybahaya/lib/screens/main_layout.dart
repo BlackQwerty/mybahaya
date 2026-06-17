@@ -17,20 +17,22 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeDashboard(),
-    const MapScreen(),
-    const ReportScreen(),
-    const LiveAlertsScreen(),
-    const SettingsScreen(),
-  ];
+  void _goToHome() => setState(() => _currentIndex = 0);
 
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      const HomeDashboard(),
+      const MapScreen(),
+      ReportScreen(onReportSuccess: _goToHome),
+      const LiveAlertsScreen(),
+      const SettingsScreen(),
+    ];
+
     return Scaffold(
       backgroundColor: AppTheme.solidBg,
       extendBody: true,
-      body: IndexedStack(index: _currentIndex, children: _screens),
+      body: IndexedStack(index: _currentIndex, children: screens),
       bottomNavigationBar: MyBahayaNavBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),

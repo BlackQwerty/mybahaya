@@ -4,16 +4,6 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
-/// Default [FirebaseOptions] for use with your Firebase apps.
-///
-/// Example:
-/// ```dart
-/// import 'firebase_options.dart';
-/// // ...
-/// await Firebase.initializeApp(
-///   options: DefaultFirebaseOptions.currentPlatform,
-/// );
-/// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -30,8 +20,7 @@ class DefaultFirebaseOptions {
         return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for linux - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
+          'DefaultFirebaseOptions have not been configured for linux.',
         );
       default:
         throw UnsupportedError(
@@ -40,47 +29,52 @@ class DefaultFirebaseOptions {
     }
   }
 
+  // Web config (from Firebase console → Project Settings → Web app)
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyByrfe5ptARXB3P8npOTHhVoxMau6f1z6w',
-    appId: '1:671526838889:web:7766f9d2e7e248dcc638f8',
-    messagingSenderId: '671526838889',
-    projectId: 'mybahaya-app',
-    authDomain: 'mybahaya-app.firebaseapp.com',
-    storageBucket: 'mybahaya-app.firebasestorage.app',
+    apiKey: 'AIzaSyCw63F4hFRDHGAXhhAlZJ-cT8M643MSisw',
+    appId: '1:491193659854:web:dfd34cbfb22ba66458bb9f',
+    messagingSenderId: '491193659854',
+    projectId: 'mybahaya-fyp',
+    authDomain: 'mybahaya-fyp.firebaseapp.com',
+    storageBucket: 'mybahaya-fyp.firebasestorage.app',
   );
 
+  // Android config (from google-services.json)
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCCTexkSDmxwd0OCA-rapjnngMihLSCgqw',
-    appId: '1:671526838889:android:665bd59974eff595c638f8',
-    messagingSenderId: '671526838889',
-    projectId: 'mybahaya-app',
-    storageBucket: 'mybahaya-app.firebasestorage.app',
+    apiKey: 'AIzaSyCCGSsOK6tscy2gw6O0FdM17wl4K0O4qvk',
+    appId: '1:491193659854:android:82b4522b63e2f99a58bb9f',
+    messagingSenderId: '491193659854',
+    projectId: 'mybahaya-fyp',
+    storageBucket: 'mybahaya-fyp.firebasestorage.app',
   );
 
+  // iOS config (from GoogleService-Info.plist)
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyC8A0fslQMvOctARrQawaqufh919VkfGVY',
-    appId: '1:671526838889:ios:7cff130558279fa8c638f8',
-    messagingSenderId: '671526838889',
-    projectId: 'mybahaya-app',
-    storageBucket: 'mybahaya-app.firebasestorage.app',
+    apiKey: 'AIzaSyC9DC-v4y7WArPNTqC6kVBUFcEUEjdcORk',
+    appId: '1:491193659854:ios:5189fa10661685d658bb9f',
+    messagingSenderId: '491193659854',
+    projectId: 'mybahaya-fyp',
+    storageBucket: 'mybahaya-fyp.firebasestorage.app',
     iosBundleId: 'com.shukri.mybahaya',
   );
 
+  // macOS uses same values as iOS
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyC8A0fslQMvOctARrQawaqufh919VkfGVY',
-    appId: '1:671526838889:ios:e2551f2576a7376cc638f8',
-    messagingSenderId: '671526838889',
-    projectId: 'mybahaya-app',
-    storageBucket: 'mybahaya-app.firebasestorage.app',
-    iosBundleId: 'com.example.mybahaya',
+    apiKey: 'AIzaSyC9DC-v4y7WArPNTqC6kVBUFcEUEjdcORk',
+    appId: '1:491193659854:ios:5189fa10661685d658bb9f',
+    messagingSenderId: '491193659854',
+    projectId: 'mybahaya-fyp',
+    storageBucket: 'mybahaya-fyp.firebasestorage.app',
+    iosBundleId: 'com.shukri.mybahaya',
   );
 
+  // Windows uses same values as web
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyByrfe5ptARXB3P8npOTHhVoxMau6f1z6w',
-    appId: '1:671526838889:web:c75b8923ff7723c8c638f8',
-    messagingSenderId: '671526838889',
-    projectId: 'mybahaya-app',
-    authDomain: 'mybahaya-app.firebaseapp.com',
-    storageBucket: 'mybahaya-app.firebasestorage.app',
+    apiKey: 'AIzaSyCw63F4hFRDHGAXhhAlZJ-cT8M643MSisw',
+    appId: '1:491193659854:web:dfd34cbfb22ba66458bb9f',
+    messagingSenderId: '491193659854',
+    projectId: 'mybahaya-fyp',
+    authDomain: 'mybahaya-fyp.firebaseapp.com',
+    storageBucket: 'mybahaya-fyp.firebasestorage.app',
   );
 }

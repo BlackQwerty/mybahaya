@@ -11,7 +11,9 @@ import 'package:geolocator/geolocator.dart';
 import '../../services/api_service.dart';
 
 class ReportScreen extends StatefulWidget {
-  const ReportScreen({super.key});
+  final VoidCallback? onReportSuccess;
+
+  const ReportScreen({super.key, this.onReportSuccess});
 
   @override
   State<ReportScreen> createState() => _ReportScreenState();
@@ -113,7 +115,14 @@ class _ReportScreenState extends State<ReportScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.pop(context); // Return to previous screen
+        // Reset the form for next report
+        setState(() {
+          _selectedImage = null;
+          selectedCategory = null;
+          descriptionController.clear();
+        });
+        // Navigate back to home tab
+        widget.onReportSuccess?.call();
       }
     } catch (e) {
       setState(() => _errorMessage = e.toString().replaceFirst('Exception: ', ''));
