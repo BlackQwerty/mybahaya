@@ -83,6 +83,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ── reports/{reportId} ───────────────────────────────────────
+    match /reports/{reportId} {
+      // Users can only read their own reports
+      allow read: if isAuthenticated() &&
+                     resource.data.userId == request.auth.uid;
+      // Reports are created only via backend (Admin SDK bypasses rules)
+      allow write: if false;
+    }
+
     // Deny all other paths by default
     match /{document=**} {
       allow read, write: if false;

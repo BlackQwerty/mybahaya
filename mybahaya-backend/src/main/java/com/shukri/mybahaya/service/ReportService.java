@@ -1,13 +1,13 @@
 package com.shukri.mybahaya.service;
 
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.FieldValue;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Date;
 
 @Service
 public class ReportService {
@@ -28,7 +28,9 @@ public class ReportService {
         location.put("longitude", longitude);
         reportData.put("location", location);
         
-        reportData.put("createdAt", new Date());
+        // FieldValue.serverTimestamp() stores a proper Firestore Timestamp
+        // (not a plain Java Date) so ordering and querying works correctly
+        reportData.put("createdAt", FieldValue.serverTimestamp());
 
         // Save to Firestore 'reports' collection
         db.collection("reports").document(reportId).set(reportData).get();

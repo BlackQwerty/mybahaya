@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bar.dart';
+import 'my_reports_screen.dart';
 
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -95,6 +96,9 @@ class _ReportScreenState extends State<ReportScreen> {
       _errorMessage = null;
     });
 
+    bool success = false;
+    String errorMsg = '';
+
     try {
       await ApiService.submitReport(
         imageFile: _selectedImage!,
@@ -103,32 +107,204 @@ class _ReportScreenState extends State<ReportScreen> {
         longitude: _currentPosition!.longitude,
         details: descriptionController.text.trim(),
       );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Report submitted successfully!',
-              style: GoogleFonts.inter(color: Colors.white),
-            ),
-            backgroundColor: const Color(0xFF422E2E),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        // Reset the form for next report
-        setState(() {
-          _selectedImage = null;
-          selectedCategory = null;
-          descriptionController.clear();
-        });
-        // Navigate back to home tab
-        widget.onReportSuccess?.call();
-      }
+      success = true;
     } catch (e) {
-      setState(() => _errorMessage = e.toString().replaceFirst('Exception: ', ''));
+      errorMsg = e.toString().replaceFirst('Exception: ', '');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+
+    if (!mounted) return;
+
+    // Show result dialog
+    await _showResultDialog(success: success, errorMsg: errorMsg);
+
+    // Reset form after dialog is dismissed
+    if (success && mounted) {
+      setState(() {
+        _selectedImage = null;
+        selectedCategory = null;
+        descriptionController.clear();
+      });
+    }
+  }
+
+  Future<void> _showResultDialog({
+    required bool success,
+    required String errorMsg,
+  }) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2A1515),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.08),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.5),
+                blurRadius: 30,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ── Status Icon ──
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: success
+                      ? AppTheme.alertGreen.withOpacity(0.15)
+                      : AppTheme.alertRed.withOpacity(0.15),
+                  border: Border.all(
+                    color: success
+                        ? AppTheme.alertGreen.withOpacity(0.4)
+                        : AppTheme.alertRed.withOpacity(0.4),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  success
+                      ? Icons.check_circle_rounded
+                      : Icons.error_rounded,
+                  color: success ? AppTheme.alertGreen : AppTheme.alertRed,
+                  size: 44,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // ── Title ──
+              Text(
+                success ? 'Report Submitted!' : 'Submission Failed',
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 10),
+
+              // ── Message ──
+              Text(
+                success
+                    ? 'Your incident report has been successfully submitted. Authorities have been notified.'
+                    : errorMsg.isNotEmpty
+                        ? errorMsg
+                        : 'Something went wrong. Please try again.',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: Colors.white.withOpacity(0.65),
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 28),
+
+              // ── Buttons ──
+              if (success) ...[
+                // Two buttons: OK and View Report
+                Row(
+                  children: [
+                    // OK → go home
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          widget.onReportSuccess?.call();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: BorderSide(
+                            color: Colors.white.withOpacity(0.2),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          'OK',
+                          style: GoogleFonts.inter(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // View Report → open My Reports screen
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const MyReportsScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: burgundyColor,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'View Report',
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                // Single OK button on failure
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: burgundyColor,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Try Again',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -156,7 +332,47 @@ class _ReportScreenState extends State<ReportScreen> {
           children: [
             const AppHeader(title: 'Report'),
             const SizedBox(height: 28),
-            _buildLocationBadge(),
+            // ── Location badge + View Reports button ──
+            Row(
+              children: [
+                _buildLocationBadge(),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const MyReportsScreen(),
+                    ),
+                  ),
+                  icon: const Icon(
+                    Icons.history_rounded,
+                    size: 15,
+                    color: Color(0xFFFFABBB),
+                  ),
+                  label: Text(
+                    'View Reports',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFFFFABBB),
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: const Color(0xFF422E2E).withOpacity(0.55),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(
+                        color: Colors.white.withOpacity(0.06),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 24),
             _buildMediaUpload(),
             const SizedBox(height: 28),
