@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../screens/profile/profile_screen.dart';
 
 class MyBahayaAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -45,7 +44,7 @@ class MyBahayaAppBar extends StatelessWidget implements PreferredSizeWidget {
             // 2. Consistent Title Typography
             Text(
               'MyBahaya',
-              style: GoogleFonts.playfairDisplay(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: const Color(

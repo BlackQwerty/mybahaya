@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Deep Maroon Background Palette
@@ -36,20 +35,18 @@ class AppTheme {
         surface: backgroundMid,
         error: alertRed,
       ),
-      textTheme: GoogleFonts.interTextTheme(
-        ThemeData.dark().textTheme,
-      ).apply(
+      textTheme: ThemeData.dark().textTheme.apply(
         bodyColor: Colors.white,
         displayColor: Colors.white,
       ),
     );
   }
 
-  static TextStyle get sourceSerif4 => GoogleFonts.sourceSerif4(
+  static TextStyle get sourceSerif4 => TextStyle(
         fontWeight: FontWeight.w700,
       );
 
-  static TextStyle get sourceSans3 => GoogleFonts.sourceSans3(
+  static TextStyle get sourceSans3 => TextStyle(
         fontWeight: FontWeight.w400,
       );
 }

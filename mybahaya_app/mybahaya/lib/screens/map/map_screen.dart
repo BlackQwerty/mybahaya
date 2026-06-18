@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -275,7 +274,7 @@ class _MapScreenState extends State<MapScreen> {
             children: [
               Text(
                 '$count incident${count == 1 ? '' : 's'} on map',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
@@ -283,7 +282,7 @@ class _MapScreenState extends State<MapScreen> {
               ),
               Text(
                 'Tap any pin for details',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 9,
                   color: Colors.white.withOpacity(0.60),
                 ),
@@ -306,7 +305,7 @@ class _MapScreenState extends State<MapScreen> {
                 const SizedBox(width: 4),
                 Text(
                   'Locating',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 9,
                     color: Colors.white.withOpacity(0.6),
                   ),
@@ -328,7 +327,7 @@ class _MapScreenState extends State<MapScreen> {
                 const SizedBox(width: 4),
                 Text(
                   'Live',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 9,
                     color: const Color(0xFF2ECC71),
                     fontWeight: FontWeight.w700,
@@ -364,7 +363,7 @@ class _MapScreenState extends State<MapScreen> {
         children: [
           Text(
             'LEGEND',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w800,
               color: Colors.white.withOpacity(0.50),
@@ -396,7 +395,7 @@ class _MapScreenState extends State<MapScreen> {
                 const SizedBox(width: 8),
                 Text(
                   item.label,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 12,
                     color: Colors.white.withOpacity(0.90),
                     fontWeight: FontWeight.w500,
@@ -427,7 +426,7 @@ class _MapScreenState extends State<MapScreen> {
               const SizedBox(width: 8),
               Text(
                 'You',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 12,
                   color: Colors.white.withOpacity(0.90),
                   fontWeight: FontWeight.w500,
@@ -586,7 +585,7 @@ class _IncidentSheetState extends State<_IncidentSheet> {
                       const SizedBox(width: 5),
                       Text(
                         category.toUpperCase(),
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: catColor,
@@ -606,7 +605,7 @@ class _IncidentSheetState extends State<_IncidentSheet> {
                       Expanded(
                         child: Text(
                           _placeName,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 11,
                             color: Colors.grey.shade600,
                             fontWeight: FontWeight.w500,
@@ -629,7 +628,7 @@ class _IncidentSheetState extends State<_IncidentSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 details,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 13,
                   color: Colors.grey.shade700,
                   height: 1.5,
@@ -653,7 +652,7 @@ class _IncidentSheetState extends State<_IncidentSheet> {
                 icon: const Icon(Icons.map_rounded, size: 17),
                 label: Text(
                   'View on Map',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),

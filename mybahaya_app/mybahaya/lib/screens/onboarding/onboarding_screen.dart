@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../theme/app_theme.dart';
 
@@ -112,7 +111,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         ),
                         child: Text(
                           'MyBahaya',
-                          style: GoogleFonts.playfairDisplay(
+                          style: TextStyle(
                             fontSize: 13,
                             color: AppTheme.maroonGlow,
                             fontWeight: FontWeight.w600,
@@ -124,7 +123,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       Text(
                         widget.title,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.playfairDisplay(
+                        style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
@@ -135,7 +134,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       Text(
                         widget.subtitle,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 15,
                           color: Colors.white.withOpacity(0.6),
                           height: 1.5,
@@ -182,7 +181,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 children: [
                                   Text(
                                     widget.buttonText,
-                                    style: GoogleFonts.inter(
+                                    style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
                                       letterSpacing: 2,

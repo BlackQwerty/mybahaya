@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppHeader extends StatelessWidget {
   final String title;
@@ -19,7 +18,7 @@ class AppHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.playfairDisplay(
+          style: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -29,7 +28,7 @@ class AppHeader extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           _getSubtitle(title),
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
             color: nudeColor,

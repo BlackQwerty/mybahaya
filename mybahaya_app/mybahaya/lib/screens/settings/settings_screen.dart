@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:mybahaya/widgets/app_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -41,7 +40,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _icePhoneCtrl  = TextEditingController();
 
   static const Color nude     = Color(0xFFACA494);
-  static const Color pink     = Color(0xFFFFABBB);
+  static const Color pink = Colors.white;
   static const Color burgundy = Color(0xFFB22222);
 
   static const _bloodTypes = ['A+', 'A−', 'B+', 'B−', 'AB+', 'AB−', 'O+', 'O−'];
@@ -89,7 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         SnackBar(
           content: Text(
             _isBM ? 'Profil kecemasan disimpan.' : 'Emergency profile saved.',
-            style: GoogleFonts.inter(),
+            style: TextStyle(),
           ),
           backgroundColor: const Color(0xFF2ECC71),
           behavior: SnackBarBehavior.floating,
@@ -138,7 +137,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _isBM
                     ? 'Maklumat ini membantu responder pertolongan cemas.'
                     : 'This info helps first responders if you are in an incident.',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                     fontSize: 11, color: nude.withOpacity(0.55)),
               ),
             ),
@@ -224,7 +223,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(width: 8),
           Text(
             label,
-            style: GoogleFonts.playfairDisplay(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: nude,
@@ -286,12 +285,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           title: Text(username,
-              style: GoogleFonts.playfairDisplay(
+              style: TextStyle(
                   fontSize: 18, fontWeight: FontWeight.bold, color: pink)),
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(email,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                     fontSize: 12, color: pink.withOpacity(0.7))),
           ),
           trailing: const Icon(Icons.chevron_right_rounded,
@@ -372,7 +371,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       Text(
                         badgeName,
-                        style: GoogleFonts.playfairDisplay(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: badgeColor,
@@ -383,7 +382,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         _isBM
                             ? '$count laporan dikemukakan'
                             : '$count report${count == 1 ? '' : 's'} submitted',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 12,
                           color: Colors.white.withOpacity(0.7),
                         ),
@@ -391,7 +390,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: 6),
                       Text(
                         nextGoal,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 10,
                           color: nude.withOpacity(0.55),
                           height: 1.3,
@@ -419,7 +418,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Blood type selector
             Text(
               _isBM ? 'Kumpulan Darah' : 'Blood Type',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                   fontSize: 12, fontWeight: FontWeight.w600, color: nude),
             ),
             const SizedBox(height: 10),
@@ -446,7 +445,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     alignment: Alignment.center,
                     child: Text(
                       bt,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: sel ? Colors.white : nude,
@@ -497,7 +496,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: const Icon(Icons.check_rounded, size: 18),
                 label: Text(
                   _isBM ? 'Simpan Profil' : 'Save Profile',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                       fontSize: 14, fontWeight: FontWeight.w700),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -531,7 +530,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(width: 5),
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                   fontSize: 12, fontWeight: FontWeight.w600, color: nude),
             ),
           ],
@@ -547,10 +546,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: TextField(
             controller: controller,
             keyboardType: keyboardType,
-            style: GoogleFonts.inter(fontSize: 13, color: Colors.white),
+            style: TextStyle(fontSize: 13, color: Colors.white),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: GoogleFonts.inter(
+              hintStyle: TextStyle(
                   fontSize: 12, color: nude.withOpacity(0.35)),
               border: InputBorder.none,
               isDense: true,
@@ -574,12 +573,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 Text(
                   _isBM ? 'Terima amaran dalam ' : 'Alert me within ',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                       fontSize: 13, color: Colors.white.withOpacity(0.7)),
                 ),
                 Text(
                   '${_alertRadius.round()} km',
-                  style: GoogleFonts.playfairDisplay(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: pink,
@@ -592,7 +591,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _isBM
                   ? 'Semua laporan dalam radius ini akan dipaparkan di halaman utama.'
                   : 'All reports within this radius appear in your home feed.',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                   fontSize: 11, color: nude.withOpacity(0.5)),
             ),
             SliderTheme(
@@ -616,10 +615,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('1 km',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                         fontSize: 10, color: nude.withOpacity(0.4))),
                 Text('50 km',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                         fontSize: 10, color: nude.withOpacity(0.4))),
               ],
             ),
@@ -642,7 +641,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Text(
                     _isBM ? 'Bahasa / Language' : 'Language / Bahasa',
-                    style: GoogleFonts.playfairDisplay(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: pink,
@@ -651,7 +650,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 3),
                   Text(
                     _isBM ? 'Bahasa Melayu dipilih' : 'English selected',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                         fontSize: 11, color: nude.withOpacity(0.6)),
                   ),
                 ],
@@ -698,7 +697,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       alignment: Alignment.center,
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
           color: active ? Colors.white : nude,
@@ -719,13 +718,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: GoogleFonts.playfairDisplay(
+                    style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: pink)),
                 const SizedBox(height: 3),
                 Text(subtitle,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                         fontSize: 11,
                         color: nude.withOpacity(0.65),
                         height: 1.3)),
@@ -776,7 +775,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       leading: Icon(icon, color: color, size: 20),
       title: Text(title,
-          style: GoogleFonts.playfairDisplay(
+          style: TextStyle(
               fontSize: 16, fontWeight: FontWeight.bold, color: color)),
       trailing: Icon(Icons.chevron_right_rounded,
           color: color.withOpacity(0.5), size: 20),
@@ -792,24 +791,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: const Color(0xFF2A1A1A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(label,
-            style: GoogleFonts.playfairDisplay(
+            style: TextStyle(
                 color: Colors.white, fontWeight: FontWeight.bold)),
         content: Text(
           _isBM
               ? 'Adakah anda pasti mahu log keluar?'
               : 'Are you sure you want to log out?',
-          style: GoogleFonts.inter(color: Colors.white70),
+          style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(_isBM ? 'Batal' : 'Cancel',
-                style: GoogleFonts.inter(color: Colors.white54)),
+                style: TextStyle(color: Colors.white54)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(label,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                     color: pink, fontWeight: FontWeight.bold)),
           ),
         ],

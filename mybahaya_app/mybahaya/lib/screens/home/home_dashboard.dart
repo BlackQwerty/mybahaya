@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -28,7 +27,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
   bool _locationLoading = true;
 
   static const Color nude     = Color(0xFFACA494);
-  static const Color pink     = Color(0xFFFFABBB);
+  static const Color pink = Colors.white;
   static const Color burgundy = Color(0xFFB22222);
 
   @override
@@ -164,7 +163,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
                         : _userState.isNotEmpty
                             ? _userState
                             : 'Location unavailable',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: nude,
@@ -262,7 +261,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
             Text(
               msg,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                   fontSize: 13, color: nude.withOpacity(0.45)),
             ),
           ],
@@ -362,7 +361,7 @@ class _FeedListState extends State<_FeedList> {
             child: Text(
               'No incidents reported in ${widget.userState}.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                   fontSize: 13,
                   color: const Color(0xFFACA494).withOpacity(0.45)),
             ),
@@ -400,7 +399,7 @@ class _IncidentCardState extends State<_IncidentCard> {
   String _placeName = 'Loading location...';
 
   static const Color nude     = Color(0xFFACA494);
-  static const Color pink     = Color(0xFFFFABBB);
+  static const Color pink = Colors.white;
   static const Color burgundy = Color(0xFFB22222);
 
   @override
@@ -493,7 +492,7 @@ class _IncidentCardState extends State<_IncidentCard> {
                       const SizedBox(width: 6),
                       Text(
                         'INCIDENT REPORT',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
@@ -506,7 +505,7 @@ class _IncidentCardState extends State<_IncidentCard> {
                 const Spacer(),
                 Text(
                   _timeAgo(widget.data['createdAt']),
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 11,
                     color: nude.withOpacity(0.5),
                   ),
@@ -571,7 +570,7 @@ class _IncidentCardState extends State<_IncidentCard> {
                       const SizedBox(width: 4),
                       Text(
                         category.toUpperCase(),
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.w700,
                           color: catColor,
@@ -592,7 +591,7 @@ class _IncidentCardState extends State<_IncidentCard> {
                       Expanded(
                         child: Text(
                           _placeName,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: nude,
@@ -617,7 +616,7 @@ class _IncidentCardState extends State<_IncidentCard> {
                 details,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 13,
                   color: Colors.white.withOpacity(0.75),
                   height: 1.5,
@@ -646,7 +645,7 @@ class _IncidentCardState extends State<_IncidentCard> {
                     color: Colors.white, size: 15),
                 label: Text(
                   'View Details on Map',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -723,7 +722,7 @@ class _FilterPill extends StatelessWidget {
             const SizedBox(width: 5),
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight:
                     isActive ? FontWeight.bold : FontWeight.w500,

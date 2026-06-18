@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,7 +25,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
 
   static const Color burgundy = Color(0xFFB22222);
   static const Color nude     = Color(0xFFACA494);
-  static const Color pink     = Color(0xFFFFABBB);
+  static const Color pink = Colors.white;
 
   static const _filters = ['All', 'Fire', 'Theft', 'Assault', 'Medical', 'Other'];
 
@@ -180,7 +179,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                     const SizedBox(width: 5),
                     Text(
                       'EMERGENCY',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
                         color: const Color(0xFFFF8888),
@@ -193,7 +192,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
               const Spacer(),
               Text(
                 'Malaysia 24/7',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 10,
                   color: Colors.white.withOpacity(0.35),
                 ),
@@ -231,7 +230,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                       const Icon(Icons.sos_rounded, color: Colors.white, size: 44),
                       Text(
                         '999',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
                           color: Colors.white.withOpacity(0.85),
@@ -248,7 +247,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
           const SizedBox(height: 8),
           Text(
             'Tap to call 999 immediately',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 11,
               color: Colors.white.withOpacity(0.45),
             ),
@@ -291,7 +290,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
               const SizedBox(height: 5),
               Text(
                 number,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
@@ -302,7 +301,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
                   label,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 8,
                     color: Colors.white.withOpacity(0.45),
                     height: 1.3,
@@ -328,7 +327,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
           children: [
             Text(
               'Live Incidents',
-              style: GoogleFonts.playfairDisplay(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: nude,
@@ -356,7 +355,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                   const SizedBox(width: 4),
                   Text(
                     'LIVE',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF2ECC71),
@@ -399,7 +398,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                   alignment: Alignment.center,
                   child: Text(
                     f,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                       color: active ? Colors.white : nude,
@@ -539,7 +538,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                         Expanded(
                           child: Text(
                             category,
-                            style: GoogleFonts.playfairDisplay(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
@@ -556,7 +555,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                             ),
                             child: Text(
                               _formatDistance(dist),
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 10,
                                 color: catColor,
                                 fontWeight: FontWeight.w600,
@@ -569,7 +568,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                       const SizedBox(height: 4),
                       Text(
                         details,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 12,
                           color: Colors.white.withOpacity(0.55),
                           height: 1.4,
@@ -586,7 +585,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                         const SizedBox(width: 3),
                         Text(
                           timeAgo,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 10,
                             color: Colors.white.withOpacity(0.35),
                           ),
@@ -596,7 +595,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                           children: [
                             Text(
                               'View on Map',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 10,
                                 color: catColor,
                                 fontWeight: FontWeight.w600,
@@ -643,7 +642,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
             const SizedBox(height: 12),
             Text(
               msg,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                   fontSize: 13, color: nude.withOpacity(0.45)),
               textAlign: TextAlign.center,
             ),

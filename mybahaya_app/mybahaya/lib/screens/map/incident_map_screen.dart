@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../theme/app_theme.dart';
@@ -22,7 +21,7 @@ class _IncidentMapScreenState extends State<IncidentMapScreen> {
 
   static const Color burgundy = Color(0xFFB22222);
   static const Color nude     = Color(0xFFACA494);
-  static const Color pink     = Color(0xFFFFABBB);
+  static const Color pink = Colors.white;
 
   late final LatLng _incidentLatLng;
   late final String _category;
@@ -86,7 +85,7 @@ class _IncidentMapScreenState extends State<IncidentMapScreen> {
           children: [
             Text(
               'Incident Location',
-              style: GoogleFonts.playfairDisplay(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 color: const Color(0xFFACA494),
@@ -94,7 +93,7 @@ class _IncidentMapScreenState extends State<IncidentMapScreen> {
             ),
             Text(
               _placeName,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 11,
                 color: Colors.white.withOpacity(0.5),
               ),
@@ -218,7 +217,7 @@ class _IncidentMapScreenState extends State<IncidentMapScreen> {
         children: [
           Text(
             'LEGEND',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 8,
               fontWeight: FontWeight.w800,
               color: Colors.grey.shade500,
@@ -248,7 +247,7 @@ class _IncidentMapScreenState extends State<IncidentMapScreen> {
                 const SizedBox(width: 6),
                 Text(
                   item.label,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     fontSize: 10,
                     color: Colors.grey.shade700,
                     fontWeight: FontWeight.w500,
@@ -278,7 +277,7 @@ class _IncidentMapScreenState extends State<IncidentMapScreen> {
               const SizedBox(width: 6),
               Text(
                 'You',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 10,
                   color: Colors.grey.shade700,
                   fontWeight: FontWeight.w500,
@@ -365,7 +364,7 @@ class _IncidentMapScreenState extends State<IncidentMapScreen> {
                       const SizedBox(width: 4),
                       Text(
                         _category.toUpperCase(),
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.w700,
                           color: catColor,
@@ -384,7 +383,7 @@ class _IncidentMapScreenState extends State<IncidentMapScreen> {
                     Expanded(
                       child: Text(
                         _placeName,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 10,
                           color: Colors.white.withOpacity(0.7),
                           fontWeight: FontWeight.w500,
@@ -399,7 +398,7 @@ class _IncidentMapScreenState extends State<IncidentMapScreen> {
                   const SizedBox(height: 4),
                   Text(
                     _details,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 10,
                       color: Colors.white.withOpacity(0.5),
                       height: 1.3,
@@ -412,7 +411,7 @@ class _IncidentMapScreenState extends State<IncidentMapScreen> {
                 Center(
                   child: Text(
                     'Tap pin to close',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 9,
                       color: Colors.white.withOpacity(0.25),
                     ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -246,7 +245,7 @@ class _AuthScreenState extends State<AuthScreen>
                         const SizedBox(height: 12),
                         Text(
                           'MyBahaya',
-                          style: GoogleFonts.playfairDisplay(
+                          style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -255,7 +254,7 @@ class _AuthScreenState extends State<AuthScreen>
                         const SizedBox(height: 4),
                         Text(
                           'Let us keep our community safe',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             fontSize: 11,
                             color: Colors.white.withOpacity(0.5),
                           ),
@@ -350,7 +349,7 @@ class _AuthScreenState extends State<AuthScreen>
                             Text(
                               _errorMessage!,
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 color: AppTheme.alertRed,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
@@ -454,7 +453,7 @@ class _AuthScreenState extends State<AuthScreen>
             onTap: () => setState(() => _isSignUp = false),
             child: Text(
               'Already have an account? Sign in',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 12,
                 color: Colors.white.withOpacity(0.7),
                 decoration: TextDecoration.underline,
@@ -506,7 +505,7 @@ class _AuthScreenState extends State<AuthScreen>
             },
             child: Text(
               'Forgot Password?',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 12,
                 color: const Color(0xFFB22222),
                 fontWeight: FontWeight.w600,
@@ -520,7 +519,7 @@ class _AuthScreenState extends State<AuthScreen>
             onTap: () => setState(() => _isSignUp = true),
             child: Text(
               "Don't have an account? Sign up",
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 12,
                 color: Colors.white.withOpacity(0.7),
                 decoration: TextDecoration.underline,
@@ -538,7 +537,7 @@ class _AuthScreenState extends State<AuthScreen>
       padding: const EdgeInsets.only(left: 8.0),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: Colors.white.withOpacity(0.8),
@@ -568,13 +567,13 @@ class _AuthScreenState extends State<AuthScreen>
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
-        style: GoogleFonts.inter(
+        style: TextStyle(
           color: Colors.white,
           fontSize: 14,
         ),
         decoration: InputDecoration(
           hintText: placeholder,
-          hintStyle: GoogleFonts.inter(
+          hintStyle: TextStyle(
             color: Colors.white.withOpacity(0.35),
             fontSize: 14,
           ),
@@ -621,7 +620,7 @@ class _AuthScreenState extends State<AuthScreen>
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 11,
                 color: Colors.white.withOpacity(0.7),
                 height: 1.4,
@@ -630,7 +629,7 @@ class _AuthScreenState extends State<AuthScreen>
                 const TextSpan(text: 'By continuing, you agree to our '),
                 TextSpan(
                   text: 'Terms & Conditions',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     color: const Color(0xFFB22222),
                     fontWeight: FontWeight.bold,
                   ),
@@ -638,7 +637,7 @@ class _AuthScreenState extends State<AuthScreen>
                 const TextSpan(text: ' and '),
                 TextSpan(
                   text: 'Privacy Policy',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     color: const Color(0xFFB22222),
                     fontWeight: FontWeight.bold,
                   ),
@@ -687,7 +686,7 @@ class _AuthScreenState extends State<AuthScreen>
                 )
               : Text(
                   _isSignUp ? 'Sign up' : 'Sign in',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -719,7 +718,7 @@ class _TabItem extends StatelessWidget {
       onTap: onTap,
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.bold,
           color: isActive ? Colors.white : Colors.white.withOpacity(0.4),

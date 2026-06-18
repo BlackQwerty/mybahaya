@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -18,7 +17,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   // Theme color tokens
   static const Color nudeColor = Color(0xFFACA494);
-  static const Color pinkColor = Color(0xFFFFABBB);
+  static const Color pinkColor = Colors.white;
 
   late TextEditingController _usernameController;
   late TextEditingController _phoneController;
@@ -99,7 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Text(
                 'Change Profile Photo',
-                style: GoogleFonts.playfairDisplay(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: pinkColor,
@@ -152,7 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(width: 14),
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
@@ -204,7 +203,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SnackBar(
             content: Text(
               'Profile updated successfully!',
-              style: GoogleFonts.inter(color: Colors.white),
+              style: TextStyle(color: Colors.white),
             ),
             backgroundColor: const Color(0xFF422E2E),
             behavior: SnackBarBehavior.floating,
@@ -231,7 +230,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           'Change Phone Number',
-          style: GoogleFonts.playfairDisplay(
+          style: TextStyle(
             color: pinkColor,
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -240,10 +239,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         content: TextField(
           controller: tempController,
           keyboardType: TextInputType.phone,
-          style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+          style: TextStyle(color: Colors.white, fontSize: 14),
           decoration: InputDecoration(
             hintText: '01123456789',
-            hintStyle: GoogleFonts.inter(
+            hintStyle: TextStyle(
               color: Colors.white.withOpacity(0.35),
               fontSize: 14,
             ),
@@ -264,7 +263,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               'Cancel',
-              style: GoogleFonts.inter(color: nudeColor),
+              style: TextStyle(color: nudeColor),
             ),
           ),
           ElevatedButton(
@@ -280,7 +279,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Text(
               'Update',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
@@ -328,7 +327,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               Text(
                                 'Settings',
-                                style: GoogleFonts.playfairDisplay(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: nudeColor,
@@ -350,7 +349,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 )
                               : Text(
                                   'Done',
-                                  style: GoogleFonts.playfairDisplay(
+                                  style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     color: nudeColor,
@@ -364,7 +363,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // ── Screen Title ──
                     Text(
                       'Edit Profile',
-                      style: GoogleFonts.playfairDisplay(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: nudeColor,
@@ -434,7 +433,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Expanded(
                                       child: TextField(
                                         controller: _usernameController,
-                                        style: GoogleFonts.playfairDisplay(
+                                        style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                           color: pinkColor,
@@ -445,7 +444,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               const EdgeInsets.symmetric(
                                                   vertical: 6),
                                           hintText: 'Enter username',
-                                          hintStyle: GoogleFonts.inter(
+                                          hintStyle: TextStyle(
                                             fontSize: 14,
                                             color: Colors.white38,
                                           ),
@@ -481,7 +480,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 // Email display (read-only)
                                 Text(
                                   _profile?.email ?? '',
-                                  style: GoogleFonts.inter(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.white54,
                                   ),
@@ -500,7 +499,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Text(
                         'Tap the photo to change it. Edit your username above.',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 11,
                           color: nudeColor,
                         ),
@@ -521,7 +520,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             horizontal: 20, vertical: 4),
                         title: Text(
                           'Change number',
-                          style: GoogleFonts.playfairDisplay(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                             color: pinkColor,
@@ -534,7 +533,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _phoneController.text.isNotEmpty
                                   ? _phoneController.text
                                   : '—',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.white70,
                               ),
@@ -557,7 +556,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text(
                         _errorMessage!,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           color: const Color(0xFFB22222),
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -584,7 +583,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           child: Text(
                             'VIEW ALL HISTORY',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
@@ -617,7 +616,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             Text(
                               'LOG OUT',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w800,
                                 color: const Color(0xFFB22222),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bar.dart';
@@ -31,7 +30,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
   // Unified color tokens
   static const Color nudeColor = Color(0xFFACA494);
-  static const Color pinkColor = Color(0xFFFFABBB);
+  static const Color pinkColor = Colors.white;
   static const Color burgundyColor = Color(0xFFB22222);
 
   @override
@@ -187,7 +186,7 @@ class _ReportScreenState extends State<ReportScreen> {
               // ── Title ──
               Text(
                 success ? 'Report Submitted!' : 'Submission Failed',
-                style: GoogleFonts.playfairDisplay(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -204,7 +203,7 @@ class _ReportScreenState extends State<ReportScreen> {
                     : errorMsg.isNotEmpty
                         ? errorMsg
                         : 'Something went wrong. Please try again.',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 13,
                   color: Colors.white.withOpacity(0.65),
                   height: 1.5,
@@ -237,7 +236,7 @@ class _ReportScreenState extends State<ReportScreen> {
                         ),
                         child: Text(
                           'OK',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             color: Colors.white70,
                             fontWeight: FontWeight.w600,
                           ),
@@ -267,7 +266,7 @@ class _ReportScreenState extends State<ReportScreen> {
                         ),
                         child: Text(
                           'View Report',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
@@ -292,7 +291,7 @@ class _ReportScreenState extends State<ReportScreen> {
                     ),
                     child: Text(
                       'Try Again',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -347,14 +346,14 @@ class _ReportScreenState extends State<ReportScreen> {
                   icon: const Icon(
                     Icons.history_rounded,
                     size: 15,
-                    color: Color(0xFFFFABBB),
+                    color: Colors.white,
                   ),
                   label: Text(
                     'View Reports',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFFFFABBB),
+                      color: Colors.white,
                     ),
                   ),
                   style: TextButton.styleFrom(
@@ -383,7 +382,7 @@ class _ReportScreenState extends State<ReportScreen> {
               Center(
                 child: Text(
                   _errorMessage!,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     color: AppTheme.alertRed,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -421,7 +420,7 @@ class _ReportScreenState extends State<ReportScreen> {
           const SizedBox(width: 8),
           Text(
             hasLocation ? 'Current Location Active' : 'Locating...',
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: nudeColor,
@@ -470,7 +469,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       const SizedBox(height: 12),
                       Text(
                         'Capture or Upload Media',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: Colors.white70,
@@ -480,7 +479,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       const SizedBox(height: 4),
                       Text(
                         'Supports JPEG, PNG up to 50MB',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 11,
                           color: nudeColor.withOpacity(0.6),
                         ),
@@ -502,7 +501,7 @@ class _ReportScreenState extends State<ReportScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
             'WHAT HAPPENED?',
-            style: GoogleFonts.playfairDisplay(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: pinkColor,
@@ -522,13 +521,13 @@ class _ReportScreenState extends State<ReportScreen> {
           child: TextField(
             controller: descriptionController,
             maxLines: 4,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 14,
               color: Colors.white,
             ),
             decoration: InputDecoration(
               hintText: 'Provide detailed details on location, hazards, or safety threats...',
-              hintStyle: GoogleFonts.inter(
+              hintStyle: TextStyle(
                 fontSize: 13,
                 color: nudeColor.withOpacity(0.4),
               ),
@@ -543,7 +542,7 @@ class _ReportScreenState extends State<ReportScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
             'SELECT HAZARD CATEGORY',
-            style: GoogleFonts.playfairDisplay(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: pinkColor,
@@ -582,7 +581,7 @@ class _ReportScreenState extends State<ReportScreen> {
             ),
             child: Text(
               category,
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 color: isSelected ? Colors.white : nudeColor,
@@ -609,7 +608,7 @@ class _ReportScreenState extends State<ReportScreen> {
                   size: 18, color: Colors.white54),
               label: Text(
                 'Cancel',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: Colors.white54,
@@ -643,7 +642,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       size: 18, color: Colors.white),
               label: Text(
                 _isLoading ? 'Submitting...' : 'Report Incident',
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,

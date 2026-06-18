@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -9,7 +8,7 @@ class MyReportsScreen extends StatelessWidget {
   const MyReportsScreen({super.key});
 
   static const Color nudeColor = Color(0xFFACA494);
-  static const Color pinkColor = Color(0xFFFFABBB);
+  static const Color pinkColor = Colors.white;
   static const Color burgundyColor = Color(0xFFB22222);
 
   // Maps category to an icon
@@ -66,7 +65,7 @@ class MyReportsScreen extends StatelessWidget {
         ),
         title: Text(
           'My Reports',
-          style: GoogleFonts.playfairDisplay(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: const Color(0xFFACA494),
@@ -152,7 +151,7 @@ class MyReportsScreen extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: TextStyle(
               fontSize: 14,
               color: nudeColor.withOpacity(0.5),
             ),
@@ -172,7 +171,7 @@ class _ReportCard extends StatelessWidget {
   final String formattedDate;
 
   static const Color nudeColor    = Color(0xFFACA494);
-  static const Color pinkColor    = Color(0xFFFFABBB);
+  static const Color pinkColor = Colors.white;
   static const Color burgundyColor = Color(0xFFB22222);
 
   const _ReportCard({
@@ -262,7 +261,7 @@ class _ReportCard extends StatelessWidget {
                           const SizedBox(width: 5),
                           Text(
                             category.toUpperCase(),
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               color: categoryColor,
@@ -300,7 +299,7 @@ class _ReportCard extends StatelessWidget {
                             const SizedBox(width: 5),
                             Text(
                               'LATEST',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                                 color: burgundyColor,
@@ -322,7 +321,7 @@ class _ReportCard extends StatelessWidget {
                     details,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 13,
                       color: Colors.white.withOpacity(0.85),
                       height: 1.5,
@@ -343,7 +342,7 @@ class _ReportCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         '${lat.toStringAsFixed(5)}, ${lng.toStringAsFixed(5)}',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 11,
                           color: nudeColor.withOpacity(0.7),
                         ),
@@ -364,7 +363,7 @@ class _ReportCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       formattedDate,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 11,
                         color: nudeColor.withOpacity(0.5),
                       ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -164,7 +163,7 @@ class WelcomeScreen extends StatelessWidget {
                     children: [
                       Text(
                         'WELCOME',
-                        style: GoogleFonts.playfairDisplay(
+                        style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -174,7 +173,7 @@ class WelcomeScreen extends StatelessWidget {
                       const SizedBox(height: 10),
                       Text(
                         'TO',
-                        style: GoogleFonts.playfairDisplay(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.white.withOpacity(0.8),
@@ -184,7 +183,7 @@ class WelcomeScreen extends StatelessWidget {
                       const SizedBox(height: 12),
                       Text(
                         'MyBahaya',
-                        style: GoogleFonts.playfairDisplay(
+                        style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -205,7 +204,7 @@ class WelcomeScreen extends StatelessWidget {
                     child: Text(
                       'Hello and thank you for all users and especially Malaysians. This app is to acknowledge people about all kind of dangers and a faster reporting with evidence while keeping the reporter privacy and identity while helping those who in trouble getting help faster and safer. A strict legal action will be taken for users who create fake reports and scamming.\n\nStay Safe and "Kita Jaga Kita".',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                         fontSize: 12.5,
                         color: const Color(0xFFACA494),
                         height: 1.6,
@@ -258,7 +257,7 @@ class WelcomeScreen extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
