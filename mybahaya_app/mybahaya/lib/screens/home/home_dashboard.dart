@@ -1,9 +1,18 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/app_header.dart';
 import '../../services/user_service.dart';
+import '../../services/geocoding_service.dart';
+import '../map/incident_map_screen.dart';
+
+// Filter options for the home feed
+enum _FeedFilter { nearby, state, malaysia }
 
 class HomeDashboard extends StatefulWidget {
   const HomeDashboard({super.key});
@@ -13,55 +22,116 @@ class HomeDashboard extends StatefulWidget {
 }
 
 class _HomeDashboardState extends State<HomeDashboard> {
-  final List<_IncidentData> _incidents = [
-    _IncidentData(
-      location: 'Bukit Katil, Melaka',
-      title: 'Unauthorized Crowd Formation',
-      descriptionPrefix:
-          'An unusual gathering of 50+ individuals detected near ',
-      highlightText: 'Taman Bukit Bayan',
-      descriptionSuffix:
-          '. Local authorities have been notified and are en route.',
-    ),
-    _IncidentData(
-      location: 'Sungai Udang, Melaka',
-      title: 'Suspicious Vehicle Loitering',
-      descriptionPrefix:
-          'A white Toyota Vellfire bearing plate WXY 8899 has been stationary outside ',
-      highlightText: 'Sekolah Seri Puteri',
-      descriptionSuffix:
-          ' for the past 45 minutes. Plate check flagged as unregistered.',
-    ),
-    _IncidentData(
-      location: 'Ayer Keroh, Melaka',
-      title: 'Electrical Hazard Snap',
-      descriptionPrefix:
-          'Live power line snapped near Jalan Utama block. Residents advised to keep a ',
-      highlightText: '15-metre radius',
-      descriptionSuffix: '. TNB crew has been dispatched.',
-    ),
-  ];
+  _FeedFilter _filter = _FeedFilter.nearby;
+  Position? _userPosition;
+  String _userState = '';
+  bool _locationLoading = true;
+
+  static const Color nude     = Color(0xFFACA494);
+  static const Color pink     = Color(0xFFFFABBB);
+  static const Color burgundy = Color(0xFFB22222);
+
+  @override
+  void initState() {
+    super.initState();
+    _initLocation();
+  }
+
+  Future<void> _initLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
+      LocationPermission perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) return;
+
+      final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+      );
+
+      // Phase 1 — GPS obtained: stop spinner immediately, show coordinates
+      if (mounted) {
+        setState(() {
+          _userPosition    = pos;
+          _locationLoading = false;
+          // Show coordinates as fallback while geocoding runs
+          _userState =
+              '${pos.latitude.toStringAsFixed(2)}°N, ${pos.longitude.toStringAsFixed(2)}°E';
+        });
+      }
+
+      // Phase 2 — geocode in background; doesn't block the UI
+      final state = await GeocodingService.getState(
+          pos.latitude, pos.longitude);
+      if (mounted) setState(() => _userState = state);
+
+    } catch (_) {
+      // Silently fall through — finally always runs
+    } finally {
+      if (mounted && _locationLoading) {
+        setState(() => _locationLoading = false);
+      }
+    }
+  }
+
+  // Haversine formula — returns distance in km between two coordinates
+  double _distanceKm(double lat1, double lng1, double lat2, double lng2) {
+    const r = 6371.0;
+    final dLat = _rad(lat2 - lat1);
+    final dLng = _rad(lng2 - lng1);
+    final a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_rad(lat1)) * cos(_rad(lat2)) *
+            sin(dLng / 2) * sin(dLng / 2);
+    return r * 2 * atan2(sqrt(a), sqrt(1 - a));
+  }
+
+  double _rad(double deg) => deg * pi / 180;
+
+  // Apply the selected filter to a list of Firestore docs
+  List<QueryDocumentSnapshot> _applyFilter(
+      List<QueryDocumentSnapshot> docs) {
+    switch (_filter) {
+      case _FeedFilter.malaysia:
+        return docs;
+
+      case _FeedFilter.nearby:
+        if (_userPosition == null) return docs;
+        return docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final loc  = data['location'] as Map<String, dynamic>?;
+          if (loc == null) return false;
+          final lat = (loc['latitude']  as num?)?.toDouble() ?? 0;
+          final lng = (loc['longitude'] as num?)?.toDouble() ?? 0;
+          return _distanceKm(
+                _userPosition!.latitude, _userPosition!.longitude,
+                lat, lng) <= 5;
+        }).toList();
+
+      case _FeedFilter.state:
+        // State filter is applied asynchronously — handled in StreamBuilder
+        return docs;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final stateLabel = _userState.isNotEmpty ? _userState : 'My State';
+
     return Scaffold(
       backgroundColor: AppTheme.solidBg,
-      extendBody:
-          true, // Allows content to flow smoothly underneath the navigation bar
+      extendBody: true,
       appBar: const MyBahayaAppBar(),
-
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          20,
-          20,
-          130, // Standardized bottom spacing clear of navigation bar
-        ),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 130),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Greeting with real username from Firestore ──
+            // ── Greeting ──────────────────────────────────────────
             StreamBuilder<UserProfile?>(
               stream: UserService.profileStream(),
               builder: (context, snapshot) {
@@ -72,11 +142,12 @@ class _HomeDashboardState extends State<HomeDashboard> {
                 return AppHeader(title: greeting);
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            // ── Location Chip ──
+            // ── Location chip ─────────────────────────────────────
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(16),
@@ -84,32 +155,82 @@ class _HomeDashboardState extends State<HomeDashboard> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.location_on_rounded,
-                    color: Color(0xFFB22222),
-                    size: 14,
-                  ),
+                  const Icon(Icons.location_on_rounded,
+                      color: burgundy, size: 14),
                   const SizedBox(width: 6),
                   Text(
-                    'Bukit Katil, Melaka',
+                    _locationLoading
+                        ? 'Locating...'
+                        : _userState.isNotEmpty
+                            ? _userState
+                            : 'Location unavailable',
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFFACA494),
+                      color: nude,
                     ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+
+            // ── Filter Pills ──────────────────────────────────────
+            Row(
+              children: [
+                _FilterPill(
+                  label: 'Nearby',
+                  icon: Icons.near_me_rounded,
+                  isActive: _filter == _FeedFilter.nearby,
+                  onTap: () => setState(() => _filter = _FeedFilter.nearby),
+                ),
+                const SizedBox(width: 8),
+                _FilterPill(
+                  label: stateLabel,
+                  icon: Icons.flag_rounded,
+                  isActive: _filter == _FeedFilter.state,
+                  onTap: () => setState(() => _filter = _FeedFilter.state),
+                ),
+                const SizedBox(width: 8),
+                _FilterPill(
+                  label: 'Malaysia',
+                  icon: Icons.public_rounded,
+                  isActive: _filter == _FeedFilter.malaysia,
+                  onTap: () =>
+                      setState(() => _filter = _FeedFilter.malaysia),
+                ),
+              ],
+            ),
             const SizedBox(height: 24),
 
-            // ── Scrollable Card Feed ──
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _incidents.length,
-              itemBuilder: (context, index) {
-                return _buildIncidentCard(_incidents[index]);
+            // ── Feed ─────────────────────────────────────────────
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('reports')
+                  .orderBy('createdAt', descending: true)
+                  .limit(50)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return _buildSkeleton();
+                }
+                if (snapshot.hasError) {
+                  return _buildEmpty(
+                      'Could not load reports. Check your connection.');
+                }
+
+                final allDocs = snapshot.data?.docs ?? [];
+                final filtered = _applyFilter(allDocs);
+
+                if (filtered.isEmpty) {
+                  return _buildEmpty(_emptyMessage());
+                }
+
+                return _FeedList(
+                  docs: filtered,
+                  userState: _userState,
+                  filterMode: _filter,
+                );
               },
             ),
           ],
@@ -118,116 +239,413 @@ class _HomeDashboardState extends State<HomeDashboard> {
     );
   }
 
-  // ── Incident Card Builder ──
-  Widget _buildIncidentCard(_IncidentData incident) {
+  String _emptyMessage() {
+    switch (_filter) {
+      case _FeedFilter.nearby:
+        return 'No incidents reported within 5 km of you.';
+      case _FeedFilter.state:
+        return 'No incidents reported in $_userState.';
+      case _FeedFilter.malaysia:
+        return 'No incidents reported yet.';
+    }
+  }
+
+  Widget _buildEmpty(String msg) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 60),
+      child: Center(
+        child: Column(
+          children: [
+            Icon(Icons.shield_outlined,
+                size: 52, color: nude.withOpacity(0.25)),
+            const SizedBox(height: 16),
+            Text(
+              msg,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                  fontSize: 13, color: nude.withOpacity(0.45)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return Column(
+      children: List.generate(
+        3,
+        (_) => Container(
+          margin: const EdgeInsets.only(bottom: 20),
+          height: 280,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Feed list — handles state filter async ────────────────────────────────
+class _FeedList extends StatefulWidget {
+  final List<QueryDocumentSnapshot> docs;
+  final String userState;
+  final _FeedFilter filterMode;
+
+  const _FeedList({
+    required this.docs,
+    required this.userState,
+    required this.filterMode,
+  });
+
+  @override
+  State<_FeedList> createState() => _FeedListState();
+}
+
+class _FeedListState extends State<_FeedList> {
+  List<QueryDocumentSnapshot> _stateDocs = [];
+  bool _stateLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.filterMode == _FeedFilter.state) _filterByState();
+  }
+
+  @override
+  void didUpdateWidget(_FeedList old) {
+    super.didUpdateWidget(old);
+    if (widget.filterMode == _FeedFilter.state &&
+        (old.filterMode != _FeedFilter.state ||
+            old.docs.length != widget.docs.length)) {
+      _filterByState();
+    }
+  }
+
+  Future<void> _filterByState() async {
+    if (widget.userState.isEmpty) {
+      setState(() => _stateDocs = widget.docs);
+      return;
+    }
+    setState(() => _stateLoading = true);
+    final results = <QueryDocumentSnapshot>[];
+    for (final doc in widget.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final loc  = data['location'] as Map<String, dynamic>?;
+      if (loc == null) continue;
+      final lat = (loc['latitude']  as num?)?.toDouble() ?? 0;
+      final lng = (loc['longitude'] as num?)?.toDouble() ?? 0;
+      final state = await GeocodingService.getState(lat, lng);
+      if (state == widget.userState) results.add(doc);
+    }
+    if (mounted) setState(() { _stateDocs = results; _stateLoading = false; });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.filterMode == _FeedFilter.state) {
+      if (_stateLoading) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.all(40),
+            child: CircularProgressIndicator(
+                color: Color(0xFFB22222), strokeWidth: 2),
+          ),
+        );
+      }
+      if (_stateDocs.isEmpty) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 60),
+          child: Center(
+            child: Text(
+              'No incidents reported in ${widget.userState}.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: const Color(0xFFACA494).withOpacity(0.45)),
+            ),
+          ),
+        );
+      }
+      return _buildList(_stateDocs);
+    }
+    return _buildList(widget.docs);
+  }
+
+  Widget _buildList(List<QueryDocumentSnapshot> docs) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: docs.length,
+      itemBuilder: (context, i) {
+        final data = docs[i].data() as Map<String, dynamic>;
+        return _IncidentCard(data: data);
+      },
+    );
+  }
+}
+
+// ── Single incident card ──────────────────────────────────────────────────
+class _IncidentCard extends StatefulWidget {
+  final Map<String, dynamic> data;
+  const _IncidentCard({required this.data});
+
+  @override
+  State<_IncidentCard> createState() => _IncidentCardState();
+}
+
+class _IncidentCardState extends State<_IncidentCard> {
+  String _placeName = 'Loading location...';
+
+  static const Color nude     = Color(0xFFACA494);
+  static const Color pink     = Color(0xFFFFABBB);
+  static const Color burgundy = Color(0xFFB22222);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPlace();
+  }
+
+  Future<void> _loadPlace() async {
+    final loc = widget.data['location'] as Map<String, dynamic>?;
+    if (loc == null) return;
+    final lat = (loc['latitude']  as num?)?.toDouble() ?? 0;
+    final lng = (loc['longitude'] as num?)?.toDouble() ?? 0;
+    final name = await GeocodingService.getPlaceName(lat, lng);
+    if (mounted) setState(() => _placeName = name);
+  }
+
+  Color _catColor(String cat) {
+    switch (cat.toLowerCase()) {
+      case 'fire':    return const Color(0xFFFF6B35);
+      case 'theft':   return const Color(0xFF9B59B6);
+      case 'assault': return const Color(0xFFE74C3C);
+      case 'medical': return const Color(0xFF2ECC71);
+      default:        return burgundy;
+    }
+  }
+
+  IconData _catIcon(String cat) {
+    switch (cat.toLowerCase()) {
+      case 'fire':    return Icons.local_fire_department_rounded;
+      case 'theft':   return Icons.no_encryption_rounded;
+      case 'assault': return Icons.personal_injury_rounded;
+      case 'medical': return Icons.medical_services_rounded;
+      default:        return Icons.warning_amber_rounded;
+    }
+  }
+
+  String _timeAgo(dynamic timestamp) {
+    if (timestamp == null) return '';
+    DateTime dt;
+    if (timestamp is Timestamp) {
+      dt = timestamp.toDate();
+    } else {
+      return '';
+    }
+    final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 1)  return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours   < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final category = widget.data['category'] as String? ?? 'Unknown';
+    final details  = widget.data['details']  as String? ?? '';
+    final imageUrl = widget.data['imageUrl'] as String? ?? '';
+    final catColor = _catColor(category);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        color: const Color(
-          0xFF422E2E,
-        ).withOpacity(0.55), // Lighter warm brown/maroon container
+        color: const Color(0xFF422E2E).withOpacity(0.55),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white.withOpacity(0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Red Badge Header
+          // ── Header badge ─────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(
-                  0xFF8B1A1A,
-                ).withOpacity(0.9), // Lighter red badge background
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8B1A1A).withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'NEARBY INCIDENT + SEVERITY',
-                    style: GoogleFonts.inter(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6, height: 6,
+                        decoration: const BoxDecoration(
+                          color: Colors.white, shape: BoxShape.circle),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'INCIDENT REPORT',
+                        style: GoogleFonts.inter(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const Spacer(),
+                Text(
+                  _timeAgo(widget.data['createdAt']),
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: nude.withOpacity(0.5),
+                  ),
+                ),
+              ],
             ),
           ),
+
+          // ── Reported image ───────────────────────────────────
+          if (imageUrl.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  placeholder: (_, __) => Container(
+                    height: 180,
+                    color: Colors.white.withOpacity(0.05),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                          color: burgundy, strokeWidth: 1.5),
+                    ),
+                  ),
+                  errorWidget: (_, __, ___) => Container(
+                    height: 100,
+                    color: Colors.white.withOpacity(0.04),
+                    child: Icon(Icons.broken_image_rounded,
+                        color: nude.withOpacity(0.3), size: 32),
+                  ),
+                ),
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 14),
+
+          // ── Category + place name ────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                // Category badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: catColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: catColor.withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(_catIcon(category),
+                          color: catColor, size: 12),
+                      const SizedBox(width: 4),
+                      Text(
+                        category.toUpperCase(),
+                        style: GoogleFonts.inter(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          color: catColor,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Place name
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(Icons.location_on_rounded,
+                          color: pink.withOpacity(0.6), size: 12),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          _placeName,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: nude,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Details ──────────────────────────────────────────
+          if (details.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                details,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: Colors.white.withOpacity(0.75),
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
 
           const SizedBox(height: 16),
 
-          // 2. Incident Title
+          // ── View Details button ──────────────────────────────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              incident.title,
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                height: 1.25,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // 3. Rich Highlighted Paragraph
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: RichText(
-              text: TextSpan(
-                style: GoogleFonts.inter(
-                  fontSize: 13.5,
-                  color: Colors.white.withOpacity(0.9),
-                  height: 1.5,
-                ),
-                children: [
-                  TextSpan(text: incident.descriptionPrefix),
-                  TextSpan(
-                    text: incident.highlightText,
-                    style: const TextStyle(
-                      color: Color(0xFFACA494), // Warm gold highlight
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TextSpan(text: incident.descriptionSuffix),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // 4. View Details Button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: SizedBox(
               height: 38,
               child: OutlinedButton.icon(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.info_outline,
-                  color: Colors.white,
-                  size: 16,
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => IncidentMapScreen(
+                      report: widget.data,
+                    ),
+                  ),
                 ),
+                icon: const Icon(Icons.map_rounded,
+                    color: Colors.white, size: 15),
                 label: Text(
-                  'View Details',
+                  'View Details on Map',
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -235,43 +653,15 @@ class _HomeDashboardState extends State<HomeDashboard> {
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
-                  backgroundColor: const Color(
-                    0xFF261212,
-                  ).withOpacity(0.8), // Dark outline background
-                  side: BorderSide(color: Colors.white.withOpacity(0.12)),
+                  backgroundColor:
+                      const Color(0xFF261212).withOpacity(0.8),
+                  side: BorderSide(
+                      color: Colors.white.withOpacity(0.12)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(19),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                 ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // 5. Malaysia Silhouette Mini-map
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            child: Container(
-              height: 150,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(
-                  0xFFD9D5CD,
-                ), // Beautiful light gold/gray map background
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: CustomPaint(painter: _MalaysiaMapPainter()),
               ),
             ),
           ),
@@ -281,132 +671,70 @@ class _HomeDashboardState extends State<HomeDashboard> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Malaysia Map Silhouette Painter
-// ─────────────────────────────────────────────────────────────────────────────
-class _MalaysiaMapPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paintMap =
-        Paint()
-          ..color = const Color(0xFF1D5F8A) // Premium Malaysia blue silhouette
-          ..style = PaintingStyle.fill;
+// ── Filter pill widget ────────────────────────────────────────────────────
+class _FilterPill extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isActive;
+  final VoidCallback onTap;
 
-    final paintOverlay =
-        Paint()
-          ..color = const Color(
-            0xFFB22222,
-          ) // Red accent dot for threat location
-          ..style = PaintingStyle.fill;
-
-    final paintGlow =
-        Paint()
-          ..color = const Color(0xFFB22222).withOpacity(0.4)
-          ..style = PaintingStyle.fill;
-
-    // West Malaysia Path (Stylized polygon)
-    final pathWest =
-        Path()
-          ..moveTo(size.width * 0.15, size.height * 0.40)
-          ..quadraticBezierTo(
-            size.width * 0.18,
-            size.height * 0.22,
-            size.width * 0.23,
-            size.height * 0.18,
-          )
-          ..quadraticBezierTo(
-            size.width * 0.28,
-            size.height * 0.15,
-            size.width * 0.32,
-            size.height * 0.20,
-          )
-          ..lineTo(size.width * 0.35, size.height * 0.32)
-          ..quadraticBezierTo(
-            size.width * 0.38,
-            size.height * 0.45,
-            size.width * 0.36,
-            size.height * 0.58,
-          )
-          ..lineTo(size.width * 0.38, size.height * 0.72)
-          ..quadraticBezierTo(
-            size.width * 0.32,
-            size.height * 0.85,
-            size.width * 0.28,
-            size.height * 0.88,
-          )
-          ..quadraticBezierTo(
-            size.width * 0.22,
-            size.height * 0.72,
-            size.width * 0.20,
-            size.height * 0.65,
-          )
-          ..close();
-
-    // East Malaysia Path (Stylized polygon)
-    final pathEast =
-        Path()
-          ..moveTo(size.width * 0.50, size.height * 0.65)
-          ..quadraticBezierTo(
-            size.width * 0.55,
-            size.height * 0.55,
-            size.width * 0.62,
-            size.height * 0.52,
-          )
-          ..quadraticBezierTo(
-            size.width * 0.70,
-            size.height * 0.56,
-            size.width * 0.75,
-            size.height * 0.48,
-          )
-          ..lineTo(size.width * 0.78, size.height * 0.35) // Sabah top tip
-          ..quadraticBezierTo(
-            size.width * 0.83,
-            size.height * 0.38,
-            size.width * 0.86,
-            size.height * 0.45,
-          )
-          ..quadraticBezierTo(
-            size.width * 0.88,
-            size.height * 0.55,
-            size.width * 0.84,
-            size.height * 0.62,
-          )
-          ..quadraticBezierTo(
-            size.width * 0.76,
-            size.height * 0.68,
-            size.width * 0.68,
-            size.height * 0.72,
-          )
-          ..close();
-
-    canvas.drawPath(pathWest, paintMap);
-    canvas.drawPath(pathEast, paintMap);
-
-    // Draw active incident radar dot (Bukit Katil, Melaka - Southern part of West Malaysia)
-    final threatCenter = Offset(size.width * 0.32, size.height * 0.75);
-    canvas.drawCircle(threatCenter, 12, paintGlow);
-    canvas.drawCircle(threatCenter, 5, paintOverlay);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Incident Data Model
-// ─────────────────────────────────────────────────────────────────────────────
-class _IncidentData {
-  final String location;
-  final String title;
-  final String descriptionPrefix;
-  final String highlightText;
-  final String descriptionSuffix;
-
-  _IncidentData({
-    required this.location,
-    required this.title,
-    required this.descriptionPrefix,
-    required this.highlightText,
-    required this.descriptionSuffix,
+  const _FilterPill({
+    required this.label,
+    required this.icon,
+    required this.isActive,
+    required this.onTap,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive
+              ? const Color(0xFFB22222)
+              : const Color(0xFF422E2E).withOpacity(0.6),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive
+                ? Colors.transparent
+                : Colors.white.withOpacity(0.08),
+          ),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFFB22222).withOpacity(0.3),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  )
+                ]
+              : [],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon,
+                size: 13,
+                color: isActive
+                    ? Colors.white
+                    : const Color(0xFFACA494)),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight:
+                    isActive ? FontWeight.bold : FontWeight.w500,
+                color: isActive
+                    ? Colors.white
+                    : const Color(0xFFACA494),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

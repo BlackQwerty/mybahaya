@@ -392,9 +392,9 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
               ),
             ],
-            
+
             const SizedBox(height: 32),
-            _buildReportButton(),
+            _buildBottomButtons(),
           ],
         ),
       ),
@@ -594,60 +594,74 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget _buildReportButton() {
-    return Container(
-      width: double.infinity,
-      height: 52,
-      decoration: BoxDecoration(
-        color: burgundyColor,
-        borderRadius: BorderRadius.circular(26),
-        boxShadow: [
-          BoxShadow(
-            color: burgundyColor.withOpacity(0.35),
-            blurRadius: 12,
-            spreadRadius: 2,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(26),
-          onTap: _isLoading ? null : _submitReport,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_isLoading)
-                const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-              else ...[
-                const Icon(
-                  Icons.warning_amber_rounded,
-                  color: Colors.white,
-                  size: 20,
+  // Two-button row: Cancel (dismiss keyboard) + Report Incident
+  Widget _buildBottomButtons() {
+    return Row(
+      children: [
+        // Cancel — dismisses keyboard, stays on page
+        Expanded(
+          flex: 4,
+          child: SizedBox(
+            height: 52,
+            child: OutlinedButton.icon(
+              onPressed: () => FocusScope.of(context).unfocus(),
+              icon: const Icon(Icons.keyboard_hide_rounded,
+                  size: 18, color: Colors.white54),
+              label: Text(
+                'Cancel',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white54,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'REPORT INCIDENT',
-                  style: GoogleFonts.playfairDisplay(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.0,
-                  ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: Colors.white.withOpacity(0.12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(26),
                 ),
-              ],
-            ],
+              ),
+            ),
           ),
         ),
-      ),
+        const SizedBox(width: 12),
+        // Report Incident — dark charcoal, not red
+        Expanded(
+          flex: 6,
+          child: SizedBox(
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: _isLoading ? null : _submitReport,
+              icon: _isLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2),
+                    )
+                  : const Icon(Icons.warning_amber_rounded,
+                      size: 18, color: Colors.white),
+              label: Text(
+                _isLoading ? 'Submitting...' : 'Report Incident',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2A1010),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                side: BorderSide(color: Colors.white.withOpacity(0.15)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(26),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
