@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'dart:ui';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_header.dart';
@@ -174,8 +175,8 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
                 child: Icon(
                   success
-                      ? Icons.check_circle_rounded
-                      : Icons.error_rounded,
+                      ? CupertinoIcons.checkmark_circle_fill
+                      : CupertinoIcons.xmark_circle_fill,
                   color: success ? AppTheme.alertGreen : AppTheme.alertRed,
                   size: 44,
                 ),
@@ -344,7 +345,7 @@ class _ReportScreenState extends State<ReportScreen> {
                     ),
                   ),
                   icon: const Icon(
-                    Icons.history_rounded,
+                    CupertinoIcons.clock,
                     size: 15,
                     color: Colors.white,
                   ),
@@ -413,7 +414,7 @@ class _ReportScreenState extends State<ReportScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            hasLocation ? Icons.location_on_rounded : Icons.location_searching_rounded,
+            hasLocation ? CupertinoIcons.location_fill : CupertinoIcons.location,
             color: hasLocation ? Colors.greenAccent : nudeColor,
             size: 16,
           ),
@@ -462,7 +463,7 @@ class _ReportScreenState extends State<ReportScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.add_a_photo_rounded,
+                        CupertinoIcons.camera_fill,
                         color: pinkColor.withOpacity(0.8),
                         size: 40,
                       ),
@@ -604,7 +605,7 @@ class _ReportScreenState extends State<ReportScreen> {
             height: 52,
             child: OutlinedButton.icon(
               onPressed: () => FocusScope.of(context).unfocus(),
-              icon: const Icon(Icons.keyboard_hide_rounded,
+              icon: const Icon(CupertinoIcons.keyboard_chevron_compact_down,
                   size: 18, color: Colors.white54),
               label: Text(
                 'Cancel',
@@ -638,7 +639,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       child: CircularProgressIndicator(
                           color: Colors.white, strokeWidth: 2),
                     )
-                  : const Icon(Icons.warning_amber_rounded,
+                  : const Icon(CupertinoIcons.exclamationmark_triangle_fill,
                       size: 18, color: Colors.white),
               label: Text(
                 _isLoading ? 'Submitting...' : 'Report Incident',

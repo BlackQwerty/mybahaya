@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -154,7 +155,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.location_on_rounded,
+                  const Icon(CupertinoIcons.location_fill,
                       color: burgundy, size: 14),
                   const SizedBox(width: 6),
                   Text(
@@ -179,21 +180,21 @@ class _HomeDashboardState extends State<HomeDashboard> {
               children: [
                 _FilterPill(
                   label: 'Nearby',
-                  icon: Icons.near_me_rounded,
+                  icon: CupertinoIcons.location_fill,
                   isActive: _filter == _FeedFilter.nearby,
                   onTap: () => setState(() => _filter = _FeedFilter.nearby),
                 ),
                 const SizedBox(width: 8),
                 _FilterPill(
                   label: stateLabel,
-                  icon: Icons.flag_rounded,
+                  icon: CupertinoIcons.flag_fill,
                   isActive: _filter == _FeedFilter.state,
                   onTap: () => setState(() => _filter = _FeedFilter.state),
                 ),
                 const SizedBox(width: 8),
                 _FilterPill(
                   label: 'Malaysia',
-                  icon: Icons.public_rounded,
+                  icon: CupertinoIcons.globe,
                   isActive: _filter == _FeedFilter.malaysia,
                   onTap: () =>
                       setState(() => _filter = _FeedFilter.malaysia),
@@ -255,7 +256,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
       child: Center(
         child: Column(
           children: [
-            Icon(Icons.shield_outlined,
+            Icon(CupertinoIcons.shield,
                 size: 52, color: nude.withOpacity(0.25)),
             const SizedBox(height: 16),
             Text(
@@ -429,11 +430,11 @@ class _IncidentCardState extends State<_IncidentCard> {
 
   IconData _catIcon(String cat) {
     switch (cat.toLowerCase()) {
-      case 'fire':    return Icons.local_fire_department_rounded;
-      case 'theft':   return Icons.no_encryption_rounded;
-      case 'assault': return Icons.personal_injury_rounded;
-      case 'medical': return Icons.medical_services_rounded;
-      default:        return Icons.warning_amber_rounded;
+      case 'fire':    return CupertinoIcons.flame_fill;
+      case 'theft':   return CupertinoIcons.lock_open_fill;
+      case 'assault': return CupertinoIcons.exclamationmark_circle_fill;
+      case 'medical': return CupertinoIcons.plus_circle_fill;
+      default:        return CupertinoIcons.exclamationmark_triangle_fill;
     }
   }
 
@@ -537,7 +538,7 @@ class _IncidentCardState extends State<_IncidentCard> {
                   errorWidget: (_, __, ___) => Container(
                     height: 100,
                     color: Colors.white.withOpacity(0.04),
-                    child: Icon(Icons.broken_image_rounded,
+                    child: Icon(CupertinoIcons.photo,
                         color: nude.withOpacity(0.3), size: 32),
                   ),
                 ),
@@ -585,7 +586,7 @@ class _IncidentCardState extends State<_IncidentCard> {
                 Expanded(
                   child: Row(
                     children: [
-                      Icon(Icons.location_on_rounded,
+                      Icon(CupertinoIcons.location_fill,
                           color: pink.withOpacity(0.6), size: 12),
                       const SizedBox(width: 3),
                       Expanded(
@@ -641,7 +642,7 @@ class _IncidentCardState extends State<_IncidentCard> {
                     ),
                   ),
                 ),
-                icon: const Icon(Icons.map_rounded,
+                icon: const Icon(CupertinoIcons.map_fill,
                     color: Colors.white, size: 15),
                 label: Text(
                   'View Details on Map',

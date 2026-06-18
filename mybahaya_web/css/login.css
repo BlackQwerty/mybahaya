@@ -1,0 +1,148 @@
+/* ============================================================
+   login.css — Sign In Page
+   ============================================================ */
+
+.login-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: var(--gap-lg);
+}
+
+/* ── Animated Background Orbs ── */
+.login-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+}
+.bg-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); opacity: 0.25;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, var(--bg-base), transparent);
+  top: -100px; left: -100px;
+  animation-delay: 0s;
+}
+.orb-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, var(--accent-rose), transparent);
+  bottom: -80px; right: -80px;
+  animation-delay: 3s;
+}
+.orb-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, var(--bg-surface), transparent);
+  top: 40%; left: 60%;
+  animation-delay: 6s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(20px, -20px) scale(1.05); }
+}
+
+/* ── Layout ── */
+.login-wrapper {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center;
+  gap: var(--gap-xl);
+  width: 100%; max-width: 420px;
+}
+
+/* ── Brand ── */
+.login-brand { display: flex; flex-direction: column; align-items: center; gap: var(--gap-sm); }
+.login-logo {
+  width: 72px; height: 72px;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.login-app-name {
+  font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,0.5));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.login-tagline { font-size: var(--fs-xs); color: rgba(255,255,255,0.45); letter-spacing: 0.4px; }
+
+/* ── Card ── */
+.login-card {
+  width: 100%;
+  padding: var(--gap-xl) var(--gap-xl);
+}
+
+.login-header { margin-bottom: var(--gap-lg); }
+.login-title   { font-size: var(--fs-xl); font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
+.login-subtitle { font-size: var(--fs-xs); color: rgba(255,255,255,0.45); }
+
+/* ── Error Banner ── */
+.login-error {
+  display: flex; align-items: center; gap: var(--gap-sm);
+  padding: 10px 14px; margin-bottom: var(--gap-md);
+  background: rgba(240,95,126,0.12);
+  border: 1px solid rgba(240,95,126,0.30);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-xs); color: var(--accent-rose);
+}
+.login-error ion-icon { font-size: 16px; flex-shrink: 0; }
+
+/* ── Form ── */
+.login-form { display: flex; flex-direction: column; gap: var(--gap-md); }
+
+.form-group  { display: flex; flex-direction: column; gap: 6px; }
+.form-label  {
+  font-size: var(--fs-xs); font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase; letter-spacing: 0.6px;
+}
+
+.input-wrap { position: relative; }
+.input-icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 17px; color: rgba(255,255,255,0.35); pointer-events: none;
+}
+.login-input { padding-left: 42px; padding-right: 42px; }
+
+.toggle-pw {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.35); font-size: 17px;
+  display: flex; align-items: center;
+  transition: color var(--t-fast);
+}
+.toggle-pw:hover { color: rgba(255,255,255,0.7); }
+
+/* ── Submit Button ── */
+.login-btn {
+  width: 100%; justify-content: center;
+  margin-top: var(--gap-sm);
+  height: 48px; font-size: var(--fs-base); font-weight: 600;
+  background: linear-gradient(135deg, var(--bg-base), var(--accent-rose));
+  box-shadow: 0 4px 20px rgba(77,10,24,0.6);
+  position: relative;
+}
+.login-btn:hover { box-shadow: 0 6px 28px rgba(240,95,126,0.45); }
+.login-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none !important; }
+
+/* Spinner */
+.login-spinner {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Footer note ── */
+.login-footer-note {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: var(--gap-md);
+  font-size: var(--fs-xs); color: rgba(255,255,255,0.30);
+}
+.login-footer-note ion-icon { font-size: 14px; }
+
+/* ── Version line ── */
+.login-version {
+  font-size: var(--fs-xs); color: rgba(255,255,255,0.25);
+  letter-spacing: 0.3px;
+}

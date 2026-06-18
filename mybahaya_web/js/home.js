@@ -166,21 +166,21 @@ function initActivity() {
   if (!list) return;
 
   const activities = [
-    { icon: 'ph-siren',         color: '#f05f7e', bg: 'rgba(240,95,126,0.15)', title: 'Armed Threat Reported',          desc: 'Jalan Bukit Seguntang, Alor Gajah', time: '2m ago' },
-    { icon: 'ph-fire',          color: '#f5a623', bg: 'rgba(245,166,35,0.15)',  title: 'Fire Incident — Sector 4A',      desc: 'Near Pekan Alor Gajah',             time: '8m ago' },
-    { icon: 'ph-check-circle',  color: '#30d158', bg: 'rgba(48,209,88,0.15)',   title: 'Report #INC-0882 Resolved',      desc: 'Officer Unit 3 confirmed',          time: '15m ago' },
-    { icon: 'ph-warning-circle',color: '#f5a623', bg: 'rgba(245,166,35,0.15)',  title: 'Crowd Surge Detected',           desc: 'Main Square North',                 time: '22m ago' },
-    { icon: 'ph-ambulance',     color: '#5b8dee', bg: 'rgba(91,141,238,0.15)',  title: 'Medical Emergency',              desc: 'Taman Bahera residential block',    time: '35m ago' },
+    { icon: 'alert-circle-outline',      color: '#f05f7e', bg: 'rgba(240,95,126,0.15)', title: 'Armed Threat Reported',          desc: 'Jalan Bukit Seguntang, Alor Gajah', time: '2m ago' },
+    { icon: 'flame-outline',             color: '#f5a623', bg: 'rgba(245,166,35,0.15)',  title: 'Fire Incident — Sector 4A',      desc: 'Near Pekan Alor Gajah',             time: '8m ago' },
+    { icon: 'checkmark-circle-outline',  color: '#30d158', bg: 'rgba(48,209,88,0.15)',   title: 'Report #INC-0882 Resolved',      desc: 'Officer Unit 3 confirmed',          time: '15m ago' },
+    { icon: 'warning-outline',           color: '#f5a623', bg: 'rgba(245,166,35,0.15)',  title: 'Crowd Surge Detected',           desc: 'Main Square North',                 time: '22m ago' },
+    { icon: 'medkit-outline',            color: '#5b8dee', bg: 'rgba(91,141,238,0.15)',  title: 'Medical Emergency',              desc: 'Taman Bahera residential block',    time: '35m ago' },
   ];
 
   list.innerHTML = activities.map(a => `
     <li class="activity-item" role="listitem">
       <div class="activity-icon-wrap" style="background:${a.bg}; color:${a.color}">
-        <i class="ph ${a.icon}"></i>
+        <ion-icon name="${a.icon}"></ion-icon>
       </div>
       <div class="activity-body">
         <p class="activity-title">${a.title}</p>
-        <p class="activity-desc"><i class="ph ph-map-pin"></i> ${a.desc}</p>
+        <p class="activity-desc"><ion-icon name="location-outline"></ion-icon> ${a.desc}</p>
       </div>
       <span class="activity-time">${a.time}</span>
     </li>

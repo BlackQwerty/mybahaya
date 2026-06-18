@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -88,11 +89,11 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
 
   IconData _catIcon(String cat) {
     switch (cat.toLowerCase()) {
-      case 'fire':    return Icons.local_fire_department_rounded;
-      case 'theft':   return Icons.no_encryption_rounded;
-      case 'assault': return Icons.personal_injury_rounded;
-      case 'medical': return Icons.medical_services_rounded;
-      default:        return Icons.warning_amber_rounded;
+      case 'fire':    return CupertinoIcons.flame_fill;
+      case 'theft':   return CupertinoIcons.lock_open_fill;
+      case 'assault': return CupertinoIcons.exclamationmark_circle_fill;
+      case 'medical': return CupertinoIcons.plus_circle_fill;
+      default:        return CupertinoIcons.exclamationmark_triangle_fill;
     }
   }
 
@@ -227,7 +228,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.sos_rounded, color: Colors.white, size: 44),
+                      const Icon(CupertinoIcons.phone_fill, color: Colors.white, size: 44),
                       Text(
                         '999',
                         style: TextStyle(
@@ -259,13 +260,13 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
           Row(
             children: [
               _dialTile('999', 'Polis / Bomba / Ambulans',
-                  Icons.emergency_rounded, const Color(0xFFDC2626)),
+                  CupertinoIcons.exclamationmark_circle_fill, const Color(0xFFDC2626)),
               const SizedBox(width: 8),
               _dialTile('994', 'Bomba & Penyelamat',
-                  Icons.local_fire_department_rounded, const Color(0xFFFF6B35)),
+                  CupertinoIcons.flame_fill, const Color(0xFFFF6B35)),
               const SizedBox(width: 8),
               _dialTile('991', 'Kecemasan Perubatan',
-                  Icons.medical_services_rounded, const Color(0xFF2ECC71)),
+                  CupertinoIcons.plus_circle_fill, const Color(0xFF2ECC71)),
             ],
           ),
         ],
@@ -580,7 +581,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.access_time_rounded,
+                        Icon(CupertinoIcons.clock,
                             size: 11, color: Colors.white.withOpacity(0.3)),
                         const SizedBox(width: 3),
                         Text(
@@ -602,7 +603,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                               ),
                             ),
                             const SizedBox(width: 3),
-                            Icon(Icons.arrow_forward_ios_rounded,
+                            Icon(CupertinoIcons.chevron_forward,
                                 size: 10, color: catColor),
                           ],
                         ),
@@ -637,7 +638,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
       child: Center(
         child: Column(
           children: [
-            Icon(Icons.notifications_off_rounded,
+            Icon(CupertinoIcons.bell_slash_fill,
                 size: 48, color: nude.withOpacity(0.2)),
             const SizedBox(height: 12),
             Text(

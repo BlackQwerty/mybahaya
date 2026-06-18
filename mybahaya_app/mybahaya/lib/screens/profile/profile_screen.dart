@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -107,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 20),
               _sheetButton(
-                icon: Icons.camera_alt_rounded,
+                icon: CupertinoIcons.camera_fill,
                 label: 'Take Photo',
                 onTap: () {
                   Navigator.pop(ctx);
@@ -116,7 +117,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 12),
               _sheetButton(
-                icon: Icons.photo_library_rounded,
+                icon: CupertinoIcons.photo,
                 label: 'Choose from Gallery',
                 onTap: () {
                   Navigator.pop(ctx);
@@ -321,7 +322,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(
-                                Icons.chevron_left_rounded,
+                                CupertinoIcons.chevron_back,
                                 color: nudeColor,
                                 size: 24,
                               ),
@@ -413,7 +414,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     color: Colors.black.withOpacity(0.38),
                                   ),
                                   child: const Icon(
-                                    Icons.camera_alt_outlined,
+                                    CupertinoIcons.camera,
                                     color: Colors.white,
                                     size: 22,
                                   ),
@@ -470,7 +471,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                     const SizedBox(width: 8),
                                     const Icon(
-                                      Icons.edit_rounded,
+                                      CupertinoIcons.pencil,
                                       color: pinkColor,
                                       size: 18,
                                     ),
@@ -540,7 +541,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(width: 8),
                             const Icon(
-                              Icons.chevron_right_rounded,
+                              CupertinoIcons.chevron_right,
                               color: pinkColor,
                               size: 20,
                             ),
@@ -624,7 +625,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(width: 8),
                             const Icon(
-                              Icons.logout_rounded,
+                              CupertinoIcons.square_arrow_right,
                               color: Color(0xFFB22222),
                               size: 18,
                             ),
@@ -667,7 +668,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         errorWidget: (context, url, error) => const Icon(
-          Icons.person_rounded,
+          CupertinoIcons.person_fill,
           color: Colors.white60,
           size: 36,
         ),
@@ -680,7 +681,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
         return const Icon(
-          Icons.person_rounded,
+          CupertinoIcons.person_fill,
           color: Colors.white60,
           size: 36,
         );

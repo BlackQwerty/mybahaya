@@ -6,31 +6,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyBahaya — Live Map</title>
   <meta name="description" content="Live map interface for tracking and monitoring incidents." />
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
   <!-- MapLibre -->
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
 
-  <link rel="stylesheet" href="../css/shared.css" />
-  <link rel="stylesheet" href="../css/map.css" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="css/map.css" />
 </head>
 
 <body class="map-page">
   <nav class="navbar" role="navigation" aria-label="Main navigation">
     <a href="home.html" class="navbar-brand" aria-label="MyBahaya Home">
-      <div class="brand-icon"><i class="ph ph-shield-warning"></i></div>
+      <div class="brand-icon"><img src="assets/logo_icon/officialMyBahayaIcon.png" alt="MyBahaya" class="brand-logo" /></div>
       <span class="brand-name">MyBahaya</span>
     </a>
     <ul class="nav-links" role="list">
-      <li><a href="home.html"><i class="ph ph-house"></i> Home</a></li>
-      <li><a href="report.html"><i class="ph ph-clipboard-text"></i> Reports</a></li>
-      <li><a href="map.html" class="active"><i class="ph ph-map-trifold"></i> Map</a></li>
-      <li><a href="analytics.html"><i class="ph ph-chart-line-up"></i> Analytics</a></li>
-      <li><a href="users.html" class="admin-only"><i class="ph ph-users-three"></i> Users</a></li>
+      <li><a href="home.html"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="report.html"><ion-icon name="document-text-outline"></ion-icon> Reports</a></li>
+      <li><a href="map.html" class="active"><ion-icon name="map-outline"></ion-icon> Map</a></li>
+      <li><a href="analytics.html"><ion-icon name="bar-chart-outline"></ion-icon> Analytics</a></li>
+      <li><a href="organizations.html" class="admin-only"><ion-icon name="people-outline"></ion-icon> Organizations</a></li>
     </ul>
     <div class="navbar-right">
       <div class="avatar-btn" role="button" aria-label="User profile" tabindex="0">
-        <i class="ph ph-user-circle"></i>
+        <ion-icon name="person-circle-outline"></ion-icon>
       </div>
     </div>
   </nav>
@@ -121,10 +129,10 @@
         <!-- Live Camera Feed Widget -->
         <div class="cctv-widget glass-card">
           <div class="cctv-header">
-            <span style="color:var(--accent-rose)"><i class="ph ph-record ph-fill pulse-record"></i> LIVE CAM 08</span>
+            <span style="color:var(--accent-rose)"><ion-icon name="radio-button-on" class="pulse-record"></ion-icon> LIVE CAM 08</span>
           </div>
           <div class="cctv-bg">
-            <i class="ph ph-video-camera" style="font-size:32px;opacity:0.3"></i>
+            <ion-icon name="videocam-outline" style="font-size:32px;opacity:0.3"></ion-icon>
           </div>
           <div class="cctv-footer">
             <p style="font-weight:600;font-size:12px">Main Square North</p>
@@ -138,12 +146,11 @@
     <!-- Bottom Controls -->
     <div class="map-bottom-controls">
       <div class="zoom-controls glass-card">
-        <button id="zoom-in"><i class="ph ph-plus"></i></button>
-        <button id="zoom-out"><i class="ph ph-minus"></i></button>
+        <button id="zoom-in"><ion-icon name="add-outline"></ion-icon></button>
+        <button id="zoom-out"><ion-icon name="remove-outline"></ion-icon></button>
       </div>
-      <button class="btn btn-glass icon-btn" id="locate-me"><i class="ph ph-crosshair"></i></button>
-      <button class="btn btn-primary" id="toggle-3d" style="border-radius:100px;padding:0 24px;height:48px"><i
-          class="ph ph-stack"></i> 3D View</button>
+      <button class="btn btn-glass icon-btn" id="locate-me"><ion-icon name="locate-outline"></ion-icon></button>
+      <button class="btn btn-primary" id="toggle-3d" style="border-radius:100px;padding:0 24px;height:48px"><ion-icon name="layers-outline"></ion-icon> 3D View</button>
     </div>
 
   </div>
@@ -151,19 +158,19 @@
   <div class="fab-container">
     <div class="fab-menu" id="fab-menu" role="menu">
       <a href="#" class="fab-menu-item" id="fab-settings" role="menuitem">
-        <i class="ph ph-gear"></i> Settings
+        <ion-icon name="settings-outline"></ion-icon> Settings
       </a>
       <button class="fab-menu-item danger" id="fab-logout" role="menuitem">
-        <i class="ph ph-sign-out"></i> Log Out
+        <ion-icon name="log-out-outline"></ion-icon> Log Out
       </button>
     </div>
     <button class="fab-btn" id="fab-btn" aria-label="Open menu" aria-expanded="false">
-      <i class="ph ph-list"></i>
+      <ion-icon name="menu-outline"></ion-icon>
     </button>
   </div>
 
-  <script src="../js/shared.js"></script>
-  <script src="../js/map.js"></script>
+  <script src="js/shared.js"></script>
+  <script src="js/map.js"></script>
 </body>
 
 </html>

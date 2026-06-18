@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
@@ -72,11 +73,11 @@ class _MapScreenState extends State<MapScreen> {
 
   IconData _catIcon(String cat) {
     switch (cat.toLowerCase()) {
-      case 'fire':    return Icons.local_fire_department_rounded;
-      case 'theft':   return Icons.no_encryption_rounded;
-      case 'assault': return Icons.personal_injury_rounded;
-      case 'medical': return Icons.medical_services_rounded;
-      default:        return Icons.warning_amber_rounded;
+      case 'fire':    return CupertinoIcons.flame_fill;
+      case 'theft':   return CupertinoIcons.lock_open_fill;
+      case 'assault': return CupertinoIcons.exclamationmark_circle_fill;
+      case 'medical': return CupertinoIcons.plus_circle_fill;
+      default:        return CupertinoIcons.exclamationmark_triangle_fill;
     }
   }
 
@@ -266,7 +267,7 @@ class _MapScreenState extends State<MapScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.map_rounded, color: Colors.white.withOpacity(0.85), size: 15),
+          Icon(CupertinoIcons.map_fill, color: Colors.white.withOpacity(0.85), size: 15),
           const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,11 +343,11 @@ class _MapScreenState extends State<MapScreen> {
 
   Widget _buildLegend() {
     final items = [
-      _LegendItem(Icons.local_fire_department_rounded, const Color(0xFFFF6B35), 'Fire'),
-      _LegendItem(Icons.no_encryption_rounded,         const Color(0xFF9B59B6), 'Theft'),
-      _LegendItem(Icons.personal_injury_rounded,       const Color(0xFFE74C3C), 'Assault'),
-      _LegendItem(Icons.medical_services_rounded,      const Color(0xFF2ECC71), 'Medical'),
-      _LegendItem(Icons.warning_amber_rounded,         burgundy,               'Other'),
+      _LegendItem(CupertinoIcons.flame_fill, const Color(0xFFFF6B35), 'Fire'),
+      _LegendItem(CupertinoIcons.lock_open_fill,         const Color(0xFF9B59B6), 'Theft'),
+      _LegendItem(CupertinoIcons.exclamationmark_circle_fill,       const Color(0xFFE74C3C), 'Assault'),
+      _LegendItem(CupertinoIcons.plus_circle_fill,      const Color(0xFF2ECC71), 'Medical'),
+      _LegendItem(CupertinoIcons.exclamationmark_triangle_fill,         burgundy,               'Other'),
     ];
 
     const bgColor = Color(0xFF4D0A18);
@@ -460,7 +461,7 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ],
         ),
-        child: Icon(Icons.my_location_rounded, color: burgundy, size: 22),
+        child: Icon(CupertinoIcons.location_fill, color: burgundy, size: 22),
       ),
     );
   }
@@ -509,11 +510,11 @@ class _IncidentSheetState extends State<_IncidentSheet> {
 
   IconData _catIcon(String cat) {
     switch (cat.toLowerCase()) {
-      case 'fire':    return Icons.local_fire_department_rounded;
-      case 'theft':   return Icons.no_encryption_rounded;
-      case 'assault': return Icons.personal_injury_rounded;
-      case 'medical': return Icons.medical_services_rounded;
-      default:        return Icons.warning_amber_rounded;
+      case 'fire':    return CupertinoIcons.flame_fill;
+      case 'theft':   return CupertinoIcons.lock_open_fill;
+      case 'assault': return CupertinoIcons.exclamationmark_circle_fill;
+      case 'medical': return CupertinoIcons.plus_circle_fill;
+      default:        return CupertinoIcons.exclamationmark_triangle_fill;
     }
   }
 
@@ -557,7 +558,7 @@ class _IncidentSheetState extends State<_IncidentSheet> {
                 errorWidget: (_, __, ___) => Container(
                   height: 160,
                   color: Colors.grey.shade100,
-                  child: Icon(Icons.broken_image_rounded,
+                  child: Icon(CupertinoIcons.photo,
                       color: Colors.grey.shade300, size: 40),
                 ),
               ),
@@ -599,7 +600,7 @@ class _IncidentSheetState extends State<_IncidentSheet> {
                 Expanded(
                   child: Row(
                     children: [
-                      Icon(Icons.location_on_rounded,
+                      Icon(CupertinoIcons.location_fill,
                           color: Colors.grey.shade400, size: 13),
                       const SizedBox(width: 3),
                       Expanded(
@@ -649,7 +650,7 @@ class _IncidentSheetState extends State<_IncidentSheet> {
               height: 46,
               child: ElevatedButton.icon(
                 onPressed: widget.onViewMap,
-                icon: const Icon(Icons.map_rounded, size: 17),
+                icon: const Icon(CupertinoIcons.map_fill, size: 17),
                 label: Text(
                   'View on Map',
                   style: TextStyle(

@@ -45,7 +45,7 @@ function createMarkerElement(icon, color, label) {
   const el = document.createElement('div');
   el.className = 'glass-marker';
   el.innerHTML = `
-    <div class="gm-icon" style="background:${color}"><i class="ph ${icon}"></i></div>
+    <div class="gm-icon" style="background:${color}"><ion-icon name="${icon}"></ion-icon></div>
     <div class="gm-label">${label}</div>
   `;
   return el;
@@ -53,9 +53,9 @@ function createMarkerElement(icon, color, label) {
 
 function addMockData() {
   const data = [
-    { lng: 102.2095, lat: 2.3849, color: '#f05f7e', icon: 'ph-fire', label: 'CRITICAL', desc: 'Fire: Sector 4A<br/>Response en route.' },
-    { lng: 102.2150, lat: 2.3920, color: '#30d158', icon: 'ph-shield-check', label: 'U4', desc: 'Active Patrol<br/>Officer Aziz S.' },
-    { lng: 102.1950, lat: 2.3800, color: '#f5a623', icon: 'ph-warning', label: 'CROWD', desc: 'Crowd Surge<br/>Main Square North' }
+    { lng: 102.2095, lat: 2.3849, color: '#f05f7e', icon: 'flame-outline', label: 'CRITICAL', desc: 'Fire: Sector 4A<br/>Response en route.' },
+    { lng: 102.2150, lat: 2.3920, color: '#30d158', icon: 'shield-checkmark-outline', label: 'U4', desc: 'Active Patrol<br/>Officer Aziz S.' },
+    { lng: 102.1950, lat: 2.3800, color: '#f5a623', icon: 'warning-outline', label: 'CROWD', desc: 'Crowd Surge<br/>Main Square North' }
   ];
 
   data.forEach(d => {
@@ -86,12 +86,12 @@ function setupControls() {
     is3D = !is3D;
     if (is3D) {
       map.flyTo({ pitch: 60, bearing: -20 });
-      btn3D.innerHTML = '<i class="ph ph-map-trifold"></i> 2D View';
+      btn3D.innerHTML = '<ion-icon name="map-outline"></ion-icon> 2D View';
       btn3D.classList.remove('btn-primary');
       btn3D.classList.add('btn-glass');
     } else {
       map.flyTo({ pitch: 0, bearing: 0 });
-      btn3D.innerHTML = '<i class="ph ph-stack"></i> 3D View';
+      btn3D.innerHTML = '<ion-icon name="layers-outline"></ion-icon> 3D View';
       btn3D.classList.remove('btn-glass');
       btn3D.classList.add('btn-primary');
     }

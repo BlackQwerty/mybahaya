@@ -29,9 +29,13 @@ function initFAB() {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
       if (confirm('Are you sure you want to log out?')) {
-        // Placeholder — replace with real auth logout
-        alert('Logged out successfully.');
-        window.location.href = 'home.html';
+        if (typeof firebase !== 'undefined') {
+          firebase.auth().signOut().then(() => {
+            window.location.replace('login.html');
+          });
+        } else {
+          window.location.replace('login.html');
+        }
       }
     });
   }
@@ -65,6 +69,32 @@ function initFadeIn() {
   }, { threshold: 0.1 });
   els.forEach(el => { el.style.visibility = 'hidden'; obs.observe(el); });
 }
+
+/* ── Toast Notifications ── */
+function showToast(message, type = 'success', duration = 3500) {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const icons = { success: 'checkmark-circle-outline', error: 'alert-circle-outline', info: 'information-circle-outline' };
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<ion-icon name="${icons[type] || icons.info}"></ion-icon><span>${message}</span>`;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(8px)';
+    toast.style.transition = 'opacity 0.2s, transform 0.2s';
+    setTimeout(() => toast.remove(), 220);
+  }, duration);
+}
+
+// Expose globally so page scripts can call it
+window.showToast = showToast;
 
 /* ── Init on DOM ready ── */
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:glass_liquid_navbar/glass_liquid_navbar.dart';
 
 class MyBahayaNavBar extends StatelessWidget {
@@ -33,11 +34,11 @@ class MyBahayaNavBar extends StatelessWidget {
         ),
 
         items: [
-          LiquidNavItem(icon: Icons.home_rounded, label: 'HOME'),
-          LiquidNavItem(icon: Icons.map_rounded, label: 'MAP'),
-          LiquidNavItem(icon: Icons.add_a_photo_rounded, label: 'REPORT'),
-          LiquidNavItem(icon: Icons.notifications_rounded, label: 'ALERTS'),
-          LiquidNavItem(icon: Icons.settings_rounded, label: 'SETTINGS'),
+          LiquidNavItem(icon: CupertinoIcons.house_fill, label: 'HOME'),
+          LiquidNavItem(icon: CupertinoIcons.map_fill, label: 'MAP'),
+          LiquidNavItem(icon: CupertinoIcons.camera_fill, label: 'REPORT'),
+          LiquidNavItem(icon: CupertinoIcons.bell_fill, label: 'ALERTS'),
+          LiquidNavItem(icon: CupertinoIcons.gear, label: 'SETTINGS'),
         ],
       ),
     );

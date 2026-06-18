@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'dart:async';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -169,7 +170,7 @@ class _AppNavigatorState extends State<AppNavigator> {
                 child: Image.asset(
                   'assets/images/logos/logo.png',
                   errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.shield_outlined,
+                    CupertinoIcons.shield,
                     color: Color(0xFFACA494),
                     size: 60,
                   ),

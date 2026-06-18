@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -14,11 +15,11 @@ class MyReportsScreen extends StatelessWidget {
   // Maps category to an icon
   IconData _categoryIcon(String category) {
     switch (category.toLowerCase()) {
-      case 'fire':       return Icons.local_fire_department_rounded;
-      case 'theft':      return Icons.no_encryption_rounded;
-      case 'assault':    return Icons.personal_injury_rounded;
-      case 'medical':    return Icons.medical_services_rounded;
-      default:           return Icons.warning_amber_rounded;
+      case 'fire':       return CupertinoIcons.flame_fill;
+      case 'theft':      return CupertinoIcons.lock_open_fill;
+      case 'assault':    return CupertinoIcons.exclamationmark_circle_fill;
+      case 'medical':    return CupertinoIcons.plus_circle_fill;
+      default:           return CupertinoIcons.exclamationmark_triangle_fill;
     }
   }
 
@@ -60,7 +61,7 @@ class MyReportsScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF4D0A18),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white70, size: 20),
+          icon: const Icon(CupertinoIcons.chevron_back, color: Colors.white70, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -143,7 +144,7 @@ class MyReportsScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.inbox_rounded,
+            CupertinoIcons.tray,
             size: 56,
             color: nudeColor.withOpacity(0.3),
           ),
@@ -226,7 +227,7 @@ class _ReportCard extends StatelessWidget {
                   height: 160,
                   color: Colors.white.withOpacity(0.05),
                   child: Icon(
-                    Icons.broken_image_rounded,
+                    CupertinoIcons.photo,
                     color: nudeColor.withOpacity(0.3),
                     size: 40,
                   ),
@@ -335,7 +336,7 @@ class _ReportCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        Icons.location_on_rounded,
+                        CupertinoIcons.location_fill,
                         color: pinkColor.withOpacity(0.7),
                         size: 13,
                       ),
@@ -356,7 +357,7 @@ class _ReportCard extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      Icons.access_time_rounded,
+                      CupertinoIcons.clock,
                       color: nudeColor.withOpacity(0.5),
                       size: 12,
                     ),

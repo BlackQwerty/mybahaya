@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../theme/app_theme.dart';
 
@@ -79,7 +80,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           return Container(
                             color: AppTheme.maroonPrimary.withOpacity(0.3),
                             child: Icon(
-                              Icons.image_outlined,
+                              CupertinoIcons.photo,
                               size: 80,
                               color: Colors.white.withOpacity(0.3),
                             ),
@@ -189,7 +190,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                   ),
                                   const SizedBox(width: 8),
                                   const Icon(
-                                      Icons.arrow_forward_rounded,
+                                      CupertinoIcons.arrow_right,
                                       size: 20),
                                 ],
                               ),

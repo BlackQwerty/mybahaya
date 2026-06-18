@@ -14,10 +14,10 @@ const dummyReports = [
 ];
 
 function getBadge(severity, status) {
-  if (status === 'resolved') return '<span class="badge badge-success"><i class="ph ph-check-circle ph-fill"></i> Resolved</span>';
-  if (severity === 'critical') return '<span class="badge badge-critical"><i class="ph ph-warning ph-fill"></i> Critical</span>';
-  if (severity === 'warning') return '<span class="badge badge-warning"><i class="ph ph-warning-circle ph-fill"></i> Warning</span>';
-  return '<span class="badge badge-info"><i class="ph ph-info ph-fill"></i> Pending</span>';
+  if (status === 'resolved') return '<span class="badge badge-success"><ion-icon name="checkmark-circle"></ion-icon> Resolved</span>';
+  if (severity === 'critical') return '<span class="badge badge-critical"><ion-icon name="warning"></ion-icon> Critical</span>';
+  if (severity === 'warning') return '<span class="badge badge-warning"><ion-icon name="alert-circle"></ion-icon> Warning</span>';
+  return '<span class="badge badge-info"><ion-icon name="information-circle"></ion-icon> Pending</span>';
 }
 
 function renderReports(reports) {
@@ -41,8 +41,8 @@ function renderReports(reports) {
         ${getBadge(r.severity, r.status)}
       </div>
       <div class="rc-meta">
-        <span><i class="ph ph-map-pin"></i> ${r.loc}</span>
-        <span><i class="ph ph-clock"></i> ${r.time}</span>
+        <span><ion-icon name="location-outline"></ion-icon> ${r.loc}</span>
+        <span><ion-icon name="time-outline"></ion-icon> ${r.time}</span>
       </div>
       <p class="rc-body"><strong>Details:</strong><br/>${r.desc}</p>
       <div class="rc-footer">

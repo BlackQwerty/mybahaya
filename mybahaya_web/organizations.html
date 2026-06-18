@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyBahaya — Organizations</title>
+  <meta name="description" content="Manage registered response organizations and system admins." />
+
+  <!-- Ionicons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="css/organizations.css" />
+</head>
+
+<body>
+  <div class="mesh-bg" aria-hidden="true"></div>
+
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="home.html" class="navbar-brand" aria-label="MyBahaya Home">
+      <div class="brand-icon"><img src="assets/logo_icon/officialMyBahayaIcon.png" alt="MyBahaya" class="brand-logo" /></div>
+      <span class="brand-name">MyBahaya</span>
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="home.html"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="report.html"><ion-icon name="document-text-outline"></ion-icon> Reports</a></li>
+      <li><a href="map.html"><ion-icon name="map-outline"></ion-icon> Map</a></li>
+      <li><a href="analytics.html"><ion-icon name="bar-chart-outline"></ion-icon> Analytics</a></li>
+      <li><a href="organizations.html" class="active admin-only"><ion-icon name="people-outline"></ion-icon> Organizations</a></li>
+    </ul>
+    <div class="navbar-right">
+      <div class="avatar-btn" role="button" aria-label="User" tabindex="0">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-wrapper" id="main-content">
+    <div class="orgs-container">
+
+      <!-- Page Header -->
+      <div class="page-header fade-in">
+        <div>
+          <p class="page-eyebrow"><span class="dot" style="background:var(--accent-secondary);box-shadow:0 0 8px var(--accent-secondary)"></span> Admin Only</p>
+          <h1 class="page-title">Organization <span class="gradient-text">Management</span></h1>
+          <p class="page-sub">Manage registered response organizations and system administrators</p>
+        </div>
+        <button class="btn btn-primary" id="btn-add-primary" aria-label="Add new entry">
+          <ion-icon name="add-outline"></ion-icon> <span id="btn-add-label">Add Organization</span>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tab-bar fade-in fade-in-delay-1" role="tablist">
+        <button class="tab-btn active" data-tab="organizations" role="tab" aria-selected="true">
+          <ion-icon name="business-outline"></ion-icon> Organizations
+        </button>
+        <button class="tab-btn" data-tab="admins" role="tab" aria-selected="false">
+          <ion-icon name="shield-outline"></ion-icon> Admins
+        </button>
+      </div>
+
+      <!-- ══════════════ ORGANIZATIONS TAB ══════════════ -->
+      <div id="tab-organizations" class="tab-content active">
+
+        <!-- Summary Cards -->
+        <div class="orgs-summary fade-in fade-in-delay-2">
+          <div class="glass-card org-summary-card">
+            <ion-icon name="business-outline"></ion-icon>
+            <div>
+              <p class="stat-label">Total Organizations</p>
+              <p class="stat-value" id="org-count-total">—</p>
+            </div>
+          </div>
+          <div class="glass-card org-summary-card">
+            <ion-icon name="checkmark-circle-outline" style="color:var(--accent-green)"></ion-icon>
+            <div>
+              <p class="stat-label">Active</p>
+              <p class="stat-value" id="org-count-active" style="color:var(--accent-green)">—</p>
+            </div>
+          </div>
+          <div class="glass-card org-summary-card">
+            <ion-icon name="pause-circle-outline" style="color:rgba(255,255,255,0.4)"></ion-icon>
+            <div>
+              <p class="stat-label">Inactive</p>
+              <p class="stat-value" id="org-count-inactive" style="color:rgba(255,255,255,0.4)">—</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search + Filter -->
+        <div class="glass-card action-bar fade-in fade-in-delay-3">
+          <div class="filter-search">
+            <ion-icon name="search-outline" class="search-icon"></ion-icon>
+            <input type="search" class="glass-input search-input" id="org-search"
+              placeholder="Search by name, district or email…" aria-label="Search organizations" />
+          </div>
+          <div class="filter-sort">
+            <select class="glass-input" id="org-type-filter" aria-label="Filter by type">
+              <option value="all">All Types</option>
+              <option value="police">Police</option>
+              <option value="fire">Fire Department</option>
+              <option value="medical">Medical</option>
+              <option value="government">Government</option>
+              <option value="civilian">Civilian Defense</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Organizations Table -->
+        <div class="glass-card orgs-card fade-in fade-in-delay-4">
+          <div id="org-loading" class="table-loading">
+            <div class="loading-spinner"></div><span>Loading organizations…</span>
+          </div>
+          <div id="org-table-wrap" class="hidden" style="overflow-x:auto">
+            <table class="glass-table orgs-table">
+              <thead>
+                <tr>
+                  <th>Organization</th>
+                  <th>Type</th>
+                  <th>Location</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th style="text-align:right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="org-table-body"></tbody>
+            </table>
+          </div>
+          <div id="org-empty" class="table-empty hidden">
+            <ion-icon name="business-outline"></ion-icon>
+            <p>No organizations found</p>
+          </div>
+        </div>
+
+      </div><!-- /tab-organizations -->
+
+      <!-- ══════════════ ADMINS TAB ══════════════ -->
+      <div id="tab-admins" class="tab-content">
+
+        <!-- Summary Cards -->
+        <div class="orgs-summary fade-in">
+          <div class="glass-card org-summary-card">
+            <ion-icon name="shield-outline"></ion-icon>
+            <div>
+              <p class="stat-label">Total Admins</p>
+              <p class="stat-value" id="admin-count-total">—</p>
+            </div>
+          </div>
+          <div class="glass-card org-summary-card">
+            <ion-icon name="map-outline" style="color:var(--accent-primary)"></ion-icon>
+            <div>
+              <p class="stat-label">States Covered</p>
+              <p class="stat-value" id="admin-count-states" style="color:var(--accent-primary)">—</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="glass-card action-bar fade-in fade-in-delay-1">
+          <div class="filter-search">
+            <ion-icon name="search-outline" class="search-icon"></ion-icon>
+            <input type="search" class="glass-input search-input" id="admin-search"
+              placeholder="Search by name, email or state…" aria-label="Search admins" />
+          </div>
+        </div>
+
+        <!-- Admins Table -->
+        <div class="glass-card orgs-card fade-in fade-in-delay-2">
+          <div id="admin-loading" class="table-loading">
+            <div class="loading-spinner"></div><span>Loading admins…</span>
+          </div>
+          <div id="admin-table-wrap" class="hidden" style="overflow-x:auto">
+            <table class="glass-table orgs-table">
+              <thead>
+                <tr>
+                  <th>Admin</th>
+                  <th>Email</th>
+                  <th>Cover State</th>
+                  <th>Cover District</th>
+                  <th style="text-align:right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-table-body"></tbody>
+            </table>
+          </div>
+          <div id="admin-empty" class="table-empty hidden">
+            <ion-icon name="shield-outline"></ion-icon>
+            <p>No admins found</p>
+          </div>
+        </div>
+
+      </div><!-- /tab-admins -->
+
+    </div>
+  </main>
+
+  <!-- ══════════════ ADD ORGANIZATION MODAL ══════════════ -->
+  <div class="modal-overlay hidden" id="modal-org" role="dialog" aria-modal="true" aria-labelledby="modal-org-title">
+    <div class="modal-box glass-card modal-wide">
+      <div class="modal-header">
+        <h2 class="section-title" id="modal-org-title"><span class="dot"></span> Add New Organization</h2>
+        <button class="modal-close" id="modal-close-org" aria-label="Close"><ion-icon name="close-outline"></ion-icon></button>
+      </div>
+      <form class="report-form" id="org-form" novalidate>
+
+        <div class="form-row">
+          <div class="form-group form-col-2">
+            <label class="form-label" for="o-name">Organization Name <span class="req">*</span></label>
+            <input class="glass-input" id="o-name" type="text" placeholder="e.g. Balai Polis Alor Gajah" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="o-type">Type <span class="req">*</span></label>
+            <select class="glass-input" id="o-type" required>
+              <option value="">Select type…</option>
+              <option value="police">Police</option>
+              <option value="fire">Fire Department</option>
+              <option value="medical">Medical</option>
+              <option value="government">Government</option>
+              <option value="civilian">Civilian Defense</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="o-status">Status <span class="req">*</span></label>
+            <select class="glass-input" id="o-status">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="o-state">State <span class="req">*</span></label>
+            <select class="glass-input" id="o-state" required>
+              <option value="">Select state…</option>
+              <option>Johor</option><option>Kedah</option><option>Kelantan</option>
+              <option>Melaka</option><option>Negeri Sembilan</option><option>Pahang</option>
+              <option>Perak</option><option>Perlis</option><option>Pulau Pinang</option>
+              <option>Sabah</option><option>Sarawak</option><option>Selangor</option>
+              <option>Terengganu</option><option>W.P. Kuala Lumpur</option>
+              <option>W.P. Labuan</option><option>W.P. Putrajaya</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="o-district">District <span class="req">*</span></label>
+            <input class="glass-input" id="o-district" type="text" placeholder="e.g. Alor Gajah" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="o-postcode">Postcode <span class="req">*</span></label>
+            <input class="glass-input" id="o-postcode" type="text" placeholder="e.g. 78000" maxlength="5" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="o-address">Full Address <span class="req">*</span></label>
+          <textarea class="glass-input" id="o-address" rows="2" placeholder="e.g. No. 1, Jalan Bukit Seguntang, 78000 Alor Gajah, Melaka" required></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="o-email">Organization Email <span class="req">*</span></label>
+            <input class="glass-input" id="o-email" type="email" placeholder="e.g. balaipolisag@gmail.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="o-lat">Latitude <span class="req">*</span></label>
+            <input class="glass-input" id="o-lat" type="number" step="any" placeholder="e.g. 2.3849" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="o-lng">Longitude <span class="req">*</span></label>
+            <input class="glass-input" id="o-lng" type="number" step="any" placeholder="e.g. 102.2095" required />
+          </div>
+        </div>
+
+        <div id="org-form-error" class="form-error hidden"></div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-glass" id="modal-cancel-org">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="org-submit-btn">
+            Register Organization <ion-icon name="checkmark-outline"></ion-icon>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════ ADD ADMIN MODAL ══════════════ -->
+  <div class="modal-overlay hidden" id="modal-admin" role="dialog" aria-modal="true" aria-labelledby="modal-admin-title">
+    <div class="modal-box glass-card">
+      <div class="modal-header">
+        <h2 class="section-title" id="modal-admin-title"><span class="dot"></span> Add New Admin</h2>
+        <button class="modal-close" id="modal-close-admin" aria-label="Close"><ion-icon name="close-outline"></ion-icon></button>
+      </div>
+      <form class="report-form" id="admin-form" novalidate>
+
+        <div class="form-group">
+          <label class="form-label" for="a-name">Admin Name <span class="req">*</span></label>
+          <input class="glass-input" id="a-name" type="text" placeholder="e.g. Ahmad Shukri" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="a-email">Admin Email <span class="req">*</span></label>
+          <input class="glass-input" id="a-email" type="email" placeholder="e.g. admin@mybahaya.gov.my" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="a-password">Temporary Password <span class="req">*</span></label>
+          <input class="glass-input" id="a-password" type="password" placeholder="min. 6 characters" required minlength="6" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="a-state">Cover State <span class="req">*</span></label>
+            <select class="glass-input" id="a-state" required>
+              <option value="">Select state…</option>
+              <option>Johor</option><option>Kedah</option><option>Kelantan</option>
+              <option>Melaka</option><option>Negeri Sembilan</option><option>Pahang</option>
+              <option>Perak</option><option>Perlis</option><option>Pulau Pinang</option>
+              <option>Sabah</option><option>Sarawak</option><option>Selangor</option>
+              <option>Terengganu</option><option>W.P. Kuala Lumpur</option>
+              <option>W.P. Labuan</option><option>W.P. Putrajaya</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-district">Cover District <span class="req">*</span></label>
+            <input class="glass-input" id="a-district" type="text" placeholder="e.g. Alor Gajah" required />
+          </div>
+        </div>
+
+        <div id="admin-form-error" class="form-error hidden"></div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-glass" id="modal-cancel-admin">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="admin-submit-btn">
+            Create Admin <ion-icon name="checkmark-outline"></ion-icon>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <div class="fab-container">
+    <div class="fab-menu" id="fab-menu" role="menu">
+      <a href="#" class="fab-menu-item" id="fab-settings" role="menuitem">
+        <ion-icon name="settings-outline"></ion-icon> Settings
+      </a>
+      <button class="fab-menu-item danger" id="fab-logout" role="menuitem">
+        <ion-icon name="log-out-outline"></ion-icon> Log Out
+      </button>
+    </div>
+    <button class="fab-btn" id="fab-btn" aria-label="Open menu" aria-expanded="false">
+      <ion-icon name="menu-outline"></ion-icon>
+    </button>
+  </div>
+
+  <script src="js/shared.js"></script>
+  <script src="js/organizations.js"></script>
+</body>
+
+</html>

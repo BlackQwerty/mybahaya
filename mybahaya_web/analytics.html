@@ -6,10 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyBahaya — Analytics</title>
   <meta name="description" content="Detailed incident analytics and system intelligence." />
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="../css/shared.css" />
-  <link rel="stylesheet" href="../css/analytics.css" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="css/analytics.css" />
 </head>
 
 <body>
@@ -17,19 +25,19 @@
 
   <nav class="navbar" role="navigation" aria-label="Main navigation">
     <a href="home.html" class="navbar-brand" aria-label="MyBahaya Home">
-      <div class="brand-icon"><i class="ph ph-shield-warning"></i></div>
+      <div class="brand-icon"><img src="assets/logo_icon/officialMyBahayaIcon.png" alt="MyBahaya" class="brand-logo" /></div>
       <span class="brand-name">MyBahaya</span>
     </a>
     <ul class="nav-links" role="list">
-      <li><a href="home.html"><i class="ph ph-house"></i> Home</a></li>
-      <li><a href="report.html"><i class="ph ph-clipboard-text"></i> Reports</a></li>
-      <li><a href="map.html"><i class="ph ph-map-trifold"></i> Map</a></li>
-      <li><a href="analytics.html" class="active"><i class="ph ph-chart-line-up"></i> Analytics</a></li>
-      <li><a href="users.html" class="admin-only"><i class="ph ph-users-three"></i> Users</a></li>
+      <li><a href="home.html"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="report.html"><ion-icon name="document-text-outline"></ion-icon> Reports</a></li>
+      <li><a href="map.html"><ion-icon name="map-outline"></ion-icon> Map</a></li>
+      <li><a href="analytics.html" class="active"><ion-icon name="bar-chart-outline"></ion-icon> Analytics</a></li>
+      <li><a href="organizations.html" class="admin-only"><ion-icon name="people-outline"></ion-icon> Organizations</a></li>
     </ul>
     <div class="navbar-right">
       <div class="avatar-btn" role="button" aria-label="User profile" tabindex="0">
-        <i class="ph ph-user-circle"></i>
+        <ion-icon name="person-circle-outline"></ion-icon>
       </div>
     </div>
   </nav>
@@ -65,12 +73,12 @@
           <div class="glass-card stat-card kpi-card">
             <p class="stat-label">Incident Velocity</p>
             <p class="stat-value">12.4 <span style="font-size:14px;color:rgba(255,255,255,0.5)">/hr</span></p>
-            <p class="stat-change up"><i class="ph ph-trend-up"></i> 6.2% vs prev. week</p>
+            <p class="stat-change up"><ion-icon name="trending-up-outline"></ion-icon> 6.2% vs prev. week</p>
           </div>
           <div class="glass-card stat-card kpi-card">
             <p class="stat-label">Avg. Response Time</p>
             <p class="stat-value">04:12</p>
-            <p class="stat-change down"><i class="ph ph-trend-down"></i> -12s improvement</p>
+            <p class="stat-change down"><ion-icon name="trending-down-outline"></ion-icon> -12s improvement</p>
           </div>
         </div>
 
@@ -79,8 +87,8 @@
           <div class="section-header">
             <h2 class="section-title">Incident Density Heatmap</h2>
             <div class="heat-controls">
-              <button class="btn-icon"><i class="ph ph-magnifying-glass-plus"></i></button>
-              <button class="btn-icon"><i class="ph ph-lightbulb"></i></button>
+              <button class="btn-icon"><ion-icon name="search-circle-outline"></ion-icon></button>
+              <button class="btn-icon"><ion-icon name="bulb-outline"></ion-icon></button>
             </div>
           </div>
           <div class="heatmap-mock">
@@ -112,8 +120,8 @@
               <p style="font-size:11px;color:rgba(255,255,255,0.4)">Predictive modeling for upcoming cycles</p>
             </div>
             <div class="chart-legend" style="font-size:10px">
-              <span style="color:var(--accent-rose)"><i class="ph ph-minus"></i> ACTUAL</span>
-              <span style="color:rgba(255,255,255,0.3)"><i class="ph ph-minus" style="stroke-dasharray: 2 2"></i>
+              <span style="color:var(--accent-rose)"><ion-icon name="remove-outline"></ion-icon> ACTUAL</span>
+              <span style="color:rgba(255,255,255,0.3)"><ion-icon name="remove-outline"></ion-icon>
                 PROJECTED</span>
             </div>
           </div>
@@ -153,7 +161,7 @@
           </div>
 
           <div class="glass-card forecast-card">
-            <h2 class="section-title" style="font-size:12px"><i class="ph ph-sparkle"></i> AI Risk Forecast</h2>
+            <h2 class="section-title" style="font-size:12px"><ion-icon name="sparkles-outline"></ion-icon> AI Risk Forecast</h2>
             <p class="forecast-text">Expected 14% increase in <span style="color:var(--accent-rose)">Grid Sigma</span>
               incidents due to seasonal atmospheric shifts. Recommend increasing drone patrols.</p>
             <button class="btn btn-glass" style="width:100%;justify-content:center;font-size:10px;margin-top:12px">VIEW
@@ -219,16 +227,16 @@
   <div class="fab-container">
     <div class="fab-menu" id="fab-menu" role="menu">
       <button class="fab-menu-item danger" id="fab-logout" role="menuitem">
-        <i class="ph ph-sign-out"></i> Log Out
+        <ion-icon name="log-out-outline"></ion-icon> Log Out
       </button>
     </div>
     <button class="fab-btn" id="fab-btn" aria-label="Open menu">
-      <i class="ph ph-list"></i>
+      <ion-icon name="menu-outline"></ion-icon>
     </button>
   </div>
 
-  <script src="../js/shared.js"></script>
-  <script src="../js/analytics.js"></script>
+  <script src="js/shared.js"></script>
+  <script src="js/analytics.js"></script>
 </body>
 
 </html>

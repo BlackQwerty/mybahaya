@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -414,8 +415,8 @@ class _AuthScreenState extends State<AuthScreen>
             onTap: () => setState(() => _obscurePass = !_obscurePass),
             child: Icon(
               _obscurePass
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
+                  ? CupertinoIcons.eye
+                  : CupertinoIcons.eye_slash,
               color: Colors.white.withOpacity(0.4),
               size: 20,
             ),
@@ -432,8 +433,8 @@ class _AuthScreenState extends State<AuthScreen>
             onTap: () => setState(() => _obscureConfirm = !_obscureConfirm),
             child: Icon(
               _obscureConfirm
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
+                  ? CupertinoIcons.eye
+                  : CupertinoIcons.eye_slash,
               color: Colors.white.withOpacity(0.4),
               size: 20,
             ),
@@ -489,8 +490,8 @@ class _AuthScreenState extends State<AuthScreen>
             onTap: () => setState(() => _obscurePass = !_obscurePass),
             child: Icon(
               _obscurePass
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
+                  ? CupertinoIcons.eye
+                  : CupertinoIcons.eye_slash,
               color: Colors.white.withOpacity(0.4),
               size: 20,
             ),
@@ -609,7 +610,7 @@ class _AuthScreenState extends State<AuthScreen>
             ),
             child: _agreed
                 ? const Icon(
-                    Icons.check_rounded,
+                    CupertinoIcons.checkmark,
                     color: Colors.white,
                     size: 14,
                   )

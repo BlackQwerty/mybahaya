@@ -9,12 +9,20 @@
     content="MyBahaya incident monitoring dashboard — real-time overview of active reports, emergencies, and analytics." />
 
   <!-- Phosphor Icons -->
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Shared + Page CSS -->
-  <link rel="stylesheet" href="../shared.css" />
-  <link rel="stylesheet" href="../home.css" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+
+  <link rel="stylesheet" href="css/shared.css" />
+  <link rel="stylesheet" href="css/home.css" />
 </head>
 
 <body>
@@ -24,21 +32,21 @@
   <!-- ── Navigation ── -->
   <nav class="navbar" role="navigation" aria-label="Main navigation">
     <a href="home.html" class="navbar-brand" aria-label="MyBahaya Home">
-      <div class="brand-icon"><i class="ph ph-shield-warning"></i></div>
+      <div class="brand-icon"><img src="assets/logo_icon/officialMyBahayaIcon.png" alt="MyBahaya" class="brand-logo" /></div>
       <span class="brand-name">MyBahaya</span>
     </a>
 
     <ul class="nav-links" role="list">
-      <li><a href="home.html" id="nav-home"><i class="ph ph-house"></i> Home</a></li>
-      <li><a href="report.html" id="nav-report"><i class="ph ph-clipboard-text"></i> Reports</a></li>
-      <li><a href="map.html" id="nav-map"><i class="ph ph-map-trifold"></i> Map</a></li>
-      <li><a href="analytics.html" id="nav-analytics"><i class="ph ph-chart-line-up"></i> Analytics</a></li>
-      <li><a href="users.html" id="nav-users" class="admin-only"><i class="ph ph-users-three"></i> Users</a></li>
+      <li><a href="home.html" id="nav-home"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="report.html" id="nav-report"><ion-icon name="document-text-outline"></ion-icon> Reports</a></li>
+      <li><a href="map.html" id="nav-map"><ion-icon name="map-outline"></ion-icon> Map</a></li>
+      <li><a href="analytics.html" id="nav-analytics"><ion-icon name="bar-chart-outline"></ion-icon> Analytics</a></li>
+      <li><a href="organizations.html" id="nav-users" class="admin-only"><ion-icon name="people-outline"></ion-icon> Organizations</a></li>
     </ul>
 
     <div class="navbar-right">
       <div class="avatar-btn" role="button" aria-label="User profile" tabindex="0">
-        <i class="ph ph-user-circle"></i>
+        <ion-icon name="person-circle-outline"></ion-icon>
       </div>
     </div>
   </nav>
@@ -61,33 +69,33 @@
         <div class="stats-row">
           <div class="glass-card stat-card fade-in fade-in-delay-1" id="stat-total">
             <div class="stat-icon-wrap" style="color:var(--accent-primary)">
-              <div class="glass-icon"><i class="ph ph-clipboard-text"></i></div>
+              <div class="glass-icon"><ion-icon name="document-text-outline"></ion-icon></div>
             </div>
             <p class="stat-label">Total Reports</p>
             <p class="stat-value" id="val-total">1,248</p>
-            <p class="stat-change up"><i class="ph ph-trend-up"></i> +12% this month</p>
+            <p class="stat-change up"><ion-icon name="trending-up-outline"></ion-icon> +12% this month</p>
           </div>
 
           <div class="glass-card stat-card fade-in fade-in-delay-2" id="stat-emergency">
             <div class="stat-icon-wrap" style="color:var(--accent-rose)">
               <div class="glass-icon" style="background:rgba(240,95,126,0.15);border-color:rgba(240,95,126,0.3)">
-                <i class="ph ph-siren"></i>
+                <ion-icon name="alert-circle-outline"></ion-icon>
               </div>
             </div>
             <p class="stat-label">Active Emergencies</p>
             <p class="stat-value" id="val-emergency" style="color:var(--accent-rose)">24</p>
-            <p class="stat-change down"><i class="ph ph-trend-down"></i> -3 since yesterday</p>
+            <p class="stat-change down"><ion-icon name="trending-down-outline"></ion-icon> -3 since yesterday</p>
           </div>
 
           <div class="glass-card stat-card fade-in fade-in-delay-3" id="stat-high">
             <div class="stat-icon-wrap" style="color:var(--accent-amber)">
               <div class="glass-icon" style="background:rgba(245,166,35,0.15);border-color:rgba(245,166,35,0.3)">
-                <i class="ph ph-warning-circle"></i>
+                <ion-icon name="warning-outline"></ion-icon>
               </div>
             </div>
             <p class="stat-label">High Priority</p>
             <p class="stat-value" id="val-high" style="color:var(--accent-amber)">87</p>
-            <p class="stat-change up"><i class="ph ph-trend-up"></i> +5 today</p>
+            <p class="stat-change up"><ion-icon name="trending-up-outline"></ion-icon> +5 today</p>
           </div>
         </div>
 
@@ -109,7 +117,7 @@
             <h2 class="section-title"><span class="dot"
                 style="background:var(--accent-primary);box-shadow:0 0 8px var(--accent-primary)"></span> Recent Activity</h2>
             <a href="report.html" class="btn btn-glass" style="font-size:var(--fs-xs);padding:6px 14px">
-              View All <i class="ph ph-arrow-right"></i>
+              View All <ion-icon name="arrow-forward-outline"></ion-icon>
             </a>
           </div>
           <ul class="activity-list" id="activity-list" role="list"></ul>
@@ -125,14 +133,14 @@
                 style="background:var(--accent-primary);box-shadow:0 0 8px var(--accent-primary)"></span> Live Map — Alor
               Gajah</h2>
             <a href="map.html" class="btn btn-glass" style="font-size:var(--fs-xs);padding:6px 14px">
-              Full Map <i class="ph ph-arrows-out"></i>
+              Full Map <ion-icon name="expand-outline"></ion-icon>
             </a>
           </div>
           <div id="home-map" class="home-map-container" aria-label="Live incident map"></div>
           <div class="map-overlay-badges">
-            <span class="badge badge-critical"><i class="ph ph-dot-outline ph-fill"></i> 5 Critical</span>
-            <span class="badge badge-warning"><i class="ph ph-dot-outline ph-fill"></i> 12 Warning</span>
-            <span class="badge badge-success"><i class="ph ph-dot-outline ph-fill"></i> 38 Resolved</span>
+            <span class="badge badge-critical"><ion-icon name="ellipse" style="font-size:8px"></ion-icon> 5 Critical</span>
+            <span class="badge badge-warning"><ion-icon name="ellipse" style="font-size:8px"></ion-icon> 12 Warning</span>
+            <span class="badge badge-success"><ion-icon name="ellipse" style="font-size:8px"></ion-icon> 38 Resolved</span>
           </div>
         </div>
       </div><!-- /home-right -->
@@ -144,19 +152,19 @@
   <div class="fab-container" role="complementary" aria-label="Quick actions">
     <div class="fab-menu" id="fab-menu" role="menu">
       <a href="#" class="fab-menu-item" id="fab-settings" role="menuitem">
-        <i class="ph ph-gear"></i> Settings
+        <ion-icon name="settings-outline"></ion-icon> Settings
       </a>
       <button class="fab-menu-item danger" id="fab-logout" role="menuitem">
-        <i class="ph ph-sign-out"></i> Log Out
+        <ion-icon name="log-out-outline"></ion-icon> Log Out
       </button>
     </div>
     <button class="fab-btn" id="fab-btn" aria-label="Open menu" aria-expanded="false" aria-controls="fab-menu">
-      <i class="ph ph-list"></i>
+      <ion-icon name="menu-outline"></ion-icon>
     </button>
   </div>
 
-  <script src="../js/shared.js"></script>
-  <script src="../js/home.js"></script>
+  <script src="js/shared.js"></script>
+  <script src="js/home.js"></script>
 </body>
 
 </html>
