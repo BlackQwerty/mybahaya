@@ -51,95 +51,70 @@
   <!-- Interactive Overlays -->
   <div class="map-ui fade-in">
 
-    <!-- Left Panels (Tools & Filters) -->
+    <!-- Left Panel: Legend + Filter -->
     <div class="map-left-panels">
-
-      <!-- Layers Control -->
       <div class="glass-card map-panel">
-        <h3 class="panel-title">Map Layers</h3>
-        <div class="toggle-row">
-          <span>Thermal View</span>
-          <label class="switch"><input type="checkbox" id="layer-thermal"><span class="slider"></span></label>
-        </div>
-        <div class="toggle-row">
-          <span>CCTV Feeds</span>
-          <label class="switch"><input type="checkbox" id="layer-cctv"><span class="slider"></span></label>
-        </div>
-        <div class="toggle-row">
-          <span>Safe Zones</span>
-          <label class="switch"><input type="checkbox" id="layer-safe" checked><span class="slider"></span></label>
-        </div>
-      </div>
+        <h3 class="panel-title">Legend &amp; Filter</h3>
+        <div class="legend-list" id="legend-list">
 
-      <!-- Filters -->
-      <div class="glass-card map-panel">
-        <h3 class="panel-title">Active Filters</h3>
-        <div class="filter-pills">
-          <button class="map-pill active">Critical</button>
-          <button class="map-pill">Medics</button>
-          <button class="map-pill">Fire</button>
+          <div class="legend-item active" data-cat="all">
+            <div class="legend-all-dot"></div>
+            <span class="legend-label">All Reports</span>
+            <span class="legend-count" id="count-all">—</span>
+          </div>
+
+          <div class="legend-item" data-cat="Theft">
+            <div class="cat-pin cat-pin-Theft legend-cat-icon"><ion-icon name="lock-open-outline"></ion-icon></div>
+            <span class="legend-label">Theft</span>
+            <span class="legend-count" id="count-Theft">0</span>
+          </div>
+
+          <div class="legend-item" data-cat="Assault">
+            <div class="cat-pin cat-pin-Assault legend-cat-icon"><ion-icon name="alert-circle-outline"></ion-icon></div>
+            <span class="legend-label">Assault</span>
+            <span class="legend-count" id="count-Assault">0</span>
+          </div>
+
+          <div class="legend-item" data-cat="Fire">
+            <div class="cat-pin cat-pin-Fire legend-cat-icon"><ion-icon name="flame-outline"></ion-icon></div>
+            <span class="legend-label">Fire</span>
+            <span class="legend-count" id="count-Fire">0</span>
+          </div>
+
+          <div class="legend-item" data-cat="Medical">
+            <div class="cat-pin cat-pin-Medical legend-cat-icon"><ion-icon name="medkit-outline"></ion-icon></div>
+            <span class="legend-label">Medical</span>
+            <span class="legend-count" id="count-Medical">0</span>
+          </div>
+
+          <div class="legend-item" data-cat="Other">
+            <div class="cat-pin cat-pin-Other legend-cat-icon"><ion-icon name="help-circle-outline"></ion-icon></div>
+            <span class="legend-label">Other</span>
+            <span class="legend-count" id="count-Other">0</span>
+          </div>
+
         </div>
       </div>
     </div>
 
-    <!-- Right Panels (Stats & Activity) -->
+    <!-- Right Panel: Live Stats -->
     <div class="map-right-panels">
-      <div class="glass-card map-panel" style="width: 300px;">
-        <h3 class="panel-title">Sector Statistics</h3>
+      <div class="glass-card map-panel" style="width:240px;">
+        <h3 class="panel-title">Live Reports</h3>
 
-        <div class="map-stats-grid">
-          <div>
-            <p class="stat-label">Response Time</p>
-            <p class="stat-value">4.2 <span style="font-size:12px;opacity:0.6">min</span></p>
-          </div>
-          <div>
-            <p class="stat-label">Active Units</p>
-            <p class="stat-value">18</p>
-          </div>
+        <div class="stats-total-row">
+          <span class="stats-total-num" id="stats-total">—</span>
+          <span class="stats-total-label">total reports</span>
         </div>
 
-        <div class="threat-level-box mt-3">
-          <div class="d-flex justify-between" style="font-size:10px;margin-bottom:4px;color:rgba(255,255,255,0.6)">
-            <span>THREAT LEVEL</span>
-            <span style="color:var(--accent-rose)">MODERATE (42%)</span>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width: 42%; background: var(--accent-rose)"></div>
-          </div>
-        </div>
+        <div id="stats-cats" class="stats-cats"></div>
 
-        <h3 class="panel-title" style="margin-top:20px;margin-bottom:10px">Recent Activity</h3>
-        <div class="map-activity-list">
-          <div class="map-act-item">
-            <div class="act-dot" style="background:var(--accent-rose)"></div>
-            <div>
-              <p class="act-title">Assistance Requested</p>
-              <p class="act-sub">Subway St. 1A • 2m ago</p>
-            </div>
-          </div>
-          <div class="map-act-item">
-            <div class="act-dot" style="background:var(--accent-green)"></div>
-            <div>
-              <p class="act-title">Unit 04 Deployed</p>
-              <p class="act-sub">North Perimeter • 15m ago</p>
-            </div>
-          </div>
-        </div>
+        <hr class="panel-divider">
 
-        <!-- Live Camera Feed Widget -->
-        <div class="cctv-widget glass-card">
-          <div class="cctv-header">
-            <span style="color:var(--accent-rose)"><ion-icon name="radio-button-on" class="pulse-record"></ion-icon> LIVE CAM 08</span>
-          </div>
-          <div class="cctv-bg">
-            <ion-icon name="videocam-outline" style="font-size:32px;opacity:0.3"></ion-icon>
-          </div>
-          <div class="cctv-footer">
-            <p style="font-weight:600;font-size:12px">Main Square North</p>
-            <p style="font-size:10px;color:rgba(255,255,255,0.5)">34 Units Detected</p>
-          </div>
+        <h3 class="panel-title" style="margin-bottom:10px">Recent Activity</h3>
+        <div class="map-activity-list" id="recent-activity">
+          <p class="no-data-text">Loading…</p>
         </div>
-
       </div>
     </div>
 
@@ -167,6 +142,12 @@
     <button class="fab-btn" id="fab-btn" aria-label="Open menu" aria-expanded="false">
       <ion-icon name="menu-outline"></ion-icon>
     </button>
+  </div>
+
+  <!-- Map loading badge -->
+  <div id="map-loading" class="map-loading-badge hidden">
+    <div class="map-loading-dot"></div>
+    <span class="map-loading-label">Loading reports…</span>
   </div>
 
   <script src="js/shared.js"></script>

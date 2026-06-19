@@ -136,3 +136,132 @@ input:checked + .slider:before { transform: translateX(18px); }
 .maplibregl-popup-tip { border-top-color: rgba(20,20,30,0.9) !important; }
 .maplibregl-popup-close-button { color: rgba(255,255,255,0.6) !important; right: 8px !important; top: 8px !important; }
 .maplibregl-popup-close-button:hover { background: transparent !important; color: white !important; }
+
+/* ── Category Pin Markers ── */
+.cat-pin {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.cat-pin:hover { transform: translateY(-3px) scale(1.15); }
+.cat-pin ion-icon { font-size: 15px; color: white; pointer-events: none; }
+
+.cat-pin-Theft   { background: rgba(155,89,182,0.90); box-shadow: 0 3px 14px rgba(155,89,182,0.55); }
+.cat-pin-Assault { background: rgba(255,59,48,0.90);  box-shadow: 0 3px 14px rgba(255,59,48,0.55);  }
+.cat-pin-Fire    { background: rgba(255,107,53,0.90); box-shadow: 0 3px 14px rgba(255,107,53,0.55); }
+.cat-pin-Medical { background: rgba(48,209,88,0.90);  box-shadow: 0 3px 14px rgba(48,209,88,0.55);  }
+.cat-pin-Other   { background: rgba(172,164,148,0.90);box-shadow: 0 3px 14px rgba(172,164,148,0.40);}
+
+/* Smaller version used inside legend rows */
+.legend-cat-icon.cat-pin { width: 22px; height: 22px; border-width: 1.5px; flex-shrink: 0; }
+.legend-cat-icon.cat-pin ion-icon { font-size: 10px; }
+.legend-cat-icon.cat-pin:hover { transform: none; }
+
+/* ── Focus Marker (report-view mode) ── */
+.focus-marker {
+  width: 46px; height: 46px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--focus-bg, rgba(255,59,48,0.90));
+  border: 3px solid white; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  font-size: 20px; color: white; position: relative;
+}
+.focus-pulse {
+  position: absolute; inset: -8px; border-radius: 50%;
+  border: 2px solid var(--focus-color, #FF3B30);
+  animation: focusPulse 1.5s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes focusPulse {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+/* ── Legend Panel ── */
+.legend-list { display: flex; flex-direction: column; gap: 2px; }
+
+.legend-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px; border-radius: 10px;
+  cursor: pointer; transition: background var(--t-fast);
+  user-select: none;
+}
+.legend-item:hover  { background: rgba(255,255,255,0.06); }
+.legend-item.active { background: rgba(255,255,255,0.11); }
+
+.legend-all-dot {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.35);
+}
+.legend-label { font-size: 12px; color: rgba(255,255,255,0.80); flex: 1; }
+.legend-count {
+  font-size: 11px; font-weight: 700;
+  color: rgba(255,255,255,0.40); min-width: 18px; text-align: right;
+}
+
+/* ── Right Panel Stats ── */
+.stats-total-row { text-align: center; padding: 10px 0 14px; }
+.stats-total-num  { display: block; font-size: 2.4rem; font-weight: 800; line-height: 1; color: white; }
+.stats-total-label { font-size: 10px; color: rgba(255,255,255,0.40); text-transform: uppercase; letter-spacing: 1px; }
+
+.stats-cats { display: flex; flex-direction: column; gap: 7px; }
+.stats-cat-row { display: flex; align-items: center; gap: 7px; }
+.stats-cat-label { font-size: 11px; color: rgba(255,255,255,0.65); min-width: 50px; }
+.stats-cat-bar-bg { flex: 1; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+.stats-cat-bar-fill { height: 100%; border-radius: 2px; min-width: 3px; transition: width 0.6s ease; }
+.stats-cat-num { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.40); min-width: 18px; text-align: right; }
+
+.panel-divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 14px 0; }
+
+/* ── Map Loading Badge ── */
+.map-loading-badge {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); z-index: 20;
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 18px; border-radius: 99px;
+  background: rgba(20,10,10,0.85); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.10);
+  font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.60);
+  pointer-events: none;
+}
+.map-loading-badge.hidden { display: none; }
+.map-loading-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent-primary);
+  animation: mapLoadPulse 0.8s infinite alternate;
+}
+@keyframes mapLoadPulse { 0% { opacity: 1; } 100% { opacity: 0.25; } }
+
+/* ── Stack Marker (multiple reports at same location) ── */
+.stack-marker-ring {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.55);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stack-marker-ring:hover {
+  transform: translateY(-3px) scale(1.15);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.65);
+}
+.stack-marker-inner {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(12,10,20,0.92);
+  display: flex; align-items: center; justify-content: center;
+}
+.stack-count {
+  font-size: 13px; font-weight: 800; color: white; line-height: 1;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+}
+
+/* ── Clickable recent activity rows ── */
+.map-act-item.clickable {
+  cursor: pointer; border-radius: 8px;
+  padding: 5px 6px; margin: -5px -6px;
+  transition: background var(--t-fast);
+}
+.map-act-item.clickable:hover { background: rgba(255,255,255,0.07); }
+
+.no-data-text { font-size: 12px; color: rgba(255,255,255,0.28); font-style: italic; }
