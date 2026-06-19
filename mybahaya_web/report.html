@@ -5,23 +5,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyBahaya — Reports</title>
-  <meta name="description" content="View, filter and manage all incident reports submitted to MyBahaya." />
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script>
-
   <link rel="stylesheet" href="css/shared.css" />
   <link rel="stylesheet" href="css/report.css" />
 </head>
 
 <body>
-  <div class="mesh-bg" aria-hidden="true"></div>
-
   <nav class="navbar" role="navigation" aria-label="Main navigation">
     <a href="home.html" class="navbar-brand" aria-label="MyBahaya Home">
       <div class="brand-icon"><img src="assets/logo_icon/officialMyBahayaIcon.png" alt="MyBahaya" class="brand-logo" /></div>
@@ -32,7 +27,7 @@
       <li><a href="report.html" class="active"><ion-icon name="document-text-outline"></ion-icon> Reports</a></li>
       <li><a href="map.html"><ion-icon name="map-outline"></ion-icon> Map</a></li>
       <li><a href="analytics.html"><ion-icon name="bar-chart-outline"></ion-icon> Analytics</a></li>
-      <li><a href="organizations.html" class="admin-only"><ion-icon name="people-outline"></ion-icon> Organizations</a></li>
+      <li><a href="organizations.html"><ion-icon name="people-outline"></ion-icon> Organizations</a></li>
     </ul>
     <div class="navbar-right">
       <div class="avatar-btn" role="button" aria-label="User profile" tabindex="0">
@@ -49,34 +44,82 @@
         <div>
           <p class="page-eyebrow"><span class="dot"></span> Incident Reports</p>
           <h1 class="page-title">Reports <span class="gradient-text">Centre</span></h1>
-          <p class="page-sub">All submitted incidents — searchable, filterable, and actionable</p>
+          <p class="page-sub">All incidents from across Malaysia — real-time from Firestore</p>
         </div>
-        <button class="btn btn-primary" id="btn-new-report" aria-label="Submit new report">
-          <ion-icon name="add-outline"></ion-icon> New Report
-        </button>
+        <div class="header-meta">
+          <span class="total-badge" id="total-count-badge">Loading…</span>
+        </div>
       </div>
 
       <!-- Filter Bar -->
       <div class="glass-card filter-bar fade-in fade-in-delay-1">
+
+        <!-- Search -->
         <div class="filter-search">
           <ion-icon name="search-outline" class="search-icon"></ion-icon>
           <input type="search" class="glass-input search-input" id="report-search"
-            placeholder="Search reports, locations, IDs…" aria-label="Search reports" />
+            placeholder="Search category, description…" aria-label="Search reports" />
         </div>
-        <div class="filter-chips" role="group" aria-label="Filter by severity">
-          <button class="chip active" data-filter="all">All</button>
-          <button class="chip chip-critical" data-filter="critical">Critical</button>
-          <button class="chip chip-warning" data-filter="warning">Warning</button>
-          <button class="chip chip-success" data-filter="resolved">Resolved</button>
-          <button class="chip chip-info" data-filter="pending">Pending</button>
+
+        <!-- Layer 1 : Geographic scope -->
+        <div class="filter-layer">
+          <span class="filter-layer-label">
+            <ion-icon name="location-outline"></ion-icon> Scope
+          </span>
+          <div class="filter-chips" role="group" aria-label="Geographic scope">
+            <button class="chip active" data-scope="malaysia">🇲🇾 Malaysia</button>
+            <button class="chip" data-scope="state">By State</button>
+          </div>
+          <select class="glass-input state-select hidden" id="state-select" aria-label="Select state">
+            <option value="">— Select state —</option>
+            <option>Perlis</option>
+            <option>Kedah</option>
+            <option>Pulau Pinang</option>
+            <option>Perak</option>
+            <option>Selangor</option>
+            <option>Kuala Lumpur</option>
+            <option>Putrajaya</option>
+            <option>Negeri Sembilan</option>
+            <option>Melaka</option>
+            <option>Johor</option>
+            <option>Pahang</option>
+            <option>Terengganu</option>
+            <option>Kelantan</option>
+            <option>Sabah</option>
+            <option>Sarawak</option>
+            <option>Labuan</option>
+          </select>
         </div>
+
+        <!-- Layer 2 : Category -->
+        <div class="filter-layer">
+          <span class="filter-layer-label">
+            <ion-icon name="grid-outline"></ion-icon> Category
+          </span>
+          <div class="filter-chips" role="group" aria-label="Filter by category">
+            <button class="chip active" data-cat="all">All</button>
+            <button class="chip chip-theft"   data-cat="Theft">Theft</button>
+            <button class="chip chip-assault" data-cat="Assault">Assault</button>
+            <button class="chip chip-fire"    data-cat="Fire">Fire</button>
+            <button class="chip chip-medical" data-cat="Medical">Medical</button>
+            <button class="chip chip-other"   data-cat="Other">Other</button>
+          </div>
+        </div>
+
+        <!-- Sort -->
         <div class="filter-sort">
           <select class="glass-input sort-select" id="report-sort" aria-label="Sort reports">
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
-            <option value="severity">By Severity</option>
           </select>
         </div>
+
+      </div>
+
+      <!-- Loading state -->
+      <div id="reports-loading" class="loading-row">
+        <div class="loading-spinner"></div>
+        <span>Loading reports from Firestore…</span>
       </div>
 
       <!-- Reports Grid -->
@@ -84,7 +127,7 @@
 
       <!-- Empty State -->
       <div class="empty-state hidden" id="empty-state">
-        <div class="glass-icon" style="font-size:40px;padding:20px;border-radius:20px">
+        <div class="glass-icon" style="font-size:36px;padding:18px;border-radius:18px">
           <ion-icon name="search-outline"></ion-icon>
         </div>
         <p>No reports match your filters</p>
@@ -93,64 +136,6 @@
 
     </div>
   </main>
-
-  <!-- New Report Modal -->
-  <div class="modal-overlay hidden" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal-box glass-card">
-      <div class="modal-header">
-        <h2 class="section-title" id="modal-title"><span class="dot"></span> New Incident Report</h2>
-        <button class="modal-close" id="modal-close" aria-label="Close modal">
-          <ion-icon name="close-outline"></ion-icon>
-        </button>
-      </div>
-      <form class="report-form" id="report-form" novalidate>
-        <div class="form-group">
-          <label class="form-label" for="f-type">Incident Type</label>
-          <select class="glass-input" id="f-type" required>
-            <option value="">Select type…</option>
-            <option>Armed Threat</option>
-            <option>Fire</option>
-            <option>Medical Emergency</option>
-            <option>Crowd Disturbance</option>
-            <option>Theft / Robbery</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="f-location">Location</label>
-          <input class="glass-input" id="f-location" type="text" placeholder="e.g. Jalan Bukit Seguntang" required />
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="f-severity">Severity</label>
-            <select class="glass-input" id="f-severity" required>
-              <option value="">Select…</option>
-              <option value="critical">Critical</option>
-              <option value="warning">Warning</option>
-              <option value="low">Low</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="f-status">Status</label>
-            <select class="glass-input" id="f-status">
-              <option value="pending">Pending</option>
-              <option value="active">Active</option>
-              <option value="resolved">Resolved</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="f-details">Description</label>
-          <textarea class="glass-input" id="f-details" rows="3"
-            placeholder="Describe the incident in detail…"></textarea>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-glass" id="modal-cancel">Cancel</button>
-          <button type="submit" class="btn btn-primary">Submit Report <ion-icon name="send-outline"></ion-icon></button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- FAB -->
   <div class="fab-container">

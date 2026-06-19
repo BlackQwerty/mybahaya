@@ -1,146 +1,240 @@
 /* ============================================================
-   report.js — Report Page Logic
+   report.js — Reports page: real Firestore data, 2-layer filter
+   Firestore schema (set by Spring Boot):
+     reports/{reportId}: { reportId, userId, category, details,
+       imageUrl, location:{latitude,longitude}, createdAt }
    ============================================================ */
 
 'use strict';
 
-const dummyReports = [
-  { id: 'INC-1042', type: 'Armed Threat', loc: 'Alor Gajah, Melaka', desc: 'Group of armed individuals spotted targeting people nearby. Require immediate police backup.', severity: 'critical', status: 'active', time: '10m ago' },
-  { id: 'INC-1041', type: 'Fire', loc: 'Taman Melaka Perdana', desc: 'Large smoke pillar observed from residential area. Fire truck requested.', severity: 'critical', status: 'active', time: '25m ago' },
-  { id: 'INC-1040', type: 'Suspicious Activity', loc: 'UiTM Lendu Campus', desc: 'Unidentified vehicle circling parking lot C multiple times.', severity: 'warning', status: 'pending', time: '1h ago' },
-  { id: 'INC-1039', type: 'Traffic Accident', loc: 'Lebuh AMJ KM 21', desc: 'Two car collision blocking left lane. No visible injuries, but traffic is building up.', severity: 'warning', status: 'active', time: '2h ago' },
-  { id: 'INC-1038', type: 'Medical Emergency', loc: 'Hospital Alor Gajah', desc: 'Patient requires urgent transfer. Ambulance dispatched.', severity: 'resolved', status: 'resolved', time: '5h ago' },
-  { id: 'INC-1037', type: 'Flooding', loc: 'Kampung Paya Datuk', desc: 'Water level rising rapidly near the river bank. Evacuation warning issued.', severity: 'critical', status: 'active', time: '1d ago' },
-];
-
-function getBadge(severity, status) {
-  if (status === 'resolved') return '<span class="badge badge-success"><ion-icon name="checkmark-circle"></ion-icon> Resolved</span>';
-  if (severity === 'critical') return '<span class="badge badge-critical"><ion-icon name="warning"></ion-icon> Critical</span>';
-  if (severity === 'warning') return '<span class="badge badge-warning"><ion-icon name="alert-circle"></ion-icon> Warning</span>';
-  return '<span class="badge badge-info"><ion-icon name="information-circle"></ion-icon> Pending</span>';
+/* ── Category metadata ── */
+const CAT_META = {
+  Theft:   { icon: 'lock-open-outline',           label: 'Theft',   cls: 'cat-Theft'   },
+  Assault: { icon: 'alert-circle-outline',         label: 'Assault', cls: 'cat-Assault' },
+  Fire:    { icon: 'flame-outline',               label: 'Fire',    cls: 'cat-Fire'    },
+  Medical: { icon: 'medkit-outline',              label: 'Medical', cls: 'cat-Medical' },
+  Other:   { icon: 'help-circle-outline',         label: 'Other',   cls: 'cat-Other'   },
+};
+function catMeta(cat) {
+  return CAT_META[cat] || { icon: 'warning-outline', label: cat || 'Unknown', cls: 'cat-Other' };
 }
 
+/* ── Malaysian state bounding boxes (rough, for client-side geo filter) ── */
+const STATE_BOUNDS = {
+  'Perlis':          { minLat:6.10, maxLat:6.80, minLng:100.00, maxLng:100.60 },
+  'Kedah':           { minLat:5.50, maxLat:6.80, minLng:99.70,  maxLng:101.00 },
+  'Pulau Pinang':    { minLat:5.00, maxLat:5.70, minLng:100.00, maxLng:100.60 },
+  'Perak':           { minLat:3.70, maxLat:6.00, minLng:100.20, maxLng:101.80 },
+  'Selangor':        { minLat:2.70, maxLat:3.80, minLng:101.00, maxLng:102.00 },
+  'Kuala Lumpur':    { minLat:3.00, maxLat:3.30, minLng:101.50, maxLng:101.80 },
+  'Putrajaya':       { minLat:2.90, maxLat:3.05, minLng:101.60, maxLng:101.80 },
+  'Negeri Sembilan': { minLat:2.40, maxLat:3.30, minLng:101.70, maxLng:102.80 },
+  'Melaka':          { minLat:2.00, maxLat:2.50, minLng:102.00, maxLng:102.60 },
+  'Johor':           { minLat:1.20, maxLat:2.80, minLng:102.50, maxLng:104.30 },
+  'Pahang':          { minLat:2.90, maxLat:5.30, minLng:101.30, maxLng:103.80 },
+  'Terengganu':      { minLat:4.00, maxLat:5.90, minLng:102.30, maxLng:103.50 },
+  'Kelantan':        { minLat:4.60, maxLat:6.20, minLng:101.30, maxLng:102.50 },
+  'Sabah':           { minLat:4.00, maxLat:7.40, minLng:115.50, maxLng:119.30 },
+  'Sarawak':         { minLat:0.80, maxLat:5.20, minLng:109.60, maxLng:119.30 },
+  'Labuan':          { minLat:5.20, maxLat:5.40, minLng:115.10, maxLng:115.30 },
+};
+
+function inState(report, stateName) {
+  const b = STATE_BOUNDS[stateName];
+  if (!b) return true; // unknown state → show all
+  const lat = report.location?.latitude;
+  const lng = report.location?.longitude;
+  if (lat == null || lng == null) return false;
+  return lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng;
+}
+
+/* ── Timestamp formatting ── */
+function fmtTime(ts) {
+  if (!ts) return '—';
+  const dt = ts.toDate ? ts.toDate() : new Date(ts);
+  const now = Date.now();
+  const diff = now - dt.getTime();
+  const m = Math.floor(diff / 60000);
+  const h = Math.floor(diff / 3600000);
+  const d = Math.floor(diff / 86400000);
+  if (m < 1) return 'Just now';
+  if (m < 60) return `${m}m ago`;
+  if (h < 24) return `${h}h ago`;
+  if (d < 7)  return `${d}d ago`;
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${dt.getDate()} ${mo[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+
+/* ── Short ID ── */
+function shortId(id) { return (id || '').slice(0, 8).toUpperCase(); }
+
+/* ── Render ── */
 function renderReports(reports) {
-  const grid = document.getElementById('reports-grid');
+  const grid  = document.getElementById('reports-grid');
   const empty = document.getElementById('empty-state');
-  
-  if (reports.length === 0) {
+  const badge = document.getElementById('total-count-badge');
+  badge.textContent = `${reports.length} report${reports.length !== 1 ? 's' : ''}`;
+
+  if (!reports.length) {
     grid.innerHTML = '';
     empty.classList.remove('hidden');
     return;
   }
-  
   empty.classList.add('hidden');
-  grid.innerHTML = reports.map((r, i) => `
-    <div class="glass-card report-card fade-in" style="animation-delay: ${i * 0.05}s">
-      <div class="rc-header">
-        <div>
-          <span class="rc-id">${r.id}</span>
-          <h3 class="rc-title">${r.type}</h3>
-        </div>
-        ${getBadge(r.severity, r.status)}
+
+  grid.innerHTML = reports.map((r, i) => {
+    const m    = catMeta(r.category);
+    const lat  = r.location?.latitude;
+    const lng  = r.location?.longitude;
+    const hasLoc = lat != null && lng != null;
+
+    const mapHref = hasLoc
+      ? `map.html?lat=${lat}&lng=${lng}&id=${encodeURIComponent(r.reportId || r.id)}&category=${encodeURIComponent(r.category || '')}&details=${encodeURIComponent((r.details || '').slice(0,120))}`
+      : null;
+
+    return `
+    <div class="glass-card report-card fade-in" style="animation-delay:${i * 0.04}s" role="listitem">
+
+      <div class="rc-image-bg">
+        ${r.imageUrl
+          ? `<img src="${r.imageUrl}" alt="${m.label}" loading="lazy" />`
+          : `<div class="rc-image-placeholder"><ion-icon name="${m.icon}" class="cat-icon-${r.category || 'Other'}"></ion-icon></div>`
+        }
       </div>
-      <div class="rc-meta">
-        <span><ion-icon name="location-outline"></ion-icon> ${r.loc}</span>
-        <span><ion-icon name="time-outline"></ion-icon> ${r.time}</span>
+
+      <div class="rc-detail-panel">
+        <div class="rc-id">#${shortId(r.reportId || r.id)}</div>
+        <div class="rc-title">${m.label}</div>
+        <div class="rc-details-label">Details:</div>
+        <p class="rc-desc${!r.details ? ' no-desc' : ''}">${r.details || 'No description provided.'}</p>
+        <span class="rc-time">${fmtTime(r.createdAt)}</span>
+        ${hasLoc
+          ? `<a class="rc-loc-badge" href="${mapHref}"><ion-icon name="location-outline"></ion-icon>${lat.toFixed(3)}, ${lng.toFixed(3)}</a>`
+          : `<span class="no-location-badge"><ion-icon name="location-outline"></ion-icon>No location</span>`
+        }
       </div>
-      <p class="rc-body"><strong>Details:</strong><br/>${r.desc}</p>
-      <div class="rc-footer">
-        <button class="btn btn-glass" style="font-size:var(--fs-xs); padding:6px 12px">View Details</button>
-      </div>
-    </div>
-  `).join('');
+
+    </div>`;
+  }).join('');
 }
 
-function initFilters() {
-  const searchInput = document.getElementById('report-search');
-  const chips = document.querySelectorAll('.chip');
-  const sortSelect = document.getElementById('report-sort');
-  const btnClear = document.getElementById('btn-clear-filter');
+/* ── Filter & sort state ── */
+let allReports   = [];
+let currentScope = 'malaysia';  // 'malaysia' | 'state'
+let currentState = '';
+let currentCat   = 'all';
+let currentSearch = '';
+let currentSort  = 'newest';
 
-  let currentFilter = 'all';
-  let currentSearch = '';
-
-  const filterData = () => {
-    let filtered = dummyReports.filter(r => {
-      const matchSearch = r.type.toLowerCase().includes(currentSearch) || 
-                          r.loc.toLowerCase().includes(currentSearch) || 
-                          r.id.toLowerCase().includes(currentSearch) ||
-                          r.desc.toLowerCase().includes(currentSearch);
-      
-      let matchFilter = true;
-      if (currentFilter === 'critical') matchFilter = r.severity === 'critical' && r.status !== 'resolved';
-      else if (currentFilter === 'warning') matchFilter = r.severity === 'warning' && r.status !== 'resolved';
-      else if (currentFilter === 'resolved') matchFilter = r.status === 'resolved';
-      else if (currentFilter === 'pending') matchFilter = r.status === 'pending';
-
-      return matchSearch && matchFilter;
-    });
-
-    // Dummy sort logic
-    if (sortSelect.value === 'oldest') {
-      filtered = filtered.reverse();
-    } else if (sortSelect.value === 'severity') {
-      const sevMap = { 'critical': 3, 'warning': 2, 'low': 1, 'resolved': 0 };
-      filtered.sort((a, b) => sevMap[b.severity] - sevMap[a.severity]);
+function applyFilters() {
+  let list = allReports.filter(r => {
+    // Layer 1: scope
+    if (currentScope === 'state' && currentState) {
+      if (!inState(r, currentState)) return false;
     }
 
-    renderReports(filtered);
-  };
+    // Layer 2: category
+    if (currentCat !== 'all' && r.category !== currentCat) return false;
 
-  searchInput.addEventListener('input', (e) => {
-    currentSearch = e.target.value.toLowerCase();
-    filterData();
+    // Search
+    if (currentSearch) {
+      const q = currentSearch.toLowerCase();
+      const hay = [r.category, r.details, r.reportId, r.id].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+
+    return true;
   });
 
-  chips.forEach(chip => {
-    chip.addEventListener('click', (e) => {
-      chips.forEach(c => c.classList.remove('active'));
-      e.target.classList.add('active');
-      currentFilter = e.target.dataset.filter;
-      filterData();
+  // Sort
+  list = list.slice().sort((a, b) => {
+    const ta = a.createdAt?.toMillis?.() ?? 0;
+    const tb = b.createdAt?.toMillis?.() ?? 0;
+    return currentSort === 'oldest' ? ta - tb : tb - ta;
+  });
+
+  renderReports(list);
+}
+
+/* ── Firestore listener ── */
+function listenReports() {
+  const loading = document.getElementById('reports-loading');
+
+  db.collection('reports').onSnapshot(snap => {
+    loading.classList.add('hidden');
+    allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    applyFilters();
+  }, err => {
+    loading.innerHTML = `<ion-icon name="alert-circle-outline" style="font-size:20px;color:var(--accent-rose)"></ion-icon>
+      <span style="color:var(--accent-rose)">Failed to load: ${err.message}</span>`;
+  });
+}
+
+/* ── Filter UI wiring ── */
+function initFilters() {
+  // Search
+  document.getElementById('report-search').addEventListener('input', e => {
+    currentSearch = e.target.value.trim();
+    applyFilters();
+  });
+
+  // Layer 1 — scope chips
+  document.querySelectorAll('[data-scope]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-scope]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentScope = btn.dataset.scope;
+
+      const stateSelect = document.getElementById('state-select');
+      if (currentScope === 'state') {
+        stateSelect.classList.remove('hidden');
+      } else {
+        stateSelect.classList.add('hidden');
+        currentState = '';
+      }
+      applyFilters();
     });
   });
 
-  sortSelect.addEventListener('change', filterData);
-
-  btnClear.addEventListener('click', () => {
-    searchInput.value = '';
-    currentSearch = '';
-    chips.forEach(c => c.classList.remove('active'));
-    document.querySelector('.chip[data-filter="all"]').classList.add('active');
-    currentFilter = 'all';
-    sortSelect.value = 'newest';
-    filterData();
+  // State dropdown
+  document.getElementById('state-select').addEventListener('change', e => {
+    currentState = e.target.value;
+    applyFilters();
   });
 
-  // Initial render
-  filterData();
-}
+  // Layer 2 — category chips
+  document.querySelectorAll('[data-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCat = btn.dataset.cat;
+      applyFilters();
+    });
+  });
 
-function initModal() {
-  const modal = document.getElementById('modal-overlay');
-  const btnOpen = document.getElementById('btn-new-report');
-  const btnClose = document.getElementById('modal-close');
-  const btnCancel = document.getElementById('modal-cancel');
-  const form = document.getElementById('report-form');
+  // Sort
+  document.getElementById('report-sort').addEventListener('change', e => {
+    currentSort = e.target.value;
+    applyFilters();
+  });
 
-  const openModal = () => modal.classList.remove('hidden');
-  const closeModal = () => modal.classList.add('hidden');
-
-  btnOpen.addEventListener('click', openModal);
-  btnClose.addEventListener('click', closeModal);
-  btnCancel.addEventListener('click', closeModal);
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    alert('Report submitted successfully! (Mock)');
-    closeModal();
-    form.reset();
+  // Clear all filters
+  document.getElementById('btn-clear-filter').addEventListener('click', () => {
+    document.getElementById('report-search').value = '';
+    currentSearch = ''; currentCat = 'all'; currentScope = 'malaysia';
+    currentState  = ''; currentSort = 'newest';
+    document.querySelectorAll('[data-scope]').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-scope="malaysia"]').classList.add('active');
+    document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-cat="all"]').classList.add('active');
+    document.getElementById('state-select').classList.add('hidden');
+    document.getElementById('state-select').value = '';
+    document.getElementById('report-sort').value = 'newest';
+    applyFilters();
   });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   initFilters();
-  initModal();
+  listenReports();
 });
