@@ -8,12 +8,10 @@
   <meta name="description"
     content="MyBahaya incident monitoring dashboard — real-time overview of active reports, emergencies, and analytics." />
 
-  <!-- Phosphor Icons -->
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Shared + Page CSS -->
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -26,7 +24,6 @@
 </head>
 
 <body>
-  <!-- Animated background mesh -->
   <div class="mesh-bg" aria-hidden="true"></div>
 
   <!-- ── Navigation ── -->
@@ -35,15 +32,13 @@
       <div class="brand-icon"><img src="assets/logo_icon/officialMyBahayaIcon.png" alt="MyBahaya" class="brand-logo" /></div>
       <span class="brand-name">MyBahaya</span>
     </a>
-
     <ul class="nav-links" role="list">
-      <li><a href="home.html" id="nav-home"><ion-icon name="home-outline"></ion-icon> Home</a></li>
-      <li><a href="report.html" id="nav-report"><ion-icon name="document-text-outline"></ion-icon> Reports</a></li>
-      <li><a href="map.html" id="nav-map"><ion-icon name="map-outline"></ion-icon> Map</a></li>
-      <li><a href="analytics.html" id="nav-analytics"><ion-icon name="bar-chart-outline"></ion-icon> Analytics</a></li>
-      <li><a href="organizations.html" id="nav-users" class="admin-only"><ion-icon name="people-outline"></ion-icon> Organizations</a></li>
+      <li><a href="home.html" class="active"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="report.html"><ion-icon name="document-text-outline"></ion-icon> Reports</a></li>
+      <li><a href="map.html"><ion-icon name="map-outline"></ion-icon> Map</a></li>
+      <li><a href="analytics.html"><ion-icon name="bar-chart-outline"></ion-icon> Analytics</a></li>
+      <li><a href="organizations.html" class="admin-only"><ion-icon name="people-outline"></ion-icon> Organizations</a></li>
     </ul>
-
     <div class="navbar-right">
       <div class="avatar-btn" role="button" aria-label="User profile" tabindex="0">
         <ion-icon name="person-circle-outline"></ion-icon>
@@ -55,92 +50,107 @@
   <main class="page-wrapper" id="main-content">
     <div class="home-container">
 
-      <!-- Left Column: Stats + Analytics -->
+      <!-- ═══════════════════════════════════
+           LEFT COLUMN
+           ═══════════════════════════════════ -->
       <div class="home-left">
 
         <!-- Hero Greeting -->
         <div class="hero-section fade-in">
           <p class="hero-eyebrow"><span class="dot"></span> Live Monitoring</p>
-          <h1 class="hero-title">Incident <span class="gradient-text">Overview</span></h1>
-          <p class="hero-sub">Real-time situational awareness for Alor Gajah, Melaka</p>
+          <h1 class="hero-title" id="hero-greeting">Good Morning, Admin</h1>
+          <p class="hero-sub" id="hero-sub">Live situational awareness · Malaysia</p>
+          <p class="hero-clock" id="hero-clock"></p>
         </div>
 
-        <!-- Stats Row -->
+        <!-- Stats Row: 3 real cards -->
         <div class="stats-row">
-          <div class="glass-card stat-card fade-in fade-in-delay-1" id="stat-total">
+
+          <div class="glass-card stat-card fade-in fade-in-delay-1">
             <div class="stat-icon-wrap" style="color:var(--accent-primary)">
               <div class="glass-icon"><ion-icon name="document-text-outline"></ion-icon></div>
             </div>
             <p class="stat-label">Total Reports</p>
-            <p class="stat-value" id="val-total">1,248</p>
-            <p class="stat-change up"><ion-icon name="trending-up-outline"></ion-icon> +12% this month</p>
+            <p class="stat-value" id="val-total">—</p>
+            <p class="stat-meta">All time from Firestore</p>
           </div>
 
-          <div class="glass-card stat-card fade-in fade-in-delay-2" id="stat-emergency">
-            <div class="stat-icon-wrap" style="color:var(--accent-rose)">
-              <div class="glass-icon" style="background:rgba(240,95,126,0.15);border-color:rgba(240,95,126,0.3)">
-                <ion-icon name="alert-circle-outline"></ion-icon>
+          <div class="glass-card stat-card fade-in fade-in-delay-2">
+            <div class="stat-icon-wrap" style="color:#30D158">
+              <div class="glass-icon" style="background:rgba(48,209,88,0.12);border-color:rgba(48,209,88,0.28)">
+                <ion-icon name="today-outline"></ion-icon>
               </div>
             </div>
-            <p class="stat-label">Active Emergencies</p>
-            <p class="stat-value" id="val-emergency" style="color:var(--accent-rose)">24</p>
-            <p class="stat-change down"><ion-icon name="trending-down-outline"></ion-icon> -3 since yesterday</p>
+            <p class="stat-label">Reports Today</p>
+            <p class="stat-value" id="val-today" style="color:#30D158">—</p>
+            <p class="stat-meta">Since midnight</p>
           </div>
 
-          <div class="glass-card stat-card fade-in fade-in-delay-3" id="stat-high">
-            <div class="stat-icon-wrap" style="color:var(--accent-amber)">
-              <div class="glass-icon" style="background:rgba(245,166,35,0.15);border-color:rgba(245,166,35,0.3)">
-                <ion-icon name="warning-outline"></ion-icon>
+          <div class="glass-card stat-card fade-in fade-in-delay-3">
+            <div class="stat-icon-wrap" style="color:var(--accent-secondary)">
+              <div class="glass-icon" style="background:rgba(100,210,255,0.12);border-color:rgba(100,210,255,0.28)">
+                <ion-icon name="people-outline"></ion-icon>
               </div>
             </div>
-            <p class="stat-label">High Priority</p>
-            <p class="stat-value" id="val-high" style="color:var(--accent-amber)">87</p>
-            <p class="stat-change up"><ion-icon name="trending-up-outline"></ion-icon> +5 today</p>
+            <p class="stat-label">Active Organizations</p>
+            <p class="stat-value" id="val-orgs" style="color:var(--accent-secondary)">—</p>
+            <p class="stat-meta">Status: active</p>
           </div>
+
+        </div><!-- /stats-row -->
+
+        <!-- Category Breakdown — 5 mini cards -->
+        <div class="cat-breakdown-row fade-in fade-in-delay-3" id="cat-breakdown">
+          <!-- Populated by home.js -->
         </div>
 
-        <!-- Incident Distribution Chart -->
+        <!-- 7-day Trend Chart -->
         <div class="glass-card chart-card fade-in fade-in-delay-4">
           <div class="section-header">
-            <h2 class="section-title"><span class="dot"></span> Incident Distribution</h2>
+            <h2 class="section-title"><span class="dot"></span> 7-Day Trend</h2>
             <div class="chart-legend" id="chart-legend"></div>
           </div>
-          <p class="chart-sub">Real-time analytical trends for the last 24 hours</p>
+          <p class="chart-sub">Daily report count by category over the last 7 days</p>
           <div class="chart-wrapper">
-            <canvas id="incidentChart" aria-label="Incident distribution bar chart"></canvas>
+            <canvas id="incidentChart" aria-label="7-day incident trend chart"></canvas>
           </div>
         </div>
 
         <!-- Recent Activity -->
         <div class="glass-card activity-card fade-in fade-in-delay-5">
           <div class="section-header">
-            <h2 class="section-title"><span class="dot"
-                style="background:var(--accent-primary);box-shadow:0 0 8px var(--accent-primary)"></span> Recent Activity</h2>
+            <h2 class="section-title">
+              <span class="dot" style="background:var(--accent-primary);box-shadow:0 0 8px var(--accent-primary)"></span>
+              Recent Activity
+            </h2>
             <a href="report.html" class="btn btn-glass" style="font-size:var(--fs-xs);padding:6px 14px">
               View All <ion-icon name="arrow-forward-outline"></ion-icon>
             </a>
           </div>
-          <ul class="activity-list" id="activity-list" role="list"></ul>
+          <ul class="activity-list" id="activity-list" role="list">
+            <li class="activity-empty">Loading…</li>
+          </ul>
         </div>
 
       </div><!-- /home-left -->
 
-      <!-- Right Column: Live Map -->
+      <!-- ═══════════════════════════════════
+           RIGHT COLUMN — sticky map
+           ═══════════════════════════════════ -->
       <div class="home-right">
         <div class="glass-card map-preview-card fade-in fade-in-delay-2">
           <div class="section-header">
-            <h2 class="section-title"><span class="dot"
-                style="background:var(--accent-primary);box-shadow:0 0 8px var(--accent-primary)"></span> Live Map — Alor
-              Gajah</h2>
+            <h2 class="section-title">
+              <span class="dot" style="background:var(--accent-primary);box-shadow:0 0 8px var(--accent-primary)"></span>
+              Live Map
+            </h2>
             <a href="map.html" class="btn btn-glass" style="font-size:var(--fs-xs);padding:6px 14px">
               Full Map <ion-icon name="expand-outline"></ion-icon>
             </a>
           </div>
           <div id="home-map" class="home-map-container" aria-label="Live incident map"></div>
-          <div class="map-overlay-badges">
-            <span class="badge badge-critical"><ion-icon name="ellipse" style="font-size:8px"></ion-icon> 5 Critical</span>
-            <span class="badge badge-warning"><ion-icon name="ellipse" style="font-size:8px"></ion-icon> 12 Warning</span>
-            <span class="badge badge-success"><ion-icon name="ellipse" style="font-size:8px"></ion-icon> 38 Resolved</span>
+          <div class="map-overlay-badges" id="map-badges">
+            <!-- Populated by home.js -->
           </div>
         </div>
       </div><!-- /home-right -->
@@ -148,7 +158,7 @@
     </div><!-- /home-container -->
   </main>
 
-  <!-- ── Floating Action Button ── -->
+  <!-- ── FAB ── -->
   <div class="fab-container" role="complementary" aria-label="Quick actions">
     <div class="fab-menu" id="fab-menu" role="menu">
       <a href="#" class="fab-menu-item" id="fab-settings" role="menuitem">

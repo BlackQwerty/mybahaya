@@ -1,117 +1,229 @@
 /* ============================================================
-   home.js — Home Page Logic
+   home.js — Home Page  |  All data from Firestore, zero hardcoded
    ============================================================ */
 
 'use strict';
 
-/* ── MapLibre Home Preview ── */
-function initHomeMap() {
-  if (typeof maplibregl === 'undefined') return;
+/* ── Category metadata ── */
+const CAT_META = {
+  Theft:   { icon: 'lock-open-outline',    label: 'Theft',   color: '#bf8fff', bg: 'rgba(155,89,182,0.18)', border: 'rgba(155,89,182,0.45)' },
+  Assault: { icon: 'alert-circle-outline', label: 'Assault', color: '#FF3B30', bg: 'rgba(255,59,48,0.18)',  border: 'rgba(255,59,48,0.45)'  },
+  Fire:    { icon: 'flame-outline',        label: 'Fire',    color: '#ff8c5a', bg: 'rgba(255,107,53,0.18)', border: 'rgba(255,107,53,0.45)' },
+  Medical: { icon: 'medkit-outline',       label: 'Medical', color: '#30D158', bg: 'rgba(48,209,88,0.18)',  border: 'rgba(48,209,88,0.45)'  },
+  Other:   { icon: 'help-circle-outline',  label: 'Other',   color: '#aca494', bg: 'rgba(172,164,148,0.18)',border: 'rgba(172,164,148,0.35)' },
+};
 
-  const map = new maplibregl.Map({
-    container: 'home-map',
-    style: {
-      version: 8,
-      sources: {
-        'osm': {
-          type: 'raster',
-          tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-          tileSize: 256,
-          attribution: '© OpenStreetMap contributors'
+function catMeta(cat) { return CAT_META[cat] || CAT_META.Other; }
+
+function fmtTime(ts) {
+  if (!ts) return '—';
+  const dt   = ts.toDate ? ts.toDate() : new Date(ts);
+  const diff = Date.now() - dt.getTime();
+  const m = Math.floor(diff / 60000);
+  const h = Math.floor(diff / 3600000);
+  const d = Math.floor(diff / 86400000);
+  if (m < 1)  return 'Just now';
+  if (m < 60) return `${m}m ago`;
+  if (h < 24) return `${h}h ago`;
+  if (d < 7)  return `${d}d ago`;
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${dt.getDate()} ${mo[dt.getMonth()]}`;
+}
+
+function shortId(id) { return (id || '').slice(0, 8).toUpperCase(); }
+
+function todayMidnight() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/* ── Animated counter ── */
+function animateCounter(el, target, duration = 1000) {
+  if (!el) return;
+  let start = null;
+  const step = ts => {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(eased * target).toLocaleString();
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+/* ══════════════════════════════════════════════════════════
+   1. HERO — Greeting + live clock
+   ══════════════════════════════════════════════════════════ */
+function initHero() {
+  const greetEl    = document.getElementById('hero-greeting');
+  const clockEl    = document.getElementById('hero-clock');
+  const subtitleEl = document.getElementById('hero-sub');
+
+  function updateGreeting() {
+    const h = new Date().getHours();
+    const period = h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : 'Evening';
+
+    const user = firebase.auth().currentUser;
+    const name = user?.displayName || user?.email?.split('@')[0] || 'Admin';
+    if (greetEl) greetEl.textContent = `Good ${period}, ${name}`;
+  }
+
+  function updateClock() {
+    if (!clockEl) return;
+    const now = new Date();
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const mos  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const hh   = String(now.getHours()).padStart(2, '0');
+    const mm   = String(now.getMinutes()).padStart(2, '0');
+    const ss   = String(now.getSeconds()).padStart(2, '0');
+    clockEl.textContent = `${days[now.getDay()]}, ${now.getDate()} ${mos[now.getMonth()]} ${now.getFullYear()} · ${hh}:${mm}:${ss}`;
+  }
+
+  updateGreeting();
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Update greeting name once auth resolves
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      // Try to get coverage area from admins collection
+      db.collection('admins').doc(user.uid).get().then(snap => {
+        const data = snap.data();
+        if (subtitleEl && data?.coverDistrict && data?.coverState) {
+          subtitleEl.textContent = `Live situational awareness · ${data.coverDistrict}, ${data.coverState}`;
+        } else if (subtitleEl) {
+          subtitleEl.textContent = 'Live situational awareness · Malaysia';
         }
-      },
-      layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
-    },
-    center: [102.2095, 2.3849],  // Alor Gajah, Melaka
-    zoom: 12,
-    interactive: false,
-    attributionControl: false
-  });
-
-  // Apply dark overlay tint via CSS after load
-  map.on('load', () => {
-    // Add incident markers
-    const incidents = [
-      { lng: 102.2095, lat: 2.3849, color: '#f05f7e', label: 'Critical' },
-      { lng: 102.2200, lat: 2.3920, color: '#f5a623', label: 'Warning' },
-      { lng: 102.1970, lat: 2.3780, color: '#30d158', label: 'Resolved' },
-      { lng: 102.2150, lat: 2.3700, color: '#f05f7e', label: 'Critical' },
-      { lng: 102.2050, lat: 2.4000, color: '#f5a623', label: 'Warning' },
-    ];
-
-    incidents.forEach(inc => {
-      const el = document.createElement('div');
-      el.className = 'home-marker';
-      el.style.cssText = `
-        width:14px; height:14px; border-radius:50%;
-        background:${inc.color};
-        border:2px solid white;
-        box-shadow:0 0 10px ${inc.color};
-      `;
-      new maplibregl.Marker({ element: el })
-        .setLngLat([inc.lng, inc.lat])
-        .setPopup(new maplibregl.Popup({ offset: 20 }).setText(inc.label))
-        .addTo(map);
-    });
+        updateGreeting();
+      }).catch(() => {
+        if (subtitleEl) subtitleEl.textContent = 'Live situational awareness · Malaysia';
+      });
+    }
   });
 }
 
-/* ── Incident Chart ── */
-function initChart() {
+/* ══════════════════════════════════════════════════════════
+   2. STATS + CATEGORY CARDS — from Firestore
+   ══════════════════════════════════════════════════════════ */
+let homeMap = null;
+let homeMapMarkers = [];
+let chartInstance = null;
+let allReports = [];
+
+function processReports(reports) {
+  allReports = reports;
+  const today = todayMidnight();
+
+  /* Stats */
+  const total   = reports.length;
+  const todayN  = reports.filter(r => {
+    const dt = r.createdAt?.toDate?.();
+    return dt && dt >= today;
+  }).length;
+
+  animateCounter(document.getElementById('val-total'),   total);
+  animateCounter(document.getElementById('val-today'),   todayN);
+
+  /* Category counts */
+  const counts = { Theft: 0, Assault: 0, Fire: 0, Medical: 0, Other: 0 };
+  reports.forEach(r => {
+    const cat = r.category in counts ? r.category : 'Other';
+    counts[cat]++;
+  });
+
+  /* Category breakdown cards */
+  const catRow = document.getElementById('cat-breakdown');
+  if (catRow) {
+    catRow.innerHTML = Object.entries(CAT_META).map(([cat, m]) => `
+      <a href="report.html" class="glass-card cat-card fade-in" title="View ${m.label} reports"
+         style="--cat-color:${m.color};--cat-bg:${m.bg};--cat-border:${m.border}">
+        <div class="cat-card-icon"><ion-icon name="${m.icon}"></ion-icon></div>
+        <p class="cat-card-count">${counts[cat]}</p>
+        <p class="cat-card-label">${m.label}</p>
+      </a>
+    `).join('');
+  }
+
+  /* Chart — last 7 days by category */
+  updateChart(reports, counts);
+
+  /* Recent activity */
+  updateActivity(reports);
+
+  /* Map markers */
+  if (homeMap) updateMapMarkers(reports);
+
+  /* Map badges */
+  updateMapBadges(reports, today);
+}
+
+/* ══════════════════════════════════════════════════════════
+   3. ORGANIZATIONS COUNT
+   ══════════════════════════════════════════════════════════ */
+function listenOrgs() {
+  db.collection('organizations').onSnapshot(snap => {
+    const orgs   = snap.docs.map(d => d.data());
+    const active = orgs.filter(o => o.status === 'active').length;
+    animateCounter(document.getElementById('val-orgs'), active);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   4. CHART — last 7 days per category
+   ══════════════════════════════════════════════════════════ */
+function updateChart(reports, counts) {
   const ctx = document.getElementById('incidentChart');
   if (!ctx) return;
 
-  const labels = ['00:00','03:00','06:00','09:00','12:00','15:00','18:00','21:00'];
-  const critical = [2, 1, 0, 4, 7, 5, 8, 6];
-  const warning  = [5, 3, 2, 8, 12, 9, 15, 11];
-  const resolved = [3, 2, 1, 5, 8, 10, 12, 9];
+  /* Build last-7-days labels */
+  const days   = [];
+  const labels = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - i);
+    days.push(d);
+    const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    labels.push(`${d.getDate()} ${mo[d.getMonth()]}`);
+  }
 
-  const gradient1 = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
-  gradient1.addColorStop(0, 'rgba(240,95,126,0.8)');
-  gradient1.addColorStop(1, 'rgba(240,95,126,0.1)');
+  /* Count per category per day */
+  const catKeys = Object.keys(CAT_META);
+  const series  = {};
+  catKeys.forEach(cat => { series[cat] = new Array(7).fill(0); });
 
-  const gradient2 = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
-  gradient2.addColorStop(0, 'rgba(245,166,35,0.8)');
-  gradient2.addColorStop(1, 'rgba(245,166,35,0.1)');
+  reports.forEach(r => {
+    const dt = r.createdAt?.toDate?.();
+    if (!dt) return;
+    const cat = r.category in series ? r.category : 'Other';
+    for (let i = 0; i < 7; i++) {
+      const dayStart = days[i];
+      const dayEnd   = new Date(dayStart); dayEnd.setDate(dayEnd.getDate() + 1);
+      if (dt >= dayStart && dt < dayEnd) { series[cat][i]++; break; }
+    }
+  });
 
-  const gradient3 = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
-  gradient3.addColorStop(0, 'rgba(48,209,88,0.8)');
-  gradient3.addColorStop(1, 'rgba(48,209,88,0.1)');
+  const datasets = catKeys.map(cat => {
+    const m = CAT_META[cat];
+    return {
+      label: m.label,
+      data:  series[cat],
+      borderColor: m.color,
+      backgroundColor: m.color + '22',
+      borderWidth: 2,
+      pointRadius: 4,
+      pointBackgroundColor: m.color,
+      tension: 0.4,
+      fill: false,
+    };
+  });
 
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Critical',
-          data: critical,
-          backgroundColor: gradient1,
-          borderColor: 'rgba(240,95,126,0.9)',
-          borderWidth: 1,
-          borderRadius: 6,
-          borderSkipped: false
-        },
-        {
-          label: 'Warning',
-          data: warning,
-          backgroundColor: gradient2,
-          borderColor: 'rgba(245,166,35,0.9)',
-          borderWidth: 1,
-          borderRadius: 6,
-          borderSkipped: false
-        },
-        {
-          label: 'Resolved',
-          data: resolved,
-          backgroundColor: gradient3,
-          borderColor: 'rgba(48,209,88,0.9)',
-          borderWidth: 1,
-          borderRadius: 6,
-          borderSkipped: false
-        }
-      ]
-    },
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -123,96 +235,200 @@ function initChart() {
           borderColor: 'rgba(255,255,255,0.10)',
           borderWidth: 1,
           titleColor: 'rgba(255,255,255,0.80)',
-          bodyColor: 'rgba(255,255,255,0.60)',
-          padding: 12,
-          cornerRadius: 10
-        }
+          bodyColor:  'rgba(255,255,255,0.60)',
+          padding: 12, cornerRadius: 10,
+        },
       },
       scales: {
         x: {
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: 'rgba(255,255,255,0.40)', font: { size: 10 } },
-          border: { display: false }
+          grid:   { color: 'rgba(255,255,255,0.04)' },
+          ticks:  { color: 'rgba(255,255,255,0.40)', font: { size: 10 } },
+          border: { display: false },
         },
         y: {
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: 'rgba(255,255,255,0.40)', font: { size: 10 } },
-          border: { display: false }
-        }
-      }
-    }
+          grid:      { color: 'rgba(255,255,255,0.04)' },
+          ticks:     { color: 'rgba(255,255,255,0.40)', font: { size: 10 }, precision: 0 },
+          border:    { display: false },
+          beginAtZero: true,
+        },
+      },
+    },
   });
 
-  // Build custom legend
+  /* Custom legend */
   const legend = document.getElementById('chart-legend');
   if (legend) {
-    const items = [
-      { label: 'Critical', color: '#f05f7e' },
-      { label: 'Warning',  color: '#f5a623' },
-      { label: 'Resolved', color: '#30d158' }
-    ];
-    legend.innerHTML = items.map(i => `
-      <div class="chart-legend-item">
-        <div class="chart-legend-dot" style="background:${i.color}"></div>
-        ${i.label}
-      </div>
-    `).join('');
+    legend.innerHTML = catKeys.map(cat => {
+      const m = CAT_META[cat];
+      return `<div class="chart-legend-item">
+        <div class="chart-legend-dot" style="background:${m.color}"></div>${m.label}
+      </div>`;
+    }).join('');
   }
 }
 
-/* ── Recent Activity ── */
-function initActivity() {
+/* ══════════════════════════════════════════════════════════
+   5. RECENT ACTIVITY — last 8 reports
+   ══════════════════════════════════════════════════════════ */
+function updateActivity(reports) {
   const list = document.getElementById('activity-list');
   if (!list) return;
 
-  const activities = [
-    { icon: 'alert-circle-outline',      color: '#f05f7e', bg: 'rgba(240,95,126,0.15)', title: 'Armed Threat Reported',          desc: 'Jalan Bukit Seguntang, Alor Gajah', time: '2m ago' },
-    { icon: 'flame-outline',             color: '#f5a623', bg: 'rgba(245,166,35,0.15)',  title: 'Fire Incident — Sector 4A',      desc: 'Near Pekan Alor Gajah',             time: '8m ago' },
-    { icon: 'checkmark-circle-outline',  color: '#30d158', bg: 'rgba(48,209,88,0.15)',   title: 'Report #INC-0882 Resolved',      desc: 'Officer Unit 3 confirmed',          time: '15m ago' },
-    { icon: 'warning-outline',           color: '#f5a623', bg: 'rgba(245,166,35,0.15)',  title: 'Crowd Surge Detected',           desc: 'Main Square North',                 time: '22m ago' },
-    { icon: 'medkit-outline',            color: '#5b8dee', bg: 'rgba(91,141,238,0.15)',  title: 'Medical Emergency',              desc: 'Taman Bahera residential block',    time: '35m ago' },
-  ];
+  const recent = [...reports]
+    .filter(r => r.createdAt)
+    .sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0))
+    .slice(0, 8);
 
-  list.innerHTML = activities.map(a => `
-    <li class="activity-item" role="listitem">
-      <div class="activity-icon-wrap" style="background:${a.bg}; color:${a.color}">
-        <ion-icon name="${a.icon}"></ion-icon>
-      </div>
-      <div class="activity-body">
-        <p class="activity-title">${a.title}</p>
-        <p class="activity-desc"><ion-icon name="location-outline"></ion-icon> ${a.desc}</p>
-      </div>
-      <span class="activity-time">${a.time}</span>
-    </li>
-  `).join('');
+  if (!recent.length) {
+    list.innerHTML = `<li class="activity-empty">No reports yet</li>`;
+    return;
+  }
+
+  list.innerHTML = recent.map(r => {
+    const m      = catMeta(r.category);
+    const lat    = r.location?.latitude;
+    const lng    = r.location?.longitude;
+    const mapUrl = (lat != null && lng != null)
+      ? `map.html?lat=${lat}&lng=${lng}&id=${encodeURIComponent(r.reportId || r.id)}&category=${encodeURIComponent(r.category || '')}&details=${encodeURIComponent((r.details || '').slice(0, 120))}`
+      : 'map.html';
+
+    return `
+      <li class="activity-item" role="listitem" onclick="location.href='${mapUrl}'" style="cursor:pointer">
+        <div class="activity-icon-wrap" style="background:${m.bg};color:${m.color};border:1px solid ${m.border}">
+          <ion-icon name="${m.icon}"></ion-icon>
+        </div>
+        <div class="activity-body">
+          <p class="activity-title">${m.label} Incident
+            <span class="activity-id">#${shortId(r.reportId || r.id)}</span>
+          </p>
+          <p class="activity-desc">
+            ${r.details
+              ? r.details.slice(0, 60) + (r.details.length > 60 ? '…' : '')
+              : '<span style="opacity:0.5;font-style:italic">No description</span>'
+            }
+          </p>
+        </div>
+        <span class="activity-time">${fmtTime(r.createdAt)}</span>
+      </li>`;
+  }).join('');
 }
 
-/* ── Animated stat counters ── */
-function animateCounter(el, target, duration = 1200) {
-  let start = 0;
-  const step = (timestamp) => {
-    if (!start) start = timestamp;
-    const progress = Math.min((timestamp - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    el.textContent = Math.floor(eased * target).toLocaleString();
-    if (progress < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
+/* ══════════════════════════════════════════════════════════
+   6. MINI MAP — real markers
+   ══════════════════════════════════════════════════════════ */
+function initHomeMap() {
+  if (typeof maplibregl === 'undefined') return;
+
+  homeMap = new maplibregl.Map({
+    container: 'home-map',
+    style: {
+      version: 8,
+      sources: { osm: {
+        type: 'raster',
+        tiles: ['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'],
+        tileSize: 256,
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+      }},
+      layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
+    },
+    center: [109.0, 3.8],
+    zoom: 6,
+    interactive: true,
+    attributionControl: false,
+  });
+
+  homeMap.on('load', () => {
+    if (allReports.length) updateMapMarkers(allReports);
+  });
 }
 
-function initCounters() {
-  animateCounter(document.getElementById('val-total'),     1248);
-  animateCounter(document.getElementById('val-emergency'),   24);
-  animateCounter(document.getElementById('val-high'),        87);
+function updateMapMarkers(reports) {
+  homeMapMarkers.forEach(m => m.remove());
+  homeMapMarkers = [];
+
+  const withLoc = reports.filter(r => r.location?.latitude && r.location?.longitude);
+
+  /* Auto-fit Malaysia if no reports, or fit to markers */
+  if (withLoc.length > 0) {
+    const lngs = withLoc.map(r => r.location.longitude);
+    const lats = withLoc.map(r => r.location.latitude);
+    const pad  = 0.3;
+    homeMap.fitBounds(
+      [[Math.min(...lngs) - pad, Math.min(...lats) - pad],
+       [Math.max(...lngs) + pad, Math.max(...lats) + pad]],
+      { padding: 40, maxZoom: 13, duration: 800 }
+    );
+  }
+
+  withLoc.forEach(r => {
+    const m   = catMeta(r.category);
+    const el  = document.createElement('div');
+    el.className = 'home-pin';
+    el.style.cssText = `
+      width:12px; height:12px; border-radius:50%;
+      background:${m.color}; border:2px solid rgba(255,255,255,0.6);
+      box-shadow:0 0 8px ${m.color}; cursor:pointer;
+    `;
+
+    const lat = r.location.latitude;
+    const lng = r.location.longitude;
+
+    const popup = new maplibregl.Popup({ offset: 14, closeButton: false })
+      .setHTML(`<div style="font-size:11px;font-weight:600;color:${m.color}">${m.label}</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.5)">${fmtTime(r.createdAt)}</div>`);
+
+    const marker = new maplibregl.Marker({ element: el })
+      .setLngLat([lng, lat])
+      .setPopup(popup)
+      .addTo(homeMap);
+
+    homeMapMarkers.push(marker);
+  });
 }
 
-/* ── Init ── */
+function updateMapBadges(reports, today) {
+  const withLoc = reports.filter(r => r.location?.latitude && r.location?.longitude);
+  const todayN  = reports.filter(r => {
+    const dt = r.createdAt?.toDate?.();
+    return dt && dt >= today;
+  }).length;
+
+  const b = document.getElementById('map-badges');
+  if (!b) return;
+  b.innerHTML = `
+    <span class="badge badge-total">
+      <ion-icon name="ellipse" style="font-size:8px;color:var(--accent-primary)"></ion-icon>
+      ${reports.length} Total
+    </span>
+    <span class="badge badge-today">
+      <ion-icon name="ellipse" style="font-size:8px;color:#30D158"></ion-icon>
+      ${todayN} Today
+    </span>
+    <span class="badge badge-loc">
+      <ion-icon name="ellipse" style="font-size:8px;color:#ff8c5a"></ion-icon>
+      ${withLoc.length} With Location
+    </span>`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MAIN FIRESTORE LISTENER
+   ══════════════════════════════════════════════════════════ */
+function listenReports() {
+  db.collection('reports').onSnapshot(snap => {
+    const reports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    processReports(reports);
+  }, err => console.error('Reports listener:', err));
+}
+
+/* ══════════════════════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  initChart();
-  initActivity();
-  initCounters();
+  initHero();
+  listenReports();
+  listenOrgs();
 
-  // Load MapLibre dynamically
+  /* Load MapLibre dynamically */
   const script = document.createElement('script');
   script.src = 'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js';
   script.onload = initHomeMap;

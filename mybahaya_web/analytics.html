@@ -5,10 +5,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyBahaya — Analytics</title>
-  <meta name="description" content="Detailed incident analytics and system intelligence." />
+  <meta name="description" content="Detailed incident analytics and data intelligence." />
+
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -23,6 +25,7 @@
 <body>
   <div class="mesh-bg" aria-hidden="true"></div>
 
+  <!-- ── Navigation ── -->
   <nav class="navbar" role="navigation" aria-label="Main navigation">
     <a href="home.html" class="navbar-brand" aria-label="MyBahaya Home">
       <div class="brand-icon"><img src="assets/logo_icon/officialMyBahayaIcon.png" alt="MyBahaya" class="brand-logo" /></div>
@@ -45,192 +48,186 @@
   <main class="page-wrapper" id="main-content">
     <div class="analytics-container">
 
-      <!-- Header -->
+      <!-- ── Page Header ── -->
       <div class="page-header fade-in">
         <div>
-          <p class="page-eyebrow"><span class="dot"
-              style="background:var(--accent-primary);box-shadow:0 0 8px var(--accent-primary)"></span> Intelligence Hub</p>
+          <p class="page-eyebrow">
+            <span class="dot" style="background:var(--accent-primary);box-shadow:0 0 8px var(--accent-primary)"></span>
+            Data Intelligence
+          </p>
           <h1 class="page-title">System <span class="gradient-text">Analytics</span></h1>
         </div>
         <div class="header-actions">
-          <select class="glass-input" style="width: auto" aria-label="Timeframe">
-            <option>Last 30 Days</option>
-            <option>Last 7 Days</option>
-            <option>Today</option>
+          <select class="glass-input" id="timeframe-select" style="width:auto" aria-label="Timeframe">
+            <option value="7">Last 7 Days</option>
+            <option value="30" selected>Last 30 Days</option>
+            <option value="90">Last 90 Days</option>
+            <option value="0">All Time</option>
           </select>
-          <button class="btn btn-primary"
-            style="background:var(--accent-rose);box-shadow:0 4px 16px rgba(240,95,126,0.3)">
-            Export Data
+          <button class="btn btn-glass" id="export-btn">
+            <ion-icon name="download-outline"></ion-icon> Export CSV
           </button>
         </div>
       </div>
 
-      <!-- Top Row -->
-      <div class="grid-top fade-in fade-in-delay-1">
+      <!-- ── KPI Row ── -->
+      <div class="kpi-row fade-in fade-in-delay-1">
 
-        <!-- KPIs -->
-        <div class="kpi-column">
-          <div class="glass-card stat-card kpi-card">
-            <p class="stat-label">Incident Velocity</p>
-            <p class="stat-value">12.4 <span style="font-size:14px;color:rgba(255,255,255,0.5)">/hr</span></p>
-            <p class="stat-change up"><ion-icon name="trending-up-outline"></ion-icon> 6.2% vs prev. week</p>
+        <div class="glass-card kpi-card">
+          <div class="kpi-icon-wrap" style="color:var(--accent-primary)">
+            <div class="glass-icon"><ion-icon name="document-text-outline"></ion-icon></div>
           </div>
-          <div class="glass-card stat-card kpi-card">
-            <p class="stat-label">Avg. Response Time</p>
-            <p class="stat-value">04:12</p>
-            <p class="stat-change down"><ion-icon name="trending-down-outline"></ion-icon> -12s improvement</p>
-          </div>
+          <p class="stat-label">Total Reports</p>
+          <p class="stat-value" id="kpi-total">—</p>
+          <p class="kpi-meta" id="kpi-total-meta">in selected period</p>
         </div>
 
-        <!-- Heatmap Mock -->
-        <div class="glass-card heatmap-card">
-          <div class="section-header">
-            <h2 class="section-title">Incident Density Heatmap</h2>
-            <div class="heat-controls">
-              <button class="btn-icon"><ion-icon name="search-circle-outline"></ion-icon></button>
-              <button class="btn-icon"><ion-icon name="bulb-outline"></ion-icon></button>
+        <div class="glass-card kpi-card">
+          <div class="kpi-icon-wrap" style="color:#30D158">
+            <div class="glass-icon" style="background:rgba(48,209,88,0.12);border-color:rgba(48,209,88,0.28)">
+              <ion-icon name="today-outline"></ion-icon>
             </div>
           </div>
-          <div class="heatmap-mock">
-            <!-- Simulated heatmap using CSS gradients -->
-            <div class="heat-blob" style="top:30%;left:40%;width:100px;height:100px;background:var(--accent-rose)">
-            </div>
-            <div class="heat-blob" style="top:60%;left:70%;width:150px;height:150px;background:var(--accent-amber)">
-            </div>
-            <div class="heat-blob" style="top:20%;left:80%;width:80px;height:80px;background:var(--accent-primary)">
-            </div>
-
-            <div class="code-overlay">
-              <p>COORD: 102.2095, 2.3849</p>
-              <p>DENSITY: 0.84</p>
-              <p>RISK_IDX: HIGH</p>
-            </div>
-          </div>
+          <p class="stat-label">Today</p>
+          <p class="stat-value" id="kpi-today" style="color:#30D158">—</p>
+          <p class="kpi-meta">since midnight</p>
         </div>
 
-      </div>
+        <div class="glass-card kpi-card">
+          <div class="kpi-icon-wrap" style="color:var(--accent-secondary)">
+            <div class="glass-icon" style="background:rgba(100,210,255,0.12);border-color:rgba(100,210,255,0.28)">
+              <ion-icon name="trending-up-outline"></ion-icon>
+            </div>
+          </div>
+          <p class="stat-label">Daily Average</p>
+          <p class="stat-value" id="kpi-avg" style="color:var(--accent-secondary)">—</p>
+          <p class="kpi-meta">reports per day</p>
+        </div>
 
-      <!-- Main Chart Row -->
-      <div class="grid-main fade-in fade-in-delay-2">
+        <div class="glass-card kpi-card">
+          <div class="kpi-icon-wrap" style="color:var(--accent-rose)">
+            <div class="glass-icon" style="background:rgba(240,95,126,0.12);border-color:rgba(240,95,126,0.28)">
+              <ion-icon name="flame-outline"></ion-icon>
+            </div>
+          </div>
+          <p class="stat-label">Top Category</p>
+          <p class="stat-value kpi-top-cat-val" id="kpi-top-cat" style="font-size:1.4rem">—</p>
+          <p class="kpi-meta" id="kpi-top-cat-count">—</p>
+        </div>
 
-        <div class="glass-card trend-card">
+      </div><!-- /kpi-row -->
+
+      <!-- ── Chart Row 1: Trend + Donut ── -->
+      <div class="charts-2col fade-in fade-in-delay-2">
+
+        <div class="glass-card chart-card">
           <div class="section-header">
             <div>
-              <h2 class="section-title">Trend Frequency Analysis</h2>
-              <p style="font-size:11px;color:rgba(255,255,255,0.4)">Predictive modeling for upcoming cycles</p>
+              <h2 class="section-title">Daily Trend</h2>
+              <p class="chart-sub" id="trend-sub">Reports per day in selected period</p>
             </div>
-            <div class="chart-legend" style="font-size:10px">
-              <span style="color:var(--accent-rose)"><ion-icon name="remove-outline"></ion-icon> ACTUAL</span>
-              <span style="color:rgba(255,255,255,0.3)"><ion-icon name="remove-outline"></ion-icon>
-                PROJECTED</span>
-            </div>
+            <div class="chart-legend" id="trend-legend"></div>
           </div>
-          <div class="chart-wrapper" style="height:250px">
-            <canvas id="trendChart"></canvas>
+          <div class="chart-wrapper" style="height:240px">
+            <canvas id="trendChart" aria-label="Daily trend chart"></canvas>
           </div>
         </div>
 
-        <div class="side-metrics">
-          <div class="glass-card alert-dist-card">
-            <h2 class="section-title" style="font-size:11px;margin-bottom:16px">Alert Distribution</h2>
-
-            <div class="dist-item">
-              <div class="dist-head"><span>Structural Failure</span><span>42%</span></div>
-              <div class="dist-bar">
-                <div class="fill" style="width:42%;background:var(--accent-rose)"></div>
-              </div>
-            </div>
-            <div class="dist-item">
-              <div class="dist-head"><span>Atmospheric Hazard</span><span>28%</span></div>
-              <div class="dist-bar">
-                <div class="fill" style="width:28%;background:var(--accent-amber)"></div>
-              </div>
-            </div>
-            <div class="dist-item">
-              <div class="dist-head"><span>Security Breach</span><span>18%</span></div>
-              <div class="dist-bar">
-                <div class="fill" style="width:18%;background:var(--accent-secondary)"></div>
-              </div>
-            </div>
-            <div class="dist-item">
-              <div class="dist-head"><span>Other</span><span>12%</span></div>
-              <div class="dist-bar">
-                <div class="fill" style="width:12%;background:rgba(255,255,255,0.3)"></div>
-              </div>
+        <div class="glass-card chart-card">
+          <div class="section-header">
+            <h2 class="section-title">Category Split</h2>
+          </div>
+          <div class="donut-wrap">
+            <canvas id="donutChart" aria-label="Category distribution donut chart"></canvas>
+            <div class="donut-center" id="donut-center">
+              <span class="donut-total" id="donut-total">—</span>
+              <span class="donut-label">total</span>
             </div>
           </div>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
 
-          <div class="glass-card forecast-card">
-            <h2 class="section-title" style="font-size:12px"><ion-icon name="sparkles-outline"></ion-icon> AI Risk Forecast</h2>
-            <p class="forecast-text">Expected 14% increase in <span style="color:var(--accent-rose)">Grid Sigma</span>
-              incidents due to seasonal atmospheric shifts. Recommend increasing drone patrols.</p>
-            <button class="btn btn-glass" style="width:100%;justify-content:center;font-size:10px;margin-top:12px">VIEW
-              DETAILED FORECAST</button>
+      </div>
+
+      <!-- ── Chart Row 2: Hourly Pattern (full width) ── -->
+      <div class="glass-card chart-card fade-in fade-in-delay-3">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Hourly Pattern</h2>
+            <p class="chart-sub">Which hours of the day have the most reports</p>
+          </div>
+          <div class="peak-badge" id="peak-hour-badge"></div>
+        </div>
+        <div class="chart-wrapper" style="height:180px">
+          <canvas id="hourlyChart" aria-label="Hourly report pattern"></canvas>
+        </div>
+      </div>
+
+      <!-- ── Chart Row 3: Category Bars + Day of Week ── -->
+      <div class="charts-2col fade-in fade-in-delay-3">
+
+        <div class="glass-card chart-card">
+          <h2 class="section-title" style="margin-bottom:20px">Category Breakdown</h2>
+          <div id="cat-dist-bars" class="cat-dist-bars"></div>
+        </div>
+
+        <div class="glass-card chart-card">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Day of Week</h2>
+              <p class="chart-sub">Which days have the most incidents</p>
+            </div>
+          </div>
+          <div class="chart-wrapper" style="height:200px">
+            <canvas id="dowChart" aria-label="Day of week pattern"></canvas>
           </div>
         </div>
 
       </div>
 
-      <!-- Anomalies Table -->
-      <div class="glass-card table-card fade-in fade-in-delay-3">
-        <div class="section-header" style="margin-bottom: 0; padding: var(--gap-md) var(--gap-lg)">
-          <h2 class="section-title" style="font-size:12px;letter-spacing:1px;text-transform:uppercase">Recent Anomalies
-          </h2>
-          <a href="#" style="font-size:11px;color:rgba(255,255,255,0.5);text-decoration:none">View Audit Log →</a>
+      <!-- ── Reports Table ── -->
+      <div class="glass-card table-card fade-in fade-in-delay-4">
+        <div class="table-header">
+          <div>
+            <h2 class="section-title">Recent Reports</h2>
+            <p class="chart-sub" id="table-sub">Latest reports in selected period</p>
+          </div>
+          <a href="report.html" class="btn btn-glass" style="font-size:var(--fs-xs);padding:6px 14px;white-space:nowrap">
+            View All <ion-icon name="arrow-forward-outline"></ion-icon>
+          </a>
         </div>
         <div style="overflow-x:auto">
           <table class="glass-table">
             <thead>
               <tr>
-                <th>Timestamp</th>
-                <th>Incident ID</th>
-                <th>Entity</th>
-                <th>Severity</th>
-                <th>Status</th>
-                <th>Probability</th>
+                <th>ID</th>
+                <th>Category</th>
+                <th>Details</th>
+                <th>Location</th>
+                <th>Date &amp; Time</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td style="font-family:monospace;font-size:11px">14:22:05</td>
-                <td style="font-weight:600">#INC-8892</td>
-                <td>Downtown Sector 4</td>
-                <td><span class="badge badge-critical">HIGH</span></td>
-                <td>Resolved</td>
-                <td style="font-family:monospace">99.2%</td>
-              </tr>
-              <tr>
-                <td style="font-family:monospace;font-size:11px">14:10:33</td>
-                <td style="font-weight:600">#INC-8891</td>
-                <td>Industrial Port</td>
-                <td><span class="badge badge-warning">MEDIUM</span></td>
-                <td>Active</td>
-                <td style="font-family:monospace">76.4%</td>
-              </tr>
-              <tr>
-                <td style="font-family:monospace;font-size:11px">13:50:12</td>
-                <td style="font-weight:600">#INC-8889</td>
-                <td>Substation Bravo</td>
-                <td><span class="badge badge-warning"
-                    style="color:var(--accent-green);border-color:var(--accent-green)">LOW</span></td>
-                <td>Archived</td>
-                <td style="font-family:monospace">12.0%</td>
-              </tr>
+            <tbody id="reports-tbody">
+              <tr><td colspan="5" class="table-loading">Loading…</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
-    </div>
+    </div><!-- /analytics-container -->
   </main>
 
+  <!-- FAB -->
   <div class="fab-container">
     <div class="fab-menu" id="fab-menu" role="menu">
+      <a href="#" class="fab-menu-item" id="fab-settings" role="menuitem">
+        <ion-icon name="settings-outline"></ion-icon> Settings
+      </a>
       <button class="fab-menu-item danger" id="fab-logout" role="menuitem">
         <ion-icon name="log-out-outline"></ion-icon> Log Out
       </button>
     </div>
-    <button class="fab-btn" id="fab-btn" aria-label="Open menu">
+    <button class="fab-btn" id="fab-btn" aria-label="Open menu" aria-expanded="false">
       <ion-icon name="menu-outline"></ion-icon>
     </button>
   </div>

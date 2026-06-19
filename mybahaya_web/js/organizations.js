@@ -61,14 +61,35 @@ async function createAuthUserREST(email, password) {
   const data = await res.json();
   if (data.error) {
     const msgs = {
-      'EMAIL_EXISTS':        'This email is already registered.',
-      'WEAK_PASSWORD':       'Password must be at least 6 characters.',
-      'INVALID_EMAIL':       'Invalid email address.',
+      'EMAIL_EXISTS':          'This email is already registered.',
+      'WEAK_PASSWORD':         'Password must be at least 6 characters.',
+      'INVALID_EMAIL':         'Invalid email address.',
       'OPERATION_NOT_ALLOWED': 'Email/password sign-in is not enabled.',
     };
     throw new Error(msgs[data.error.message] || data.error.message);
   }
   return data.localId; // Firebase Auth UID
+}
+
+/* ── Send password reset / setup email via REST ─────────── */
+// Org receives this email to set their own password for the first time.
+async function sendPasswordResetREST(email) {
+  const res = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${FIREBASE_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requestType: 'PASSWORD_RESET', email }),
+    }
+  );
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+}
+
+/* ── Random temp password (org never uses it — reset email replaces it) ── */
+function genTempPassword() {
+  return Math.random().toString(36).slice(2, 10) +
+         Math.random().toString(36).slice(2, 6).toUpperCase() + '!9';
 }
 
 /* ── Tab switching ───────────────────────────────────────── */
@@ -142,6 +163,7 @@ function renderOrgs(orgs) {
       <td><span class="status-${o.status}"><span class="dot-indicator"></span>${o.status === 'active' ? 'Active' : 'Inactive'}</span></td>
       <td>
         <div class="table-actions">
+          <button class="btn-action" title="Resend Setup Email" onclick="resendOrgSetup('${o.email}','${o.name.replace(/'/g,"\\'")}')"><ion-icon name="mail-outline"></ion-icon></button>
           <button class="btn-action" title="Edit" onclick="editOrg('${o.id}')"><ion-icon name="create-outline"></ion-icon></button>
           <button class="btn-action delete" title="Delete" onclick="deleteOrg('${o.id}','${o.name.replace(/'/g,"\\'")}')"><ion-icon name="trash-outline"></ion-icon></button>
         </div>
@@ -234,6 +256,18 @@ window.deleteOrg = async function (id, name) {
   }
 };
 
+/* ── Resend password setup email to an existing org ─────── */
+window.resendOrgSetup = async function (email, name) {
+  if (!email) { window.showToast?.('No email on record for this organization.', 'error'); return; }
+  if (!confirm(`Resend password setup email to:\n${email}\n\nThe organization will receive a link to set their password.`)) return;
+  try {
+    await sendPasswordResetREST(email);
+    window.showToast?.(`Setup email resent to ${email}.`, 'success');
+  } catch (err) {
+    window.showToast?.('Failed to send email: ' + err.message, 'error');
+  }
+};
+
 function initOrgModal() {
   const modal  = document.getElementById('modal-org');
   const form   = document.getElementById('org-form');
@@ -279,17 +313,26 @@ function initOrgModal() {
     try {
       const editId = modal._editId;
       if (editId) {
+        // Edit: update Firestore only (auth account already exists)
         await db.collection('organizations').doc(editId).update(data);
         window.showToast?.(`"${name}" updated successfully.`, 'success');
       } else {
+        // New org: create Firebase Auth account → send setup email → save to Firestore
+        const uid = await createAuthUserREST(email, genTempPassword());
+        data.uid = uid;
+        data.role = 'organization';
         data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-        await db.collection('organizations').add(data);
-        window.showToast?.(`"${name}" registered successfully.`, 'success');
+        await db.collection('organizations').doc(uid).set(data);
+        await sendPasswordResetREST(email);
+        window.showToast?.(
+          `"${name}" registered. Password setup email sent to ${email}.`,
+          'success'
+        );
       }
       closeModal();
     } catch (err) {
-      showFormErr('org-form-error', 'Error saving: ' + err.message);
-      window.showToast?.('Save failed. Check the form.', 'error');
+      showFormErr('org-form-error', err.message);
+      window.showToast?.('Save failed: ' + err.message, 'error');
     } finally {
       setSubmitting('org-submit-btn', false, SAVE_BTN_HTML);
     }
