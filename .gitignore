@@ -4,3 +4,5 @@ graphify-out/
 mybahaya-fyp-firebase-adminsdk-fbsvc-fdac908045.json
 .claude/
 node_modules/
+
+.DS_Store
