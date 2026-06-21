@@ -1,25 +1,75 @@
 /* ============================================================
-   report.js — Reports page: real Firestore data, 2-layer filter
-   Firestore schema (set by Spring Boot):
-     reports/{reportId}: { reportId, userId, category, details,
-       imageUrl, location:{latitude,longitude}, createdAt }
+   report.js — Reports page: clickable cards + detail modal
    ============================================================ */
 
 'use strict';
 
+const API_BASE = 'https://api.mybahaya.com/api';
+
+function safeImageUrl(url) {
+  if (!url) return '';
+  return url.replace('http://178.105.158.80:9000', 'https://api.mybahaya.com/minio');
+}
+
+/* ── AI Analysis is computed SERVER-SIDE (Spring Boot + Gemini 2.5 Flash).
+   The web only DISPLAYS the ai.* fields that the backend writes to Firestore.
+   No API key lives in this file — that's the whole point of keeping it secure. ── */
+
+// Renders the inner HTML of the AI Analysis section from an ai object
+function renderAiBody(ai) {
+  if (!ai || ai.severity == null) return `<p class="rdm-ai-pending">No AI analysis yet.</p>`;
+  const severityLabels = { 1: 'Minor', 2: 'Low', 3: 'Moderate', 4: 'High', 5: 'Critical' };
+  const severityColors = { 1: '#30d158', 2: '#5b8dee', 3: '#f5a623', 4: '#ff6b35', 5: '#ff3b30' };
+  const sc = severityColors[ai.severity] || '#aca494';
+  return `
+    <div class="rdm-ai-grid">
+      <div class="rdm-ai-item">
+        <span class="rdm-ai-label">Severity</span>
+        <span class="rdm-severity" style="background:${sc}22;color:${sc};border-color:${sc}55">
+          ${ai.severity}/5 — ${severityLabels[ai.severity] || 'Unknown'}
+        </span>
+      </div>
+      ${ai.suggestedCategory ? `
+      <div class="rdm-ai-item">
+        <span class="rdm-ai-label">AI Suggested Category</span>
+        <span>${ai.suggestedCategory}</span>
+      </div>` : ''}
+      ${ai.looksFake ? `
+      <div class="rdm-ai-item rdm-ai-fake">
+        <ion-icon name="warning-outline"></ion-icon>
+        <span>AI flagged this report as possibly fake or staged</span>
+      </div>` : ''}
+    </div>
+    ${ai.summary ? `<p class="rdm-ai-summary">${ai.summary}</p>` : ''}
+    ${ai.hazards && ai.hazards.length ? `
+    <div class="rdm-hazards">
+      ${ai.hazards.map(h => `<span class="rdm-hazard-tag">${h}</span>`).join('')}
+    </div>` : ''}
+  `;
+}
+
+/* ── Status metadata ── */
+const STATUS_META = {
+  NEW:         { label: 'Pending',     color: '#aca494', icon: 'time-outline' },
+  RECEIVED:    { label: 'Received',    color: '#5b8dee', icon: 'checkmark-circle-outline' },
+  IN_PROGRESS: { label: 'En Route',    color: '#f5a623', icon: 'car-outline' },
+  RESOLVED:    { label: 'Resolved',    color: '#30d158', icon: 'checkmark-done-outline' },
+};
+const NEXT_STATUS = { NEW: 'RECEIVED', RECEIVED: 'IN_PROGRESS', IN_PROGRESS: 'RESOLVED' };
+
 /* ── Category metadata ── */
 const CAT_META = {
-  Theft:   { icon: 'lock-open-outline',           label: 'Theft',   cls: 'cat-Theft'   },
-  Assault: { icon: 'alert-circle-outline',         label: 'Assault', cls: 'cat-Assault' },
-  Fire:    { icon: 'flame-outline',               label: 'Fire',    cls: 'cat-Fire'    },
-  Medical: { icon: 'medkit-outline',              label: 'Medical', cls: 'cat-Medical' },
-  Other:   { icon: 'help-circle-outline',         label: 'Other',   cls: 'cat-Other'   },
+  Theft:   { icon: 'lock-open-outline',    label: 'Theft',    cls: 'cat-Theft'   },
+  Assault: { icon: 'alert-circle-outline',  label: 'Assault',  cls: 'cat-Assault' },
+  Fire:    { icon: 'flame-outline',         label: 'Fire',     cls: 'cat-Fire'    },
+  Medical: { icon: 'medkit-outline',        label: 'Medical',  cls: 'cat-Medical' },
+  Other:   { icon: 'help-circle-outline',   label: 'Other',    cls: 'cat-Other'   },
 };
 function catMeta(cat) {
   return CAT_META[cat] || { icon: 'warning-outline', label: cat || 'Unknown', cls: 'cat-Other' };
 }
 
-/* ── Malaysian state bounding boxes (rough, for client-side geo filter) ── */
+/* ── State bounding boxes ── */
 const STATE_BOUNDS = {
   'Perlis':          { minLat:6.10, maxLat:6.80, minLng:100.00, maxLng:100.60 },
   'Kedah':           { minLat:5.50, maxLat:6.80, minLng:99.70,  maxLng:101.00 },
@@ -41,7 +91,7 @@ const STATE_BOUNDS = {
 
 function inState(report, stateName) {
   const b = STATE_BOUNDS[stateName];
-  if (!b) return true; // unknown state → show all
+  if (!b) return true;
   const lat = report.location?.latitude;
   const lng = report.location?.longitude;
   if (lat == null || lng == null) return false;
@@ -65,10 +115,180 @@ function fmtTime(ts) {
   return `${dt.getDate()} ${mo[dt.getMonth()]} ${dt.getFullYear()}`;
 }
 
-/* ── Short ID ── */
+function fmtFullDate(ts) {
+  if (!ts) return '—';
+  const dt = ts.toDate ? ts.toDate() : new Date(ts);
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const h = dt.getHours().toString().padStart(2, '0');
+  const mn = dt.getMinutes().toString().padStart(2, '0');
+  return `${dt.getDate()} ${mo[dt.getMonth()]} ${dt.getFullYear()}, ${h}:${mn}`;
+}
+
 function shortId(id) { return (id || '').slice(0, 8).toUpperCase(); }
 
-/* ── Render ── */
+/* ── Reverse geocoding using OpenStreetMap Nominatim (free, no key) ── */
+const geoCache = {};
+async function reverseGeocode(lat, lng) {
+  const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+  if (geoCache[key]) return geoCache[key];
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=16&addressdetails=1`, {
+      headers: { 'Accept-Language': 'en' }
+    });
+    const data = await res.json();
+    const addr = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    geoCache[key] = addr;
+    return addr;
+  } catch {
+    return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  }
+}
+
+/* ── Update Status (called from modal button) ── */
+window.updateReportStatus = async function (reportId, nextStatus) {
+  if (!confirm(`Mark report as "${STATUS_META[nextStatus]?.label || nextStatus}"?`)) return;
+  try {
+    const token = await firebase.auth().currentUser.getIdToken();
+    const res = await fetch(`${API_BASE}/reports/${reportId}/status`, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: nextStatus }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || 'Update failed');
+    window.showToast?.('Status updated to ' + (STATUS_META[nextStatus]?.label || nextStatus), 'success');
+    closeDetailModal();
+  } catch (e) {
+    window.showToast?.('Failed: ' + e.message, 'error');
+  }
+};
+
+/* ══════════════════════════════════════════════════════════
+   DETAIL MODAL — opens when you click a report card
+   ══════════════════════════════════════════════════════════ */
+
+function openDetailModal(r) {
+  // Remove any existing modal
+  document.getElementById('report-detail-modal')?.remove();
+
+  const m = catMeta(r.category);
+  const s = STATUS_META[r.status] || STATUS_META.NEW;
+  const lat = r.location?.latitude;
+  const lng = r.location?.longitude;
+  const hasLoc = lat != null && lng != null;
+  const next = NEXT_STATUS[r.status];
+  const ai = r.ai || {};
+  const hasSeverity = ai.severity != null;
+
+  const modal = document.createElement('div');
+  modal.id = 'report-detail-modal';
+  modal.className = 'rdm-overlay';
+  modal.innerHTML = `
+    <div class="rdm-backdrop"></div>
+    <div class="rdm-card">
+
+      <!-- Close button -->
+      <button class="rdm-close" id="rdm-close-btn">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+
+      <!-- Image -->
+      <div class="rdm-image">
+        ${r.imageUrl
+          ? `<img src="${safeImageUrl(r.imageUrl)}" alt="${m.label}" />`
+          : `<div class="rdm-image-placeholder"><ion-icon name="${m.icon}"></ion-icon></div>`
+        }
+      </div>
+
+      <!-- Content -->
+      <div class="rdm-content">
+
+        <!-- Header: Category + Status -->
+        <div class="rdm-header">
+          <div class="rdm-badges">
+            <span class="rdm-cat-badge ${m.cls}"><ion-icon name="${m.icon}"></ion-icon> ${m.label}</span>
+            <span class="rdm-status-badge" style="background:${s.color}22;color:${s.color};border-color:${s.color}55">
+              <ion-icon name="${s.icon}"></ion-icon> ${s.label}
+            </span>
+          </div>
+          <span class="rdm-report-id">#${shortId(r.reportId || r.id)}</span>
+        </div>
+
+        <!-- Assigned org -->
+        ${r.assignedOrgName ? `
+        <div class="rdm-org-row">
+          <ion-icon name="business-outline"></ion-icon>
+          <span>${r.assignedOrgName}</span>
+          ${(r.etaMinutes && r.status !== 'RESOLVED') ? `<span class="rdm-eta">ETA ~${r.etaMinutes} min</span>` : ''}
+        </div>` : ''}
+
+        <!-- Details -->
+        <div class="rdm-section">
+          <div class="rdm-section-label">Incident Details</div>
+          <p class="rdm-details-text">${r.details || 'No description provided.'}</p>
+        </div>
+
+        <!-- AI Analysis -->
+        <div class="rdm-section rdm-ai-section">
+          <div class="rdm-section-label"><ion-icon name="sparkles-outline"></ion-icon> AI Analysis</div>
+          <div id="rdm-ai-body">${
+            hasSeverity
+              ? renderAiBody(ai)
+              : `<p class="rdm-ai-pending">AI analysis is processing or not yet available for this report.</p>`
+          }</div>
+        </div>
+
+        <!-- Location -->
+        <div class="rdm-section">
+          <div class="rdm-section-label"><ion-icon name="location-outline"></ion-icon> Location</div>
+          ${hasLoc ? `<p class="rdm-location-text" id="rdm-location-addr">Loading address...</p>` : `<p class="rdm-location-text">No location data</p>`}
+        </div>
+
+        <!-- Timestamp -->
+        <div class="rdm-section">
+          <div class="rdm-section-label"><ion-icon name="time-outline"></ion-icon> Reported</div>
+          <p class="rdm-time">${fmtFullDate(r.createdAt)}</p>
+        </div>
+
+        <!-- Status Update Button -->
+        ${next ? `
+        <button class="rdm-update-btn" onclick="updateReportStatus('${r.reportId || r.id}','${next}')">
+          <ion-icon name="${STATUS_META[next].icon}"></ion-icon> Mark as ${STATUS_META[next].label}
+        </button>` : `
+        <div class="rdm-resolved-banner">
+          <ion-icon name="checkmark-done-outline"></ion-icon> This report has been resolved
+        </div>`}
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
+  requestAnimationFrame(() => modal.classList.add('open'));
+
+  // Close handlers
+  modal.querySelector('.rdm-backdrop').addEventListener('click', closeDetailModal);
+  modal.querySelector('#rdm-close-btn').addEventListener('click', closeDetailModal);
+  document.addEventListener('keydown', handleEsc);
+
+  // Reverse geocode
+  if (hasLoc) {
+    reverseGeocode(lat, lng).then(addr => {
+      const el = document.getElementById('rdm-location-addr');
+      if (el) el.textContent = addr;
+    });
+  }
+}
+
+function closeDetailModal() {
+  const modal = document.getElementById('report-detail-modal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  setTimeout(() => modal.remove(), 250);
+  document.removeEventListener('keydown', handleEsc);
+}
+
+function handleEsc(e) { if (e.key === 'Escape') closeDetailModal(); }
+
+/* ── Render report grid cards (clickable) ── */
 function renderReports(reports) {
   const grid  = document.getElementById('reports-grid');
   const empty = document.getElementById('empty-state');
@@ -83,44 +303,42 @@ function renderReports(reports) {
   empty.classList.add('hidden');
 
   grid.innerHTML = reports.map((r, i) => {
-    const m    = catMeta(r.category);
-    const lat  = r.location?.latitude;
-    const lng  = r.location?.longitude;
-    const hasLoc = lat != null && lng != null;
-
-    const mapHref = hasLoc
-      ? `map.html?lat=${lat}&lng=${lng}&id=${encodeURIComponent(r.reportId || r.id)}&category=${encodeURIComponent(r.category || '')}&details=${encodeURIComponent((r.details || '').slice(0,120))}`
-      : null;
+    const m = catMeta(r.category);
+    const s = STATUS_META[r.status] || STATUS_META.NEW;
 
     return `
-    <div class="glass-card report-card fade-in" style="animation-delay:${i * 0.04}s" role="listitem">
-
+    <div class="glass-card report-card fade-in" style="animation-delay:${i * 0.04}s;cursor:pointer" role="listitem" data-idx="${i}">
       <div class="rc-image-bg">
         ${r.imageUrl
-          ? `<img src="${r.imageUrl}" alt="${m.label}" loading="lazy" />`
+          ? `<img src="${safeImageUrl(r.imageUrl)}" alt="${m.label}" loading="lazy" />`
           : `<div class="rc-image-placeholder"><ion-icon name="${m.icon}" class="cat-icon-${r.category || 'Other'}"></ion-icon></div>`
         }
       </div>
-
       <div class="rc-detail-panel">
         <div class="rc-id">#${shortId(r.reportId || r.id)}</div>
-        <div class="rc-title">${m.label}</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+          <div class="rc-title" style="margin:0">${m.label}</div>
+          <span style="font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:20px;background:${s.color}22;color:${s.color};border:1px solid ${s.color}55">${s.label.toUpperCase()}</span>
+        </div>
         <div class="rc-details-label">Details:</div>
         <p class="rc-desc${!r.details ? ' no-desc' : ''}">${r.details || 'No description provided.'}</p>
         <span class="rc-time">${fmtTime(r.createdAt)}</span>
-        ${hasLoc
-          ? `<a class="rc-loc-badge" href="${mapHref}"><ion-icon name="location-outline"></ion-icon>${lat.toFixed(3)}, ${lng.toFixed(3)}</a>`
-          : `<span class="no-location-badge"><ion-icon name="location-outline"></ion-icon>No location</span>`
-        }
       </div>
-
     </div>`;
   }).join('');
+
+  // Attach click handlers
+  grid.querySelectorAll('.report-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const idx = parseInt(card.dataset.idx);
+      openDetailModal(reports[idx]);
+    });
+  });
 }
 
 /* ── Filter & sort state ── */
 let allReports   = [];
-let currentScope = 'malaysia';  // 'malaysia' | 'state'
+let currentScope = 'malaysia';
 let currentState = '';
 let currentCat   = 'all';
 let currentSearch = '';
@@ -128,25 +346,18 @@ let currentSort  = 'newest';
 
 function applyFilters() {
   let list = allReports.filter(r => {
-    // Layer 1: scope
     if (currentScope === 'state' && currentState) {
       if (!inState(r, currentState)) return false;
     }
-
-    // Layer 2: category
     if (currentCat !== 'all' && r.category !== currentCat) return false;
-
-    // Search
     if (currentSearch) {
       const q = currentSearch.toLowerCase();
       const hay = [r.category, r.details, r.reportId, r.id].join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
     }
-
     return true;
   });
 
-  // Sort
   list = list.slice().sort((a, b) => {
     const ta = a.createdAt?.toMillis?.() ?? 0;
     const tb = b.createdAt?.toMillis?.() ?? 0;
@@ -172,19 +383,16 @@ function listenReports() {
 
 /* ── Filter UI wiring ── */
 function initFilters() {
-  // Search
   document.getElementById('report-search').addEventListener('input', e => {
     currentSearch = e.target.value.trim();
     applyFilters();
   });
 
-  // Layer 1 — scope chips
   document.querySelectorAll('[data-scope]').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('[data-scope]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentScope = btn.dataset.scope;
-
       const stateSelect = document.getElementById('state-select');
       if (currentScope === 'state') {
         stateSelect.classList.remove('hidden');
@@ -196,13 +404,11 @@ function initFilters() {
     });
   });
 
-  // State dropdown
   document.getElementById('state-select').addEventListener('change', e => {
     currentState = e.target.value;
     applyFilters();
   });
 
-  // Layer 2 — category chips
   document.querySelectorAll('[data-cat]').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
@@ -212,13 +418,11 @@ function initFilters() {
     });
   });
 
-  // Sort
   document.getElementById('report-sort').addEventListener('change', e => {
     currentSort = e.target.value;
     applyFilters();
   });
 
-  // Clear all filters
   document.getElementById('btn-clear-filter').addEventListener('click', () => {
     document.getElementById('report-search').value = '';
     currentSearch = ''; currentCat = 'all'; currentScope = 'malaysia';

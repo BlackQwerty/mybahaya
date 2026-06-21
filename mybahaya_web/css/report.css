@@ -230,3 +230,176 @@
   display: flex; flex-direction: column; align-items: center; gap: var(--gap-md);
 }
 .empty-state p { color: rgba(255,255,255,0.6); font-size: var(--fs-sm); }
+
+/* ══════════════════════════════════════════════════════════
+   REPORT DETAIL MODAL
+   ══════════════════════════════════════════════════════════ */
+
+.rdm-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.rdm-overlay.open { opacity: 1; pointer-events: all; }
+
+.rdm-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+
+.rdm-card {
+  position: relative;
+  display: flex;
+  width: min(960px, 92vw);
+  max-height: 88vh;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(40,20,20,0.92);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  transform: scale(0.94) translateY(12px);
+  transition: transform 0.3s cubic-bezier(.22,1,.36,1);
+}
+.rdm-overlay.open .rdm-card { transform: scale(1) translateY(0); }
+
+.rdm-close {
+  position: absolute; top: 12px; right: 12px; z-index: 10;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.8); font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s;
+}
+.rdm-close:hover { background: rgba(0,0,0,0.7); color: #fff; }
+
+.rdm-image {
+  flex: 0 0 45%; max-width: 45%;
+  background: rgba(20,10,10,1);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.rdm-image img { width: 100%; height: 100%; object-fit: cover; }
+.rdm-image-placeholder { font-size: 80px; color: rgba(255,255,255,0.15); }
+
+.rdm-content {
+  flex: 1; padding: 28px 28px 24px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+.rdm-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.rdm-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.rdm-cat-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.3px;
+}
+.rdm-cat-badge.cat-Theft   { background: rgba(155,89,182,0.25); color: #bf8fff; border: 1px solid rgba(155,89,182,0.50); }
+.rdm-cat-badge.cat-Assault { background: rgba(255,59,48,0.20);  color: #ff6b6b; border: 1px solid rgba(255,59,48,0.45); }
+.rdm-cat-badge.cat-Fire    { background: rgba(255,107,53,0.20); color: #ff8c5a; border: 1px solid rgba(255,107,53,0.45); }
+.rdm-cat-badge.cat-Medical { background: rgba(48,209,88,0.20);  color: #30d158; border: 1px solid rgba(48,209,88,0.40); }
+.rdm-cat-badge.cat-Other   { background: rgba(172,164,148,0.22);color: #aca494; border: 1px solid rgba(172,164,148,0.40); }
+
+.rdm-status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 14px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
+  border: 1px solid;
+}
+.rdm-report-id {
+  font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.35);
+  font-family: var(--font-mono); letter-spacing: 0.4px; white-space: nowrap;
+}
+
+.rdm-org-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  font-size: 13px; color: rgba(255,255,255,0.7);
+}
+.rdm-org-row ion-icon { font-size: 16px; color: rgba(255,255,255,0.5); flex-shrink: 0; }
+.rdm-eta {
+  margin-left: auto;
+  font-size: 12px; font-weight: 600; color: #f5a623;
+  white-space: nowrap;
+}
+
+.rdm-section { display: flex; flex-direction: column; gap: 6px; }
+.rdm-section-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: rgba(255,255,255,0.4);
+}
+.rdm-section-label ion-icon { font-size: 13px; }
+.rdm-details-text { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; margin: 0; }
+
+.rdm-ai-section {
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.rdm-ai-section .rdm-section-label { color: #f5a623; }
+.rdm-ai-grid { display: flex; flex-direction: column; gap: 10px; }
+.rdm-ai-item {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: rgba(255,255,255,0.7);
+}
+.rdm-ai-label {
+  font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.4);
+  min-width: 140px; flex-shrink: 0;
+}
+.rdm-severity {
+  display: inline-flex; padding: 3px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 700; border: 1px solid;
+}
+.rdm-ai-fake {
+  padding: 8px 12px; border-radius: 10px;
+  background: rgba(255,59,48,0.12); border: 1px solid rgba(255,59,48,0.25);
+  color: #ff6b6b; font-size: 12px; font-weight: 600;
+}
+.rdm-ai-fake ion-icon { font-size: 16px; flex-shrink: 0; }
+.rdm-ai-summary {
+  font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.6;
+  margin: 4px 0 0; font-style: italic;
+}
+.rdm-hazards { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.rdm-hazard-tag {
+  padding: 3px 10px; border-radius: 20px;
+  background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.25);
+  font-size: 11px; font-weight: 600; color: #f5a623;
+}
+.rdm-ai-pending {
+  font-size: 13px; color: rgba(255,255,255,0.35); font-style: italic; margin: 0;
+}
+
+.rdm-location-text { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.5; margin: 0; }
+.rdm-time { font-size: 13px; color: rgba(255,255,255,0.6); margin: 0; }
+
+.rdm-update-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 12px; border-radius: 14px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 700;
+  letter-spacing: 0.3px; cursor: pointer;
+  transition: all 0.15s;
+  margin-top: auto;
+}
+.rdm-update-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.rdm-update-btn ion-icon { font-size: 16px; }
+
+.rdm-resolved-banner {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px; border-radius: 14px;
+  background: rgba(48,209,88,0.08); border: 1px solid rgba(48,209,88,0.2);
+  color: #30d158; font-size: 13px; font-weight: 600;
+  margin-top: auto;
+}
+
+@media (max-width: 700px) {
+  .rdm-card { flex-direction: column; max-height: 92vh; }
+  .rdm-image { flex: 0 0 auto; max-width: 100%; height: 240px; }
+  .rdm-content { padding: 20px; }
+}

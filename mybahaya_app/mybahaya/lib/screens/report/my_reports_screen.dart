@@ -12,6 +12,20 @@ class MyReportsScreen extends StatelessWidget {
   static const Color pinkColor = Colors.white;
   static const Color burgundyColor = Color(0xFFB22222);
 
+  // Status → display label + colour
+  static const Map<String, String> _statusLabel = {
+    'NEW':         'Pending',
+    'RECEIVED':    'Received',
+    'IN_PROGRESS': 'En Route',
+    'RESOLVED':    'Resolved',
+  };
+  static const Map<String, Color> _statusColor = {
+    'NEW':         Color(0xFFACA494),
+    'RECEIVED':    Color(0xFF5B8DEE),
+    'IN_PROGRESS': Color(0xFFF5A623),
+    'RESOLVED':    Color(0xFF30D158),
+  };
+
   // Maps category to an icon
   IconData _categoryIcon(String category) {
     switch (category.toLowerCase()) {
@@ -117,6 +131,7 @@ class MyReportsScreen extends StatelessWidget {
                           final data =
                               docs[index].data() as Map<String, dynamic>;
                           // Show LATEST badge only on the first item
+                          final status = data['status'] as String? ?? 'NEW';
                           return _ReportCard(
                             data: data,
                             isLatest: index == 0,
@@ -127,6 +142,9 @@ class MyReportsScreen extends StatelessWidget {
                               data['category'] as String? ?? '',
                             ),
                             formattedDate: _formatDate(data['createdAt']),
+                            status: status,
+                            statusLabel: _statusLabel[status] ?? status,
+                            statusColor: _statusColor[status] ?? nudeColor,
                           );
                         },
                       );
@@ -146,7 +164,7 @@ class MyReportsScreen extends StatelessWidget {
           Icon(
             CupertinoIcons.tray,
             size: 56,
-            color: nudeColor.withOpacity(0.3),
+            color: nudeColor.withValues(alpha:0.3),
           ),
           const SizedBox(height: 16),
           Text(
@@ -154,7 +172,7 @@ class MyReportsScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: nudeColor.withOpacity(0.5),
+              color: nudeColor.withValues(alpha:0.5),
             ),
           ),
         ],
@@ -170,9 +188,12 @@ class _ReportCard extends StatelessWidget {
   final IconData categoryIcon;
   final Color categoryColor;
   final String formattedDate;
+  final String status;
+  final String statusLabel;
+  final Color statusColor;
 
-  static const Color nudeColor    = Color(0xFFACA494);
-  static const Color pinkColor = Colors.white;
+  static const Color nudeColor     = Color(0xFFACA494);
+  static const Color pinkColor     = Colors.white;
   static const Color burgundyColor = Color(0xFFB22222);
 
   const _ReportCard({
@@ -181,23 +202,29 @@ class _ReportCard extends StatelessWidget {
     required this.categoryIcon,
     required this.categoryColor,
     required this.formattedDate,
+    required this.status,
+    required this.statusLabel,
+    required this.statusColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final category = data['category'] as String? ?? 'Unknown';
-    final details  = data['details']  as String? ?? '';
-    final imageUrl = data['imageUrl'] as String? ?? '';
-    final location = data['location'] as Map<String, dynamic>?;
-    final lat      = location?['latitude']  as double?;
-    final lng      = location?['longitude'] as double?;
+    final category       = data['category']       as String? ?? 'Unknown';
+    final details        = data['details']        as String? ?? '';
+    final imageUrl       = data['imageUrl']       as String? ?? '';
+    final location       = data['location']       as Map<String, dynamic>?;
+    final lat            = location?['latitude']  as double?;
+    final lng            = location?['longitude'] as double?;
+    final assignedOrg    = data['assignedOrgName'] as String?;
+    final etaMinutes     = data['etaMinutes'];
+    final isResolved     = status == 'RESOLVED';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF422E2E).withOpacity(0.55),
+        color: const Color(0xFF422E2E).withValues(alpha:0.55),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: Colors.white.withValues(alpha:0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,7 +242,7 @@ class _ReportCard extends StatelessWidget {
                 fit: BoxFit.cover,
                 placeholder: (_, __) => Container(
                   height: 160,
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha:0.05),
                   child: const Center(
                     child: CircularProgressIndicator(
                       color: burgundyColor,
@@ -225,10 +252,10 @@ class _ReportCard extends StatelessWidget {
                 ),
                 errorWidget: (_, __, ___) => Container(
                   height: 160,
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha:0.05),
                   child: Icon(
                     CupertinoIcons.photo,
-                    color: nudeColor.withOpacity(0.3),
+                    color: nudeColor.withValues(alpha:0.3),
                     size: 40,
                   ),
                 ),
@@ -249,10 +276,10 @@ class _ReportCard extends StatelessWidget {
                         vertical: 5,
                       ),
                       decoration: BoxDecoration(
-                        color: categoryColor.withOpacity(0.15),
+                        color: categoryColor.withValues(alpha:0.15),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: categoryColor.withOpacity(0.4),
+                          color: categoryColor.withValues(alpha:0.4),
                         ),
                       ),
                       child: Row(
@@ -272,6 +299,29 @@ class _ReportCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    // Status badge — updates in real-time via StreamBuilder
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: statusColor.withValues(alpha: 0.4)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 5, height: 5,
+                            decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(statusLabel.toUpperCase(),
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700,
+                                color: statusColor, letterSpacing: 0.5)),
+                        ],
+                      ),
+                    ),
                     if (isLatest) ...[
                       const SizedBox(width: 8),
                       Container(
@@ -280,10 +330,10 @@ class _ReportCard extends StatelessWidget {
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: burgundyColor.withOpacity(0.2),
+                          color: burgundyColor.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: burgundyColor.withOpacity(0.5),
+                            color: burgundyColor.withValues(alpha: 0.5),
                           ),
                         ),
                         child: Row(
@@ -314,6 +364,34 @@ class _ReportCard extends StatelessWidget {
                   ],
                 ),
 
+                // Assigned org + ETA row
+                if (assignedOrg != null) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.04),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(CupertinoIcons.building_2_fill,
+                            size: 13, color: statusColor),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(assignedOrg,
+                            style: const TextStyle(fontSize: 12,
+                                fontWeight: FontWeight.w600, color: Colors.white70)),
+                        ),
+                        if (etaMinutes != null && !isResolved)
+                          Text('~$etaMinutes min',
+                            style: TextStyle(fontSize: 11,
+                                color: nudeColor.withValues(alpha: 0.7))),
+                      ],
+                    ),
+                  ),
+                ],
+
                 const SizedBox(height: 12),
 
                 // ── Details ──
@@ -324,7 +402,7 @@ class _ReportCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha:0.85),
                       height: 1.5,
                     ),
                   ),
@@ -337,7 +415,7 @@ class _ReportCard extends StatelessWidget {
                     children: [
                       Icon(
                         CupertinoIcons.location_fill,
-                        color: pinkColor.withOpacity(0.7),
+                        color: pinkColor.withValues(alpha:0.7),
                         size: 13,
                       ),
                       const SizedBox(width: 4),
@@ -345,7 +423,7 @@ class _ReportCard extends StatelessWidget {
                         '${lat.toStringAsFixed(5)}, ${lng.toStringAsFixed(5)}',
                         style: TextStyle(
                           fontSize: 11,
-                          color: nudeColor.withOpacity(0.7),
+                          color: nudeColor.withValues(alpha:0.7),
                         ),
                       ),
                     ],
@@ -358,7 +436,7 @@ class _ReportCard extends StatelessWidget {
                   children: [
                     Icon(
                       CupertinoIcons.clock,
-                      color: nudeColor.withOpacity(0.5),
+                      color: nudeColor.withValues(alpha:0.5),
                       size: 12,
                     ),
                     const SizedBox(width: 4),
@@ -366,7 +444,7 @@ class _ReportCard extends StatelessWidget {
                       formattedDate,
                       style: TextStyle(
                         fontSize: 11,
-                        color: nudeColor.withOpacity(0.5),
+                        color: nudeColor.withValues(alpha:0.5),
                       ),
                     ),
                   ],

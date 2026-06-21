@@ -28,6 +28,7 @@ class _ReportScreenState extends State<ReportScreen> {
   bool _isLoading = false;
   String? _errorMessage;
   Position? _currentPosition;
+  SubmitReportResult? _lastResult;
 
   // Unified color tokens
   static const Color nudeColor = Color(0xFFACA494);
@@ -100,13 +101,14 @@ class _ReportScreenState extends State<ReportScreen> {
     String errorMsg = '';
 
     try {
-      await ApiService.submitReport(
+      final result = await ApiService.submitReport(
         imageFile: _selectedImage!,
         category: selectedCategory!,
         latitude: _currentPosition!.latitude,
         longitude: _currentPosition!.longitude,
         details: descriptionController.text.trim(),
       );
+      _lastResult = result;
       success = true;
     } catch (e) {
       errorMsg = e.toString().replaceFirst('Exception: ', '');
@@ -124,6 +126,7 @@ class _ReportScreenState extends State<ReportScreen> {
       setState(() {
         _selectedImage = null;
         selectedCategory = null;
+        _lastResult = null;
         descriptionController.clear();
       });
     }
@@ -133,6 +136,7 @@ class _ReportScreenState extends State<ReportScreen> {
     required bool success,
     required String errorMsg,
   }) async {
+    final result = _lastResult;
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -187,7 +191,7 @@ class _ReportScreenState extends State<ReportScreen> {
               // ── Title ──
               Text(
                 success ? 'Report Submitted!' : 'Submission Failed',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -200,7 +204,7 @@ class _ReportScreenState extends State<ReportScreen> {
               // ── Message ──
               Text(
                 success
-                    ? 'Your incident report has been successfully submitted. Authorities have been notified.'
+                    ? 'Your report has been received. Authorities have been notified.'
                     : errorMsg.isNotEmpty
                         ? errorMsg
                         : 'Something went wrong. Please try again.',
@@ -211,6 +215,58 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
+
+              // ── Dispatch info ──
+              if (success && result != null && result.assignedOrgName != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.white.withOpacity(0.08)),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(CupertinoIcons.building_2_fill,
+                              size: 14, color: AppTheme.alertGreen),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              result.assignedOrgName!,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (result.etaMinutes != null) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(CupertinoIcons.clock_fill,
+                                size: 14, color: Colors.white54),
+                            const SizedBox(width: 8),
+                            Text(
+                              'ETA: ~${result.etaMinutes} min',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
 
               const SizedBox(height: 28),
 

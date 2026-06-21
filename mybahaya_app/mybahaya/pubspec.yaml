@@ -29,6 +29,7 @@ dependencies:
   shared_preferences: ^2.5.5
   image_picker: ^1.1.2
   firebase_storage: ^12.3.5
+  firebase_messaging: ^15.0.0
   http: ^1.6.0
   url_launcher: ^6.3.0
 

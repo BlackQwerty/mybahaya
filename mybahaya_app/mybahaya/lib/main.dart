@@ -5,6 +5,7 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'theme/app_theme.dart';
@@ -13,9 +14,22 @@ import 'screens/welcome/welcome_screen.dart';
 import 'screens/auth/auth_screen.dart';
 import 'screens/main_layout.dart';
 
+// Background FCM handler — must be a top-level function (not inside a class).
+// Called when the app is terminated or in background and a message arrives.
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Flutter needs Firebase re-initialised in the background isolate.
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // System tray notification is shown automatically by the OS for data messages.
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Register the background handler before the app starts.
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   await LiquidGlassWidgets.initialize();
   runApp(LiquidGlassWidgets.wrap(const MyBahayaApp(), adaptiveQuality: true));
 }
@@ -85,6 +99,30 @@ class _AppNavigatorState extends State<AppNavigator> {
       _isOnboarded = false;
     }
 
+    // Foreground FCM handler — app is open when message arrives.
+    // Shows a banner at the top of the screen using the built-in SnackBar.
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      final notification = message.notification;
+      if (notification == null || !mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(notification.title ?? 'MyBahaya',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              if (notification.body != null)
+                Text(notification.body!, style: const TextStyle(fontSize: 12)),
+            ],
+          ),
+          backgroundColor: const Color(0xFF4D0A18),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    });
+
     // Set up auth changes listener to dynamically handle auto-login and sign-out globally
     _authSubscription = FirebaseAuth.instance.authStateChanges().listen((User? user) async {
       bool hasProfile = false;
@@ -99,6 +137,25 @@ class _AppNavigatorState extends State<AppNavigator> {
         if (!hasProfile) {
           await FirebaseAuth.instance.signOut();
           user = null;
+        }
+
+        // Save FCM token so the backend can push status updates to this device.
+        // requestPermission shows the iOS permission dialog; on Android it's automatic.
+        if (user != null && hasProfile) {
+          try {
+            await FirebaseMessaging.instance.requestPermission(
+              alert: true, badge: true, sound: true,
+            );
+            final token = await FirebaseMessaging.instance.getToken();
+            if (token != null) {
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user.uid)
+                  .update({'fcmToken': token});
+            }
+          } catch (_) {
+            // Non-fatal — app works without push notifications
+          }
         }
       }
 
