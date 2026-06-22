@@ -9,6 +9,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -22,7 +24,7 @@ public class ReportController {
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> createReport(
-            @RequestParam("image") MultipartFile image,
+            @RequestParam("images") List<MultipartFile> images,
             @RequestParam("category") String category,
             @RequestParam(value = "details", required = false) String details,
             @RequestParam("latitude") double latitude,
@@ -33,9 +35,19 @@ public class ReportController {
             if (uid == null || uid.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
+            if (images == null || images.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("status", "error", "message", "At least one image is required"));
+            }
 
-            String imageUrl = minioService.uploadReportImage(image);
-            Map<String, Object> result = reportService.saveReport(uid, category, details, latitude, longitude, imageUrl);
+            // Upload each photo (1–3) to MinIO, collect their URLs.
+            List<String> imageUrls = new ArrayList<>();
+            for (MultipartFile img : images) {
+                if (img != null && !img.isEmpty()) {
+                    imageUrls.add(minioService.uploadReportImage(img));
+                }
+            }
+
+            Map<String, Object> result = reportService.saveReport(uid, category, details, latitude, longitude, imageUrls);
             result.put("status", "success");
 
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
@@ -44,6 +56,36 @@ public class ReportController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("status", "error", "message", e.getMessage() != null ? e.getMessage() : "Unknown error"));
+        }
+    }
+
+    /* ── POST /api/reports/{reportId}/video — background video upload ── */
+    // Mobile submits the report first (fast), then uploads the optional video
+    // here in the background. The video is attached to the existing report.
+
+    @PostMapping("/{reportId}/video")
+    public ResponseEntity<Map<String, Object>> uploadVideo(
+            @PathVariable String reportId,
+            @RequestParam("video") MultipartFile video) {
+
+        try {
+            String uid = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (uid == null || uid.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            if (video == null || video.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "No video file provided"));
+            }
+
+            String videoUrl = minioService.uploadReportVideo(video);
+            reportService.attachVideo(reportId, videoUrl);
+
+            return ResponseEntity.ok(Map.of("ok", true, "videoUrl", videoUrl));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("ok", false, "message", e.getMessage() != null ? e.getMessage() : "Video upload failed"));
         }
     }
 

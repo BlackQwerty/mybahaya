@@ -32,6 +32,10 @@ firebase.auth().onAuthStateChanged(async function (user) {
 
   window.currentUser = user;
 
+  // Force a token refresh so any custom claims set server-side
+  // (role: admin/org, orgId) are present on this session's token.
+  try { await user.getIdToken(true); } catch (e) { /* non-fatal */ }
+
   let isAdmin = false;
   let org     = null;
 

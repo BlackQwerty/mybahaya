@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -27,9 +28,13 @@ public class ReportService {
     /* ── Create a new report ─────────────────────────────────── */
 
     public Map<String, Object> saveReport(String uid, String category, String details,
-                                          double latitude, double longitude, String imageUrl) throws Exception {
+                                          double latitude, double longitude, List<String> imageUrls) throws Exception {
         Firestore db = FirestoreClient.getFirestore();
         String reportId = UUID.randomUUID().toString();
+
+        // First image is the "primary" — kept in imageUrl for backward compatibility
+        // (web modal, mobile cards, AI all read imageUrl). Full set goes in imageUrls.
+        String imageUrl = (imageUrls != null && !imageUrls.isEmpty()) ? imageUrls.get(0) : "";
 
         Map<String, Object> reportData = new HashMap<>();
         reportData.put("reportId", reportId);
@@ -37,6 +42,7 @@ public class ReportService {
         reportData.put("category", category);
         reportData.put("details", details != null ? details : "");
         reportData.put("imageUrl", imageUrl);
+        reportData.put("imageUrls", imageUrls != null ? imageUrls : List.of());
         reportData.put("status", "NEW");
         reportData.put("createdAt", FieldValue.serverTimestamp());
 
@@ -64,6 +70,17 @@ public class ReportService {
         db.collection("reports").document(reportId).set(reportData).get();
         System.out.println("[ReportService] Report saved: " + reportId + " — now calling enrichReport, imageUrl=" + imageUrl);
 
+        // Sanitized public copy for the community feed/map (no reporter identity,
+        // no assignment, no status). Readable by all authenticated users.
+        Map<String, Object> publicData = new HashMap<>();
+        publicData.put("reportId",  reportId);
+        publicData.put("category",  category);
+        publicData.put("details",   details != null ? details : "");
+        publicData.put("imageUrl",  imageUrl);
+        publicData.put("location",  location);
+        publicData.put("createdAt", FieldValue.serverTimestamp());
+        db.collection("public_incidents").document(reportId).set(publicData).get();
+
         // Async AI enrichment — fires and forgets, does not block the response
         aiEnrichmentService.enrichReport(reportId, imageUrl, category, details);
         System.out.println("[ReportService] enrichReport call returned (async dispatched) for " + reportId);
@@ -77,6 +94,20 @@ public class ReportService {
             result.put("etaMinutes",      dispatch.etaMinutes());
         }
         return result;
+    }
+
+    /* ── Attach a video uploaded after the report was created ── */
+    // Called by the background video upload endpoint. Video is kept on the
+    // private report (for responders), not copied to the public feed.
+
+    public void attachVideo(String reportId, String videoUrl) throws Exception {
+        Firestore db = FirestoreClient.getFirestore();
+        var snap = db.collection("reports").document(reportId).get().get();
+        if (!snap.exists()) throw new Exception("Report not found: " + reportId);
+        db.collection("reports").document(reportId).update(
+            "videoUrl", videoUrl,
+            "videoUpdatedAt", FieldValue.serverTimestamp()
+        ).get();
     }
 
     /* ── Update status (state machine) ──────────────────────── */

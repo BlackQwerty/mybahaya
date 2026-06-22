@@ -21,15 +21,23 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Helper ────────────────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────
     function isAuth() {
       return request.auth != null;
     }
 
-    // Only UIDs that exist in /admins can write sensitive collections
+    // Admin = has the 'admin' custom claim on their token, OR (fallback during
+    // migration) a doc in /admins. The claim is set by migrate-lockdown.js.
     function isAdmin() {
-      return isAuth() &&
-             exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return isAuth() && (
+        request.auth.token.role == 'admin' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Org = has the 'org' custom claim; token.orgId is their organization doc id.
+    function isOrg() {
+      return isAuth() && request.auth.token.role == 'org';
     }
 
     // ── users (mobile app) ────────────────────────────────────
@@ -40,26 +48,42 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // ── reports (mobile app) ──────────────────────────────────
+    // ── reports (LOCKED case records) ─────────────────────────
+    // Full report with reporter identity, assignment, status, AI analysis.
+    //  • admin   → every report
+    //  • org     → only reports assigned to that org (assignedOrgId == token.orgId)
+    //  • citizen → only reports they filed themselves (userId == their uid)
+    // Writes are backend-only: the Spring Boot server uses the Admin SDK, which
+    // bypasses these rules. No client (mobile or web) writes reports directly.
     match /reports/{reportId} {
-      allow read:  if isAuth();
-      allow write: if isAuth();
+      allow read: if isAdmin()
+                  || (isOrg() && resource.data.assignedOrgId == request.auth.token.orgId)
+                  || (isAuth() && resource.data.userId == request.auth.uid);
+      allow write: if false;
     }
 
-    // ── organizations (web admin) ─────────────────────────────
+    // ── public_incidents (community feed) ─────────────────────
+    // Sanitized incident facts only (category, details, image, location, time).
+    // No reporter identity, no assignment, no status. Safe for everyone to see
+    // on the mobile community map / feed / alerts. Backend-only writes.
+    match /public_incidents/{id} {
+      allow read:  if isAuth();
+      allow write: if false;
+    }
+
+    // ── organizations ─────────────────────────────────────────
     match /organizations/{orgId} {
-      // Any authenticated user can read org info (needed so an org account
-      // can look itself up by authUid at login). Org data is not sensitive.
+      // Any authenticated user can read org info (an org account looks itself
+      // up by authUid at login). Org directory data is not sensitive.
       allow read:   if isAuth();
       allow create: if isAdmin();
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 
-    // ── admins (web admin) ────────────────────────────────────
+    // ── admins ────────────────────────────────────────────────
     match /admins/{adminId} {
-      // Any authenticated user can read their own admin doc (for isAdmin() check)
-      allow read:   if isAuth();
+      allow read:   if isAuth();   // needed for the isAdmin() exists() fallback
       allow create: if isAdmin();
       allow update: if isAdmin();
       allow delete: if isAdmin();

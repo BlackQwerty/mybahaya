@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SubmitReportResult {
@@ -26,10 +27,12 @@ class ApiService {
     return 'https://api.mybahaya.com/api'; // was http://178.105.158.80:8080/api
   }
 
-  /// Uploads a report using multipart/form-data to the Spring Boot backend.
+  /// Submits a report with 1–3 photos (multipart/form-data) to the backend.
   /// Returns dispatch info (reportId, assigned org, ETA) on success.
+  /// Video is NOT sent here — it is uploaded separately in the background
+  /// via [uploadVideo] so the citizen's report is recorded instantly.
   static Future<SubmitReportResult> submitReport({
-    required File imageFile,
+    required List<File> imageFiles,
     required String category,
     required double latitude,
     required double longitude,
@@ -57,25 +60,22 @@ class ApiService {
       request.fields['details'] = details;
     }
 
-    request.files.add(
-      await http.MultipartFile.fromPath('image', imageFile.path),
-    );
+    // All photos use the same field name "images" — Spring binds them to a List.
+    for (final file in imageFiles) {
+      request.files.add(
+        await http.MultipartFile.fromPath('images', file.path),
+      );
+    }
 
     final streamedResponse = await request.send().timeout(
       const Duration(seconds: 30),
-      onTimeout:
-          () =>
-              throw SocketException(
-                'Timed out connecting to backend at $baseUrl',
-              ),
+      onTimeout: () =>
+          throw SocketException('Timed out connecting to backend at $baseUrl'),
     );
     final response = await http.Response.fromStream(streamedResponse).timeout(
       const Duration(seconds: 30),
-      onTimeout:
-          () =>
-              throw SocketException(
-                'Timed out waiting for backend response from $baseUrl',
-              ),
+      onTimeout: () => throw SocketException(
+          'Timed out waiting for backend response from $baseUrl'),
     );
 
     if (response.statusCode == 201) {
@@ -91,5 +91,49 @@ class ApiService {
     throw Exception(
       'Backend returned ${response.statusCode}$serverMessage. API: $baseUrl/reports',
     );
+  }
+
+  /// Uploads a video for an already-created report, in the background.
+  /// [onProgress] is called with a value 0.0–1.0 so the UI can show a bar.
+  /// Uses Dio because it exposes upload (send) progress; plain http does not.
+  static Future<String?> uploadVideo({
+    required String reportId,
+    required File videoFile,
+    void Function(double progress)? onProgress,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw Exception('User is not authenticated');
+
+    final token = await user.getIdToken();
+    if (token == null) throw Exception('Failed to get authentication token');
+
+    final dio = Dio();
+    final formData = FormData.fromMap({
+      'video': await MultipartFile.fromFile(videoFile.path),
+    });
+
+    final response = await dio.post(
+      '$baseUrl/reports/$reportId/video',
+      data: formData,
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+        sendTimeout: const Duration(minutes: 3),
+        receiveTimeout: const Duration(minutes: 1),
+      ),
+      onSendProgress: (sent, total) {
+        if (total > 0 && onProgress != null) {
+          onProgress(sent / total);
+        }
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = response.data;
+      if (data is Map && data['videoUrl'] != null) {
+        return data['videoUrl'] as String;
+      }
+      return null;
+    }
+    throw Exception('Video upload failed (${response.statusCode})');
   }
 }

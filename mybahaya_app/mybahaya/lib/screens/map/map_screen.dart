@@ -222,8 +222,9 @@ class _MapScreenState extends State<MapScreen> {
       extendBody: true,
       appBar: const MyBahayaAppBar(),
       body: StreamBuilder<QuerySnapshot>(
+        // Community map reads the sanitized public feed (not the locked reports).
         stream: FirebaseFirestore.instance
-            .collection('reports')
+            .collection('public_incidents')
             .orderBy('createdAt', descending: true)
             .limit(100)
             .snapshots(),

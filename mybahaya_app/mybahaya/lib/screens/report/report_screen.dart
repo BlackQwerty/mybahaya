@@ -24,7 +24,10 @@ class _ReportScreenState extends State<ReportScreen> {
   String? selectedCategory;
   final TextEditingController descriptionController = TextEditingController();
 
-  File? _selectedImage;
+  static const int maxPhotos = 3;
+  final List<File> _selectedImages = [];
+  File? _selectedVideo;
+
   bool _isLoading = false;
   String? _errorMessage;
   Position? _currentPosition;
@@ -61,33 +64,141 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(
-      source: ImageSource.gallery,
+  /* ── Media picking ───────────────────────────────────────── */
+
+  Future<void> _takePhoto() async {
+    if (_selectedImages.length >= maxPhotos) return;
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.camera,
       imageQuality: 85,
     );
     if (picked != null) {
       setState(() {
-        _selectedImage = File(picked.path);
+        _selectedImages.add(File(picked.path));
         _errorMessage = null;
       });
     }
   }
+
+  Future<void> _pickPhotosFromGallery() async {
+    final remaining = maxPhotos - _selectedImages.length;
+    if (remaining <= 0) return;
+    final picked = await ImagePicker().pickMultiImage(imageQuality: 85);
+    if (picked.isNotEmpty) {
+      setState(() {
+        for (final x in picked.take(remaining)) {
+          _selectedImages.add(File(x.path));
+        }
+        _errorMessage = null;
+      });
+    }
+  }
+
+  Future<void> _recordVideo() async {
+    final picked = await ImagePicker().pickVideo(
+      source: ImageSource.camera,
+      maxDuration: const Duration(seconds: 15),
+    );
+    if (picked != null) {
+      setState(() => _selectedVideo = File(picked.path));
+    }
+  }
+
+  Future<void> _pickVideoFromGallery() async {
+    final picked = await ImagePicker().pickVideo(
+      source: ImageSource.gallery,
+      maxDuration: const Duration(seconds: 15),
+    );
+    if (picked != null) {
+      setState(() => _selectedVideo = File(picked.path));
+    }
+  }
+
+  void _showPhotoSourceSheet() {
+    if (_selectedImages.length >= maxPhotos) {
+      setState(() => _errorMessage = 'You can attach up to $maxPhotos photos.');
+      return;
+    }
+    _showSourceSheet(
+      title: 'Add Photo',
+      options: [
+        _SheetOption(CupertinoIcons.camera_fill, 'Take Photo', _takePhoto),
+        _SheetOption(CupertinoIcons.photo_on_rectangle, 'Choose from Gallery',
+            _pickPhotosFromGallery),
+      ],
+    );
+  }
+
+  void _showVideoSourceSheet() {
+    _showSourceSheet(
+      title: 'Add Video (optional, max 15s)',
+      options: [
+        _SheetOption(CupertinoIcons.videocam_fill, 'Record Video', _recordVideo),
+        _SheetOption(CupertinoIcons.film, 'Choose from Gallery',
+            _pickVideoFromGallery),
+      ],
+    );
+  }
+
+  void _showSourceSheet({required String title, required List<_SheetOption> options}) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        margin: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A1515),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 6),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(title,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700)),
+              ),
+            ),
+            ...options.map((o) => ListTile(
+                  leading: Icon(o.icon, color: burgundyColor),
+                  title: Text(o.label,
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 15)),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    o.onTap();
+                  },
+                )),
+            const SizedBox(height: 6),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /* ── Submit ──────────────────────────────────────────────── */
 
   Future<void> _submitReport() async {
     if (selectedCategory == null) {
       setState(() => _errorMessage = 'Please select a hazard category');
       return;
     }
-    if (_selectedImage == null) {
-      setState(() => _errorMessage = 'Please upload an image for evidence');
+    if (_selectedImages.isEmpty) {
+      setState(() => _errorMessage = 'Please add at least one photo for evidence');
       return;
     }
     if (_currentPosition == null) {
       await _getCurrentLocation();
       if (_currentPosition == null) {
-        setState(() => _errorMessage = 'Location is required. Please enable location permissions.');
+        setState(() => _errorMessage =
+            'Location is required. Please enable location permissions.');
         return;
       }
     }
@@ -99,16 +210,18 @@ class _ReportScreenState extends State<ReportScreen> {
 
     bool success = false;
     String errorMsg = '';
+    String? newReportId;
 
     try {
       final result = await ApiService.submitReport(
-        imageFile: _selectedImage!,
+        imageFiles: List<File>.from(_selectedImages),
         category: selectedCategory!,
         latitude: _currentPosition!.latitude,
         longitude: _currentPosition!.longitude,
         details: descriptionController.text.trim(),
       );
       _lastResult = result;
+      newReportId = result.reportId;
       success = true;
     } catch (e) {
       errorMsg = e.toString().replaceFirst('Exception: ', '');
@@ -118,13 +231,18 @@ class _ReportScreenState extends State<ReportScreen> {
 
     if (!mounted) return;
 
-    // Show result dialog
+    // Kick off the optional video upload in the BACKGROUND (do not await) so the
+    // report itself is already recorded. A floating chip shows its progress.
+    if (success && newReportId != null && _selectedVideo != null) {
+      _startBackgroundVideoUpload(newReportId, _selectedVideo!);
+    }
+
     await _showResultDialog(success: success, errorMsg: errorMsg);
 
-    // Reset form after dialog is dismissed
     if (success && mounted) {
       setState(() {
-        _selectedImage = null;
+        _selectedImages.clear();
+        _selectedVideo = null;
         selectedCategory = null;
         _lastResult = null;
         descriptionController.clear();
@@ -132,11 +250,43 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
+  /* ── Background video upload + floating progress chip ─────── */
+
+  void _startBackgroundVideoUpload(String reportId, File videoFile) {
+    final progress = ValueNotifier<double>(0);
+    final status = ValueNotifier<String>('uploading'); // uploading | done | error
+    final overlay = Overlay.of(context, rootOverlay: true);
+
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (ctx) => _VideoUploadChip(progress: progress, status: status),
+    );
+    overlay.insert(entry);
+
+    ApiService.uploadVideo(
+      reportId: reportId,
+      videoFile: videoFile,
+      onProgress: (p) => progress.value = p,
+    ).then((_) {
+      status.value = 'done';
+    }).catchError((_) {
+      status.value = 'error';
+    }).whenComplete(() {
+      // Leave the chip on screen briefly so the user sees the final state.
+      Future.delayed(const Duration(seconds: 3), () {
+        entry.remove();
+        progress.dispose();
+        status.dispose();
+      });
+    });
+  }
+
   Future<void> _showResultDialog({
     required bool success,
     required String errorMsg,
   }) async {
     final result = _lastResult;
+    final hasVideo = _selectedVideo != null;
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -147,9 +297,7 @@ class _ReportScreenState extends State<ReportScreen> {
           decoration: BoxDecoration(
             color: const Color(0xFF2A1515),
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.08),
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.08)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.5),
@@ -161,7 +309,6 @@ class _ReportScreenState extends State<ReportScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ── Status Icon ──
               Container(
                 width: 80,
                 height: 80,
@@ -185,10 +332,7 @@ class _ReportScreenState extends State<ReportScreen> {
                   size: 44,
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              // ── Title ──
               Text(
                 success ? 'Report Submitted!' : 'Submission Failed',
                 style: const TextStyle(
@@ -198,13 +342,12 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-
               const SizedBox(height: 10),
-
-              // ── Message ──
               Text(
                 success
-                    ? 'Your report has been received. Authorities have been notified.'
+                    ? (hasVideo
+                        ? 'Your report has been received. Your video is uploading in the background.'
+                        : 'Your report has been received. Authorities have been notified.')
                     : errorMsg.isNotEmpty
                         ? errorMsg
                         : 'Something went wrong. Please try again.',
@@ -215,13 +358,12 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-
-              // ── Dispatch info ──
               if (success && result != null && result.assignedOrgName != null) ...[
                 const SizedBox(height: 16),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(14),
@@ -267,15 +409,10 @@ class _ReportScreenState extends State<ReportScreen> {
                   ),
                 ),
               ],
-
               const SizedBox(height: 28),
-
-              // ── Buttons ──
               if (success) ...[
-                // Two buttons: OK and View Report
                 Row(
                   children: [
-                    // OK → go home
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
@@ -284,9 +421,7 @@ class _ReportScreenState extends State<ReportScreen> {
                         },
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: BorderSide(
-                            color: Colors.white.withOpacity(0.2),
-                          ),
+                          side: BorderSide(color: Colors.white.withOpacity(0.2)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -301,7 +436,6 @@ class _ReportScreenState extends State<ReportScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // View Report → open My Reports screen
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
@@ -333,7 +467,6 @@ class _ReportScreenState extends State<ReportScreen> {
                   ],
                 ),
               ] else ...[
-                // Single OK button on failure
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -377,18 +510,12 @@ class _ReportScreenState extends State<ReportScreen> {
       appBar: const MyBahayaAppBar(),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          20,
-          20,
-          130, // Clear the custom bottom nav bar
-        ),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 130),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const AppHeader(title: 'Report'),
             const SizedBox(height: 28),
-            // ── Location badge + View Reports button ──
             Row(
               children: [
                 _buildLocationBadge(),
@@ -396,15 +523,10 @@ class _ReportScreenState extends State<ReportScreen> {
                 TextButton.icon(
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => const MyReportsScreen(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const MyReportsScreen()),
                   ),
-                  icon: const Icon(
-                    CupertinoIcons.clock,
-                    size: 15,
-                    color: Colors.white,
-                  ),
+                  icon: const Icon(CupertinoIcons.clock,
+                      size: 15, color: Colors.white),
                   label: Text(
                     'View Reports',
                     style: TextStyle(
@@ -415,25 +537,22 @@ class _ReportScreenState extends State<ReportScreen> {
                   ),
                   style: TextButton.styleFrom(
                     backgroundColor: const Color(0xFF422E2E).withOpacity(0.55),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
-                        color: Colors.white.withOpacity(0.06),
-                      ),
+                      side: BorderSide(color: Colors.white.withOpacity(0.06)),
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            _buildMediaUpload(),
+            _buildPhotoSection(),
+            const SizedBox(height: 16),
+            _buildVideoSection(),
             const SizedBox(height: 28),
             _buildFormInputs(),
-            
             if (_errorMessage != null) ...[
               const SizedBox(height: 16),
               Center(
@@ -448,7 +567,6 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
               ),
             ],
-
             const SizedBox(height: 32),
             _buildBottomButtons(),
           ],
@@ -488,9 +606,51 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget _buildMediaUpload() {
+  /* ── Photo section: thumbnails + add tile (max 3) ────────── */
+
+  Widget _buildPhotoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('PHOTOS',
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: pinkColor,
+                      letterSpacing: 0.5)),
+              Text('${_selectedImages.length}/$maxPhotos',
+                  style: TextStyle(fontSize: 12, color: nudeColor)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        if (_selectedImages.isEmpty)
+          _buildEmptyMediaBox()
+        else
+          SizedBox(
+            height: 96,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                ..._selectedImages.asMap().entries.map(
+                      (e) => _buildThumbnail(e.key, e.value),
+                    ),
+                if (_selectedImages.length < maxPhotos) _buildAddTile(),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyMediaBox() {
     return GestureDetector(
-      onTap: _pickImage,
+      onTap: _showPhotoSourceSheet,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
@@ -510,43 +670,169 @@ class _ReportScreenState extends State<ReportScreen> {
               borderRadius: BorderRadius.circular(24),
               border: Border.all(color: Colors.white.withOpacity(0.06)),
             ),
-            child: _selectedImage != null
-                ? Image.file(
-                    _selectedImage!,
-                    fit: BoxFit.cover,
-                  )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        CupertinoIcons.camera_fill,
-                        color: pinkColor.withOpacity(0.8),
-                        size: 40,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Capture or Upload Media',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white70,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Supports JPEG, PNG up to 50MB',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: nudeColor.withOpacity(0.6),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.camera_fill,
+                    color: pinkColor.withOpacity(0.8), size: 40),
+                const SizedBox(height: 12),
+                Text('Take a Photo or Upload',
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white70),
+                    textAlign: TextAlign.center),
+                const SizedBox(height: 4),
+                Text('Up to $maxPhotos photos · camera or gallery',
+                    style: TextStyle(
+                        fontSize: 11, color: nudeColor.withOpacity(0.6)),
+                    textAlign: TextAlign.center),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildThumbnail(int index, File file) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.file(file, width: 96, height: 96, fit: BoxFit.cover),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedImages.removeAt(index)),
+              child: Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(CupertinoIcons.xmark,
+                    size: 13, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddTile() {
+    return GestureDetector(
+      onTap: _showPhotoSourceSheet,
+      child: Container(
+        width: 96,
+        height: 96,
+        decoration: BoxDecoration(
+          color: const Color(0xFF422E2E).withOpacity(0.55),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.10)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(CupertinoIcons.add, color: pinkColor.withOpacity(0.85), size: 26),
+            const SizedBox(height: 4),
+            Text('Add', style: TextStyle(fontSize: 11, color: nudeColor)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /* ── Video section (optional) ────────────────────────────── */
+
+  Widget _buildVideoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text('VIDEO (OPTIONAL)',
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: pinkColor,
+                  letterSpacing: 0.5)),
+        ),
+        const SizedBox(height: 10),
+        if (_selectedVideo == null)
+          GestureDetector(
+            onTap: _showVideoSourceSheet,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF422E2E).withOpacity(0.55),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: Colors.white.withOpacity(0.08)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(CupertinoIcons.videocam_fill,
+                      color: pinkColor.withOpacity(0.85), size: 20),
+                  const SizedBox(width: 10),
+                  Text('Record or upload a short video',
+                      style: TextStyle(fontSize: 13, color: Colors.white70)),
+                ],
+              ),
+            ),
+          )
+        else
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF422E2E).withOpacity(0.55),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Colors.white.withOpacity(0.08)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: burgundyColor.withOpacity(0.25),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(CupertinoIcons.play_fill,
+                      color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Video ready',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 2),
+                      Text('Will upload after you submit',
+                          style: TextStyle(
+                              color: nudeColor, fontSize: 11)),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => setState(() => _selectedVideo = null),
+                  child: Icon(CupertinoIcons.xmark_circle_fill,
+                      color: Colors.white.withOpacity(0.5), size: 22),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 
@@ -578,16 +864,12 @@ class _ReportScreenState extends State<ReportScreen> {
           child: TextField(
             controller: descriptionController,
             maxLines: 4,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.white,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.white),
             decoration: InputDecoration(
-              hintText: 'Provide detailed details on location, hazards, or safety threats...',
-              hintStyle: TextStyle(
-                fontSize: 13,
-                color: nudeColor.withOpacity(0.4),
-              ),
+              hintText:
+                  'Provide detailed details on location, hazards, or safety threats...',
+              hintStyle:
+                  TextStyle(fontSize: 13, color: nudeColor.withOpacity(0.4)),
               border: InputBorder.none,
               isDense: true,
               contentPadding: EdgeInsets.zero,
@@ -615,7 +897,6 @@ class _ReportScreenState extends State<ReportScreen> {
 
   Widget _buildCategoryChips() {
     final categories = ['Theft', 'Assault', 'Fire', 'Medical', 'Other'];
-
     return Wrap(
       spacing: 10,
       runSpacing: 10,
@@ -627,12 +908,13 @@ class _ReportScreenState extends State<ReportScreen> {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: isSelected 
-                  ? burgundyColor 
+              color: isSelected
+                  ? burgundyColor
                   : const Color(0xFF422E2E).withOpacity(0.55),
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
-                color: isSelected ? Colors.transparent : Colors.white.withOpacity(0.06),
+                color:
+                    isSelected ? Colors.transparent : Colors.white.withOpacity(0.06),
                 width: 1,
               ),
             ),
@@ -650,11 +932,9 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  // Two-button row: Cancel (dismiss keyboard) + Report Incident
   Widget _buildBottomButtons() {
     return Row(
       children: [
-        // Cancel — dismisses keyboard, stays on page
         Expanded(
           flex: 4,
           child: SizedBox(
@@ -681,7 +961,6 @@ class _ReportScreenState extends State<ReportScreen> {
           ),
         ),
         const SizedBox(width: 12),
-        // Report Incident — dark charcoal, not red
         Expanded(
           flex: 6,
           child: SizedBox(
@@ -718,6 +997,122 @@ class _ReportScreenState extends State<ReportScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+/* ── Small helper types ────────────────────────────────────── */
+
+class _SheetOption {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  _SheetOption(this.icon, this.label, this.onTap);
+}
+
+/// Floating chip shown at the top of the app while a video uploads in the
+/// background. Survives tab switches because it lives in the root overlay.
+class _VideoUploadChip extends StatelessWidget {
+  final ValueNotifier<double> progress;
+  final ValueNotifier<String> status;
+
+  const _VideoUploadChip({required this.progress, required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final topInset = MediaQuery.of(context).padding.top;
+    return Positioned(
+      top: topInset + 8,
+      left: 16,
+      right: 16,
+      child: Material(
+        color: Colors.transparent,
+        child: ValueListenableBuilder<String>(
+          valueListenable: status,
+          builder: (context, st, _) {
+            final bool done = st == 'done';
+            final bool error = st == 'error';
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2A1515),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withOpacity(0.10)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.35),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    done
+                        ? CupertinoIcons.checkmark_circle_fill
+                        : error
+                            ? CupertinoIcons.exclamationmark_circle_fill
+                            : CupertinoIcons.cloud_upload_fill,
+                    color: done
+                        ? const Color(0xFF30D158)
+                        : error
+                            ? const Color(0xFFFF453A)
+                            : Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          done
+                              ? 'Video uploaded'
+                              : error
+                                  ? 'Video upload failed'
+                                  : 'Uploading video…',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600),
+                        ),
+                        if (!done && !error) ...[
+                          const SizedBox(height: 6),
+                          ValueListenableBuilder<double>(
+                            valueListenable: progress,
+                            builder: (context, p, _) => ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: p == 0 ? null : p,
+                                minHeight: 5,
+                                backgroundColor: Colors.white.withOpacity(0.12),
+                                valueColor: const AlwaysStoppedAnimation(
+                                    Color(0xFFB22222)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (!done && !error) ...[
+                    const SizedBox(width: 12),
+                    ValueListenableBuilder<double>(
+                      valueListenable: progress,
+                      builder: (context, p, _) => Text(
+                        '${(p * 100).clamp(0, 100).toStringAsFixed(0)}%',
+                        style: TextStyle(
+                            color: Colors.white.withOpacity(0.7), fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

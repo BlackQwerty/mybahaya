@@ -205,8 +205,9 @@ class _HomeDashboardState extends State<HomeDashboard> {
 
             // ── Feed ─────────────────────────────────────────────
             StreamBuilder<QuerySnapshot>(
+              // Community feed reads the sanitized public feed (not locked reports).
               stream: FirebaseFirestore.instance
-                  .collection('reports')
+                  .collection('public_incidents')
                   .orderBy('createdAt', descending: true)
                   .limit(50)
                   .snapshots(),

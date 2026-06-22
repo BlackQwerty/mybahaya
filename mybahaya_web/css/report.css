@@ -277,14 +277,51 @@
 .rdm-image {
   flex: 0 0 45%; max-width: 45%;
   background: rgba(20,10,10,1);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; flex-direction: column; align-items: stretch;
   overflow: hidden;
 }
-.rdm-image img { width: 100%; height: 100%; object-fit: cover; }
-.rdm-image-placeholder { font-size: 80px; color: rgba(255,255,255,0.15); }
+
+/* Single photo (old path) or placeholder */
+.rdm-image > img { width: 100%; height: 100%; object-fit: cover; }
+.rdm-image-placeholder {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 80px; color: rgba(255,255,255,0.15);
+}
+
+/* Multi-photo / video gallery */
+.rdm-main-area {
+  flex: 1; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(20,10,10,1);
+}
+.rdm-main-media {
+  width: 100%; height: 100%; object-fit: cover;
+}
+video.rdm-main-media { object-fit: contain; background: #000; }
+
+.rdm-thumb-strip {
+  flex-shrink: 0;
+  display: flex; gap: 5px; padding: 8px;
+  overflow-x: auto;
+  background: rgba(0,0,0,0.45);
+}
+.rdm-thumb-strip::-webkit-scrollbar { height: 3px; }
+.rdm-thumb-strip::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+
+.rdm-thumb {
+  flex-shrink: 0; width: 52px; height: 52px;
+  border-radius: 8px; overflow: hidden; cursor: pointer;
+  border: 2px solid transparent; transition: border-color 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.06);
+}
+.rdm-thumb.active { border-color: #B22222; }
+.rdm-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.rdm-thumb-video-icon { font-size: 26px; color: rgba(255,255,255,0.65); }
 
 .rdm-content {
-  flex: 1; padding: 28px 28px 24px;
+  flex: 1; padding: 28px 52px 24px 28px;
   overflow-y: auto;
   display: flex; flex-direction: column; gap: 16px;
 }
@@ -400,6 +437,7 @@
 
 @media (max-width: 700px) {
   .rdm-card { flex-direction: column; max-height: 92vh; }
-  .rdm-image { flex: 0 0 auto; max-width: 100%; height: 240px; }
+  .rdm-image { flex: 0 0 auto; max-width: 100%; height: 260px; }
+  .rdm-main-area { min-height: 200px; }
   .rdm-content { padding: 20px; }
 }

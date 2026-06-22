@@ -60,13 +60,15 @@ function initHero() {
   const clockEl    = document.getElementById('hero-clock');
   const subtitleEl = document.getElementById('hero-sub');
 
+  // Defaults until the role/profile resolves
+  let displayName = 'Admin';
+  let subText     = 'Live situational awareness · Malaysia';
+
   function updateGreeting() {
     const h = new Date().getHours();
     const period = h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : 'Evening';
-
-    const user = firebase.auth().currentUser;
-    const name = user?.displayName || user?.email?.split('@')[0] || 'Admin';
-    if (greetEl) greetEl.textContent = `Good ${period}, ${name}`;
+    if (greetEl) greetEl.textContent = `Good ${period}, ${displayName}`;
+    if (subtitleEl) subtitleEl.textContent = subText;
   }
 
   function updateClock() {
@@ -84,21 +86,28 @@ function initHero() {
   updateClock();
   setInterval(updateClock, 1000);
 
-  // Update greeting name once auth resolves
-  firebase.auth().onAuthStateChanged(user => {
-    if (user) {
-      // Try to get coverage area from admins collection
+  // Resolve the real display name once auth.js determines the role.
+  (window.authReady || Promise.resolve()).then(() => {
+    const org = window.currentUserOrg;
+    if (org) {
+      // Org user → use the organization's name + its location
+      displayName = org.name || 'Organization';
+      const loc = [org.district, org.state].filter(Boolean).join(', ');
+      subText = `Live situational awareness · ${loc || 'Malaysia'}`;
+      updateGreeting();
+    } else if (window.currentUserIsAdmin) {
+      // Admin → look up their name + coverage area from /admins
+      const user = firebase.auth().currentUser;
       db.collection('admins').doc(user.uid).get().then(snap => {
-        const data = snap.data();
-        if (subtitleEl && data?.coverDistrict && data?.coverState) {
-          subtitleEl.textContent = `Live situational awareness · ${data.coverDistrict}, ${data.coverState}`;
-        } else if (subtitleEl) {
-          subtitleEl.textContent = 'Live situational awareness · Malaysia';
+        const data = snap.data() || {};
+        if (data.name) displayName = data.name;
+        if (data.coverDistrict && data.coverState) {
+          subText = `Live situational awareness · ${data.coverDistrict}, ${data.coverState}`;
         }
         updateGreeting();
-      }).catch(() => {
-        if (subtitleEl) subtitleEl.textContent = 'Live situational awareness · Malaysia';
-      });
+      }).catch(() => updateGreeting());
+    } else {
+      updateGreeting();
     }
   });
 }

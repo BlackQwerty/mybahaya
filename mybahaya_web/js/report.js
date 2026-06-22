@@ -167,6 +167,60 @@ window.updateReportStatus = async function (reportId, nextStatus) {
    DETAIL MODAL — opens when you click a report card
    ══════════════════════════════════════════════════════════ */
 
+function buildMediaPanel(r) {
+  const photos = (r.imageUrls && r.imageUrls.length > 0)
+    ? r.imageUrls.map(safeImageUrl)
+    : (r.imageUrl ? [safeImageUrl(r.imageUrl)] : []);
+
+  const hasVideo = !!r.videoUrl;
+
+  if (!photos.length && !hasVideo) {
+    const m = catMeta(r.category);
+    return `<div class="rdm-image-placeholder"><ion-icon name="${m.icon}"></ion-icon></div>`;
+  }
+
+  const items = [
+    ...photos.map(url => ({ type: 'photo', url })),
+    ...(hasVideo ? [{ type: 'video', url: safeImageUrl(r.videoUrl) }] : []),
+  ];
+
+  const first = items[0];
+  const showStrip = items.length > 1;
+
+  const mainHtml = first.type === 'photo'
+    ? `<img class="rdm-main-media" src="${first.url}" alt="Report photo" />`
+    : `<video class="rdm-main-media" src="${first.url}" controls></video>`;
+
+  const stripHtml = showStrip ? `
+    <div class="rdm-thumb-strip">
+      ${items.map((item, i) => `
+        <div class="rdm-thumb${i === 0 ? ' active' : ''}" data-type="${item.type}" data-url="${item.url}">
+          ${item.type === 'photo'
+            ? `<img src="${item.url}" alt="Photo ${i + 1}" />`
+            : `<span class="rdm-thumb-video-icon"><ion-icon name="play-circle-outline"></ion-icon></span>`
+          }
+        </div>`).join('')}
+    </div>` : '';
+
+  return `<div class="rdm-main-area">${mainHtml}</div>${stripHtml}`;
+}
+
+function wireMediaThumbs(modal) {
+  modal.querySelectorAll('.rdm-thumb').forEach(thumb => {
+    thumb.addEventListener('click', () => {
+      modal.querySelectorAll('.rdm-thumb').forEach(t => t.classList.remove('active'));
+      thumb.classList.add('active');
+      const area = modal.querySelector('.rdm-main-area');
+      const { type, url } = thumb.dataset;
+      if (type === 'photo') {
+        area.innerHTML = `<img class="rdm-main-media" src="${url}" alt="Report photo" />`;
+      } else {
+        area.innerHTML = `<video class="rdm-main-media" src="${url}" controls autoplay></video>`;
+      }
+    });
+  });
+}
+
 function openDetailModal(r) {
   // Remove any existing modal
   document.getElementById('report-detail-modal')?.remove();
@@ -192,12 +246,9 @@ function openDetailModal(r) {
         <ion-icon name="close-outline"></ion-icon>
       </button>
 
-      <!-- Image -->
+      <!-- Media (photos gallery + optional video) -->
       <div class="rdm-image">
-        ${r.imageUrl
-          ? `<img src="${safeImageUrl(r.imageUrl)}" alt="${m.label}" />`
-          : `<div class="rdm-image-placeholder"><ion-icon name="${m.icon}"></ion-icon></div>`
-        }
+        ${buildMediaPanel(r)}
       </div>
 
       <!-- Content -->
@@ -268,6 +319,9 @@ function openDetailModal(r) {
   modal.querySelector('.rdm-backdrop').addEventListener('click', closeDetailModal);
   modal.querySelector('#rdm-close-btn').addEventListener('click', closeDetailModal);
   document.addEventListener('keydown', handleEsc);
+
+  // Wire photo/video thumbnail strip
+  wireMediaThumbs(modal);
 
   // Reverse geocode
   if (hasLoc) {

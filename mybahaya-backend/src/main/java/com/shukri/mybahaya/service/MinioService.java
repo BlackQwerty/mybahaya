@@ -24,7 +24,18 @@ public class MinioService {
     @Value("${minio.url}")
     private String minioUrl;
 
+    /** Uploads a single image and returns its public URL. */
     public String uploadReportImage(MultipartFile file) throws Exception {
+        return uploadFile(file);
+    }
+
+    /** Uploads a single video and returns its public URL. */
+    public String uploadReportVideo(MultipartFile file) throws Exception {
+        return uploadFile(file);
+    }
+
+    /** Generic upload — any media file (image or video) → MinIO → public URL. */
+    public String uploadFile(MultipartFile file) throws Exception {
         // Ensure bucket exists
         boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(reportsBucket).build());
         if (!found) {
@@ -47,7 +58,7 @@ public class MinioService {
             );
         }
 
-        // Return public URL (assuming bucket policy allows public read, or using direct URL for Hetzner)
+        // Return public URL (bucket policy allows public read)
         return minioUrl + "/" + reportsBucket + "/" + objectName;
     }
 

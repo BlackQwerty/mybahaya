@@ -412,10 +412,10 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
         ),
         const SizedBox(height: 16),
 
-        // Firestore stream
+        // Firestore stream — community alerts read the sanitized public feed.
         StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
-              .collection('reports')
+              .collection('public_incidents')
               .orderBy('createdAt', descending: true)
               .limit(50)
               .snapshots(),
