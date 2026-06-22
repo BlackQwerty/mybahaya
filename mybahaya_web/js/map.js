@@ -38,6 +38,7 @@ let allReports    = [];
 let activeMarkers = [];
 let activeCategory = 'all';
 
+
 /* ── Map init ── */
 function initMap() {
   if (typeof maplibregl === 'undefined') { setTimeout(initMap, 100); return; }
@@ -63,7 +64,7 @@ function initMap() {
       layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
     },
     center: isReportView ? [focusLng, focusLat] : [109.0, 3.8],
-    zoom:   isReportView ? 15 : 6,
+    zoom:   isReportView ? 15 : 5,
     pitch: 0, bearing: 0,
     attributionControl: false
   });
@@ -72,10 +73,22 @@ function initMap() {
 
   map.on('load', () => {
     setupControls();
-    listenReports();
+    // Wait until auth.js resolves the role so the org filter is in place.
+    (window.authReady || Promise.resolve()).then(listenReports);
     if (isReportView) {
       showFocusMarker(focusLat, focusLng, focusCat, focusId, focusDet);
       showReportPanel(focusCat, focusId, focusDet, focusLat, focusLng);
+    } else {
+      // Auto-focus to user's location at state-level zoom on map open.
+      // zoom 10.5 shows ~70 km radius which covers a typical Malaysian state.
+      navigator.geolocation?.getCurrentPosition(
+        pos => map.flyTo({
+          center:   [pos.coords.longitude, pos.coords.latitude],
+          zoom:     10.5,
+          duration: 1200,
+        }),
+        () => {} // denied or unavailable — stay at Malaysia overview
+      );
     }
   });
 }
@@ -85,7 +98,14 @@ function listenReports() {
   const loadEl = document.getElementById('map-loading');
   if (loadEl) loadEl.classList.remove('hidden');
 
-  db.collection('reports').onSnapshot(snap => {
+  // Admins see all reports; org users see only reports assigned to their org.
+  let query = db.collection('reports');
+  const org = window.currentUserOrg;
+  if (org && !window.currentUserIsAdmin) {
+    query = query.where('assignedOrgId', '==', org.id);
+  }
+
+  query.onSnapshot(snap => {
     allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     if (loadEl) loadEl.classList.add('hidden');
     renderMarkers();

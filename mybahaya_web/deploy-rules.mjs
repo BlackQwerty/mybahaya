@@ -48,7 +48,9 @@ service cloud.firestore {
 
     // ── organizations (web admin) ─────────────────────────────
     match /organizations/{orgId} {
-      allow read:   if isAdmin();
+      // Any authenticated user can read org info (needed so an org account
+      // can look itself up by authUid at login). Org data is not sensitive.
+      allow read:   if isAuth();
       allow create: if isAdmin();
       allow update: if isAdmin();
       allow delete: if isAdmin();

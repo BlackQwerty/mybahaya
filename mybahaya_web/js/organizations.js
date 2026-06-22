@@ -86,12 +86,6 @@ async function sendPasswordResetREST(email) {
   if (data.error) throw new Error(data.error.message);
 }
 
-/* ── Random temp password (org never uses it — reset email replaces it) ── */
-function genTempPassword() {
-  return Math.random().toString(36).slice(2, 10) +
-         Math.random().toString(36).slice(2, 6).toUpperCase() + '!9';
-}
-
 /* ── Tab switching ───────────────────────────────────────── */
 
 function initTabs() {
@@ -220,6 +214,9 @@ function openOrgModal() {
   document.getElementById('modal-org-title').innerHTML = '<span class="dot"></span> Add New Organization';
   document.getElementById('org-submit-btn').innerHTML  = 'Register Organization <ion-icon name="checkmark-outline"></ion-icon>';
   document.getElementById('modal-org')._editId = null;
+  // Password is required when creating a new org
+  showEl('o-password-row');
+  document.getElementById('o-password').required = true;
   document.getElementById('modal-org').classList.remove('hidden');
 }
 
@@ -242,6 +239,9 @@ window.editOrg = async function (id) {
   document.getElementById('modal-org-title').innerHTML = '<span class="dot"></span> Edit Organization';
   document.getElementById('org-submit-btn').innerHTML  = 'Save Changes <ion-icon name="checkmark-outline"></ion-icon>';
   document.getElementById('modal-org')._editId = id;
+  // Hide password on edit — the auth account already exists, can't change it here
+  hideEl('o-password-row');
+  document.getElementById('o-password').required = false;
   clearFormErr('org-form-error');
   document.getElementById('modal-org').classList.remove('hidden');
 };
@@ -291,14 +291,21 @@ function initOrgModal() {
     const postcode    = document.getElementById('o-postcode').value.trim();
     const fullAddress = document.getElementById('o-address').value.trim();
     const email       = document.getElementById('o-email').value.trim();
+    const password    = document.getElementById('o-password').value;
     const lat         = parseFloat(document.getElementById('o-lat').value);
     const lng         = parseFloat(document.getElementById('o-lng').value);
+
+    const editId = modal._editId;
 
     if (!name || !type || !state || !district || !postcode || !fullAddress || !email) {
       showFormErr('org-form-error', 'Please fill in all required fields.'); return;
     }
     if (isNaN(lat) || isNaN(lng)) {
       showFormErr('org-form-error', 'Enter valid latitude and longitude coordinates.'); return;
+    }
+    // Password only required when creating a new org
+    if (!editId && (!password || password.length < 6)) {
+      showFormErr('org-form-error', 'Password must be at least 6 characters.'); return;
     }
 
     const SAVE_BTN_HTML = 'Register Organization <ion-icon name="checkmark-outline"></ion-icon>';
@@ -311,21 +318,21 @@ function initOrgModal() {
     };
 
     try {
-      const editId = modal._editId;
       if (editId) {
         // Edit: update Firestore only (auth account already exists)
         await db.collection('organizations').doc(editId).update(data);
         window.showToast?.(`"${name}" updated successfully.`, 'success');
       } else {
-        // New org: create Firebase Auth account → send setup email → save to Firestore
-        const uid = await createAuthUserREST(email, genTempPassword());
+        // New org: create Firebase Auth account with the admin-set password → save to Firestore.
+        // authUid is the field auth.js matches at login (must be set, not just doc id).
+        const uid = await createAuthUserREST(email, password);
+        data.authUid = uid;
         data.uid = uid;
         data.role = 'organization';
         data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
         await db.collection('organizations').doc(uid).set(data);
-        await sendPasswordResetREST(email);
         window.showToast?.(
-          `"${name}" registered. Password setup email sent to ${email}.`,
+          `"${name}" registered. They can now log in with ${email} and the password you set.`,
           'success'
         );
       }

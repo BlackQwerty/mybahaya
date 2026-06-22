@@ -470,9 +470,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('export-btn')?.addEventListener('click', exportCSV);
 
-  db.collection('reports').onSnapshot(snap => {
-    allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderAll();
-  }, err => console.error('Analytics listener:', err));
+  // Admins see all reports; org users see only reports assigned to their org.
+  (window.authReady || Promise.resolve()).then(() => {
+    let query = db.collection('reports');
+    const org = window.currentUserOrg;
+    if (org && !window.currentUserIsAdmin) {
+      query = query.where('assignedOrgId', '==', org.id);
+    }
+    query.onSnapshot(snap => {
+      allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderAll();
+    }, err => console.error('Analytics listener:', err));
+  });
 
 });

@@ -371,7 +371,14 @@ function applyFilters() {
 function listenReports() {
   const loading = document.getElementById('reports-loading');
 
-  db.collection('reports').onSnapshot(snap => {
+  // Admins see all reports; org users see only reports assigned to their org.
+  let query = db.collection('reports');
+  const org = window.currentUserOrg;
+  if (org && !window.currentUserIsAdmin) {
+    query = query.where('assignedOrgId', '==', org.id);
+  }
+
+  query.onSnapshot(snap => {
     loading.classList.add('hidden');
     allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     applyFilters();
@@ -440,5 +447,6 @@ function initFilters() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initFilters();
-  listenReports();
+  // Wait until auth.js resolves the role so the org filter is in place.
+  (window.authReady || Promise.resolve()).then(listenReports);
 });
