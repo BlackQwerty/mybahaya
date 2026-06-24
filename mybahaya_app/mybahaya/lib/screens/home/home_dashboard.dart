@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../services/media_url.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar.dart';
@@ -539,7 +540,7 @@ class _IncidentCardState extends State<_IncidentCard> {
                 children: [
                   if (imageUrl.isNotEmpty)
                     CachedNetworkImage(
-                      imageUrl: imageUrl,
+                      imageUrl: safeMediaUrl(imageUrl),
                       height: 250,
                       width: double.infinity,
                       fit: BoxFit.cover,

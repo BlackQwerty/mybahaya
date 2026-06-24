@@ -735,7 +735,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         height: 31,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15.5),
-          color: value ? maroon : maroon.withOpacity(0.25),
+          color: value ? _green : maroon.withOpacity(0.25),
         ),
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 220),

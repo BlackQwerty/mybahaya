@@ -30,7 +30,8 @@ class MapScreen extends StatefulWidget {
   State<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _MapScreenState extends State<MapScreen>
+    with SingleTickerProviderStateMixin {
   final MapController _mapController = MapController();
   LatLng? _currentPosition;
   bool _locating = true;
@@ -41,10 +42,24 @@ class _MapScreenState extends State<MapScreen> {
   bool _mapReady = false;
   LatLng? _pendingFocus;
 
+  // Slow blink for the "You" marker so it stays subtle and never hides nearby
+  // report markers underneath it.
+  late final AnimationController _blinkCtrl;
+
   @override
   void initState() {
     super.initState();
+    _blinkCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
     _getCurrentLocation();
+  }
+
+  @override
+  void dispose() {
+    _blinkCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _getCurrentLocation() async {
@@ -281,18 +296,23 @@ class _MapScreenState extends State<MapScreen> {
     return Marker(
       point: _currentPosition!,
       width: 48, height: 48,
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: burgundy, width: 2.5),
-          boxShadow: [BoxShadow(
-            color: burgundy.withOpacity(0.35),
-            blurRadius: 10, spreadRadius: 2,
-          )],
-          color: Colors.white,
+      child: AnimatedBuilder(
+        animation: _blinkCtrl,
+        builder: (_, child) => Opacity(
+          // Blinks between 0.25 and 0.6 every 1.5s — visible but never blocks
+          // the report markers beneath it.
+          opacity: 0.25 + (_blinkCtrl.value * 0.35),
+          child: child,
         ),
-        child: ClipOval(
-          child: Image.asset('assets/images/logos/logo.png', fit: BoxFit.cover),
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: burgundy, width: 2.5),
+            color: Colors.white,
+          ),
+          child: ClipOval(
+            child: Image.asset('assets/images/logos/logo.png', fit: BoxFit.cover),
+          ),
         ),
       ),
     );

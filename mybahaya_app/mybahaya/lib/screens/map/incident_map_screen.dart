@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../theme/app_theme.dart';
 import '../../services/geocoding_service.dart';
+import '../../services/media_url.dart';
 
 class IncidentMapScreen extends StatefulWidget {
   final Map<String, dynamic> report;
@@ -334,7 +335,7 @@ class _IncidentMapScreenState extends State<IncidentMapScreen> {
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               child: CachedNetworkImage(
-                imageUrl: _imageUrl,
+                imageUrl: safeMediaUrl(_imageUrl),
                 height: 90,
                 width: double.infinity,
                 fit: BoxFit.cover,

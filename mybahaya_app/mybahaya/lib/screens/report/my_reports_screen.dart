@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../theme/app_theme.dart';
+import '../../services/media_url.dart';
 
 class MyReportsScreen extends StatelessWidget {
   const MyReportsScreen({super.key});
@@ -236,7 +237,7 @@ class _ReportCard extends StatelessWidget {
                 top: Radius.circular(24),
               ),
               child: CachedNetworkImage(
-                imageUrl: imageUrl,
+                imageUrl: safeMediaUrl(imageUrl),
                 height: 160,
                 width: double.infinity,
                 fit: BoxFit.cover,
