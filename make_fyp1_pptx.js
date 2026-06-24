@@ -36,7 +36,7 @@ s1.addText("AI-Powered Emergency Reporting & Real-Time Community Alert Platform"
   color:N, align:"left", margin:0
 });
 s1.addShape(pres.shapes.LINE, { x:0.7, y:3.58, w:2.5, h:0, line:{color:N, width:1.5} });
-s1.addText("FYP1 Presentation  ·  Ahmad Shukri  ·  Faculty of Computer & Mathematical Sciences, UiTM  ·  2025/2026", {
+s1.addText("FYP1 Presentation  ·  Ahmad Shukri  ·  Universiti Teknikal Malaysia Melaka (UTeM)  ·  2025/2026", {
   x:0.7, y:3.74, w:8.6, h:0.44,
   fontFace:"Calibri", fontSize:10.5,
   color:NM, align:"left", margin:0
@@ -120,49 +120,88 @@ probs.forEach((p, i) => {
 s3.addNotes("Four problems: no reporting app, slow routing, no community awareness, fake reports. These gaps justify MyBahaya.");
 
 // ════════════════════════════════════════════════════════════
-// SLIDE 4 — SURVEY RESULTS
+// SLIDE 4 — KEY STATISTICS (real cited sources)
 // ════════════════════════════════════════════════════════════
 const s4 = pres.addSlide();
 s4.background = { color: W };
 
-s4.addText("Problem Statement — Survey Results", {
+s4.addText("Problem Statement — Key Statistics", {
   x:0.5, y:0.2, w:9, h:0.65,
   fontFace:"Cambria", fontSize:27, bold:true,
   color:M, align:"left", margin:0
 });
-s4.addText("Online survey  ·  n = 50 respondents  ·  UiTM students and general public, 2025", {
-  x:0.5, y:0.82, w:9, h:0.3,
-  fontFace:"Calibri", fontSize:11, italic:true,
+s4.addText("Sources: DOSM ICT Survey 2024  ·  MERS 999 ScienceDirect 2026  ·  The Star 2025  ·  MJPHM Kelantan Study", {
+  x:0.5, y:0.82, w:9, h:0.28,
+  fontFace:"Calibri", fontSize:10, italic:true,
   color:N, align:"left", margin:0
 });
 
-s4.addChart(pres.charts.BAR, [{
-  name: "% of Respondents",
-  labels: [
-    "Unaware of emergency\nreporting apps in Malaysia",
-    "Experienced delayed\nemergency response",
-    "Want real-time nearby\ndanger alerts",
-    "Concerned about fake\nemergency reports"
-  ],
-  values: [78, 71, 85, 82]
-}], {
-  x:0.4, y:1.15, w:9.2, h:4.15,
-  barDir: "bar",
-  chartColors: [M],
-  chartArea: { fill:{color:W}, roundedCorners:false },
-  catAxisLabelColor: "3A2020",
-  catAxisFontSize: 12,
-  valAxisLabelColor: "888888",
-  valAxisMaxVal: 100,
-  valGridLine: { color:"EEEEEE", size:0.5 },
-  catGridLine: { style:"none" },
-  showValue: true,
-  dataLabelColor: W,
-  dataLabelFontSize: 13,
-  showLegend: false,
+// 4 stat cards — 2 top, 2 bottom
+const stats = [
+  {
+    num:"99.5%",
+    label:"of Malaysians own a mobile phone",
+    sub:"yet no dedicated emergency reporting app exists",
+    cite:"DOSM ICT Use & Access Survey, 2024",
+    dark:true, x:0.38, y:1.18
+  },
+  {
+    num:"84.7%",
+    label:"of ambulance calls had delayed response",
+    sub:"Response times exceeded WHO & MOH benchmarks in all districts",
+    cite:"MJPHM — Kelantan Ambulance Study",
+    dark:false, x:5.18, y:1.18
+  },
+  {
+    num:"169,000+",
+    label:"prank / fake calls to MERS 999",
+    sub:"In 2025 alone — disrupting real emergency responses",
+    cite:"The Star, November 2025",
+    dark:false, x:0.38, y:3.2
+  },
+  {
+    num:"2–3%",
+    label:"of all 999 calls are real emergencies",
+    sub:"Majority are false reports — wasting critical resources",
+    cite:"The Sun / CiliSOS — MERS 999 Analysis",
+    dark:true, x:5.18, y:3.2
+  },
+];
+
+stats.forEach(st => {
+  const bg = st.dark ? M : NL;
+  const bdr = st.dark ? M : NM;
+  s4.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+    x:st.x, y:st.y, w:4.6, h:1.95,
+    fill:{color:bg}, rectRadius:0.1, shadow:mk(), line:{color:bdr, width:0.5}
+  });
+  // Big number
+  s4.addText(st.num, {
+    x:st.x+0.15, y:st.y+0.1, w:4.3, h:0.65,
+    fontFace:"Cambria", fontSize:32, bold:true,
+    color:st.dark ? N : M, align:"left", margin:0
+  });
+  // Label
+  s4.addText(st.label, {
+    x:st.x+0.15, y:st.y+0.74, w:4.3, h:0.38,
+    fontFace:"Cambria", fontSize:12, bold:true,
+    color:st.dark ? W : TXT, align:"left", margin:0
+  });
+  // Sub description
+  s4.addText(st.sub, {
+    x:st.x+0.15, y:st.y+1.12, w:4.3, h:0.38,
+    fontFace:"Calibri", fontSize:10.5,
+    color:st.dark ? NM : "5A4A4A", align:"left", margin:0
+  });
+  // Citation tag
+  s4.addText("📌 " + st.cite, {
+    x:st.x+0.15, y:st.y+1.5, w:4.3, h:0.32,
+    fontFace:"Calibri", fontSize:9, italic:true,
+    color:st.dark ? NM : N, align:"left", margin:0
+  });
 });
 
-s4.addNotes("78% unaware of any emergency app. 71% experienced slow response. 85% want nearby alerts. 82% concerned about fake reports. Strong demand for MyBahaya confirmed.");
+s4.addNotes("All statistics from real sources. 99.5% phone ownership confirms mobile reach. 84.7% ambulance delay + response times exceeding WHO benchmarks prove the problem. 169,000 fake calls in 2025 and only 2-3% real calls justify AI fake detection in MyBahaya.");
 
 // ════════════════════════════════════════════════════════════
 // SLIDE 5 — EXISTING WORK COMPARISON
