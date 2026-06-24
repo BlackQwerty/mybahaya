@@ -38,6 +38,7 @@ class _MapScreenState extends State<MapScreen>
 
   static const LatLng _klCenter = LatLng(3.1390, 101.6869);
   static const Color burgundy   = Color(0xFFB22222);
+  static const Color _userGreen = Color(0xFF34C759);
 
   bool _mapReady = false;
   LatLng? _pendingFocus;
@@ -52,7 +53,7 @@ class _MapScreenState extends State<MapScreen>
     _blinkCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
-    )..repeat(reverse: true);
+    )..repeat();
     _getCurrentLocation();
   }
 
@@ -282,7 +283,7 @@ class _MapScreenState extends State<MapScreen>
                 ),
               ),
               Positioned(
-                right: 12, bottom: 110,
+                right: 12, bottom: 150,
                 child: _buildRecenterFab(),
               ),
             ],
@@ -295,25 +296,32 @@ class _MapScreenState extends State<MapScreen>
   Marker _buildUserMarker() {
     return Marker(
       point: _currentPosition!,
-      width: 48, height: 48,
+      width: 90, height: 90,
       child: AnimatedBuilder(
         animation: _blinkCtrl,
-        builder: (_, child) => Opacity(
-          // Blinks between 0.25 and 0.6 every 1.5s — visible but never blocks
-          // the report markers beneath it.
-          opacity: 0.25 + (_blinkCtrl.value * 0.35),
-          child: child,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: burgundy, width: 2.5),
-            color: Colors.white,
-          ),
-          child: ClipOval(
-            child: Image.asset('assets/images/logos/logo.png', fit: BoxFit.cover),
-          ),
-        ),
+        builder: (_, __) {
+          // Two staggered green pulses for a continuous radar effect — no solid
+          // dot, so report pins underneath stay fully visible.
+          final t = _blinkCtrl.value;
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              _userPulse(t),
+              _userPulse((t + 0.5) % 1.0),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _userPulse(double t) {
+    return Container(
+      width: 18 + t * 72,
+      height: 18 + t * 72,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: _userGreen.withOpacity((1 - t) * 0.45),
       ),
     );
   }
@@ -433,15 +441,18 @@ class _MapScreenState extends State<MapScreen>
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
+              // Matches the green pulse on the map.
+              SizedBox(
                 width: 24, height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 1.5),
-                  color: Colors.white,
-                ),
-                child: ClipOval(
-                  child: Image.asset('assets/images/logos/logo.png', fit: BoxFit.cover),
+                child: Center(
+                  child: Container(
+                    width: 18, height: 18,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _userGreen.withOpacity(0.25),
+                      border: Border.all(color: _userGreen, width: 2.5),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -458,7 +469,13 @@ class _MapScreenState extends State<MapScreen>
   Widget _buildRecenterFab() {
     return GestureDetector(
       onTap: () {
-        if (_currentPosition != null) _mapController.move(_currentPosition!, 15);
+        if (_currentPosition != null) {
+          _mapController.move(_currentPosition!, 15);
+        } else {
+          // Location not resolved yet — retry fetching it.
+          setState(() => _locating = true);
+          _getCurrentLocation();
+        }
       },
       child: Container(
         width: 44, height: 44,
