@@ -40,7 +40,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _editPhoneCtrl = TextEditingController();
 
   static const Color nude     = Color(0xFFACA494);
-  static const Color burgundy = Color(0xFFB22222);
+  static const Color maroon   = Color(0xFF341515);
   static const Color _green   = Color(0xFF34C759);
 
   static const _bloodTypes = ['A+', 'A−', 'B+', 'B−', 'AB+', 'AB−', 'O+', 'O−'];
@@ -269,7 +269,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildCard(_actionRow(
               'Log Out',
               CupertinoIcons.square_arrow_right,
-              Colors.white,
+              maroon,
               _confirmLogout,
             )),
           ],
@@ -288,7 +288,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Icon(icon, color: Colors.white, size: 20),
           const SizedBox(width: 8),
           Text(label, style: const TextStyle(
-            fontSize: 16, fontWeight: FontWeight.bold, color: nude)),
+            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
         ],
       ),
     );
@@ -297,9 +297,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildCard(Widget child) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF422E2E).withOpacity(0.55),
+        color: nude,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
       ),
       child: child,
     );
@@ -320,31 +319,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
             width: 56, height: 56,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF0F4C81).withOpacity(0.2),
-              border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
+              color: maroon.withOpacity(0.15),
+              border: Border.all(color: maroon.withOpacity(0.35), width: 1.5),
             ),
             child: ClipOval(
               child: photoUrl != null && photoUrl.isNotEmpty
                   ? CachedNetworkImage(
                       imageUrl: photoUrl, fit: BoxFit.cover,
                       placeholder: (_, __) => const Center(
-                        child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.white)),
+                        child: CircularProgressIndicator(strokeWidth: 1.5, color: maroon)),
                       errorWidget: (_, __, ___) =>
-                          const Icon(CupertinoIcons.person_fill, color: Colors.white, size: 28),
+                          const Icon(CupertinoIcons.person_fill, color: maroon, size: 28),
                     )
                   : Image.asset('assets/images/logos/logo.png', fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) =>
-                          const Icon(CupertinoIcons.person_fill, color: Colors.white, size: 28)),
+                          const Icon(CupertinoIcons.person_fill, color: maroon, size: 28)),
             ),
           ),
           title: Text(username,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: maroon)),
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(email,
-                style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.55))),
+                style: TextStyle(fontSize: 12, color: maroon.withOpacity(0.6))),
           ),
-          trailing: const Icon(CupertinoIcons.chevron_right, color: Colors.white54, size: 24),
+          trailing: Icon(CupertinoIcons.chevron_right, color: maroon.withOpacity(0.5), size: 24),
           onTap: () async {
             await Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const ProfileScreen()));
@@ -394,12 +393,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(width: 16),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(badge, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+              Text(badge, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: maroon)),
               const SizedBox(height: 3),
               Text('$count report${count == 1 ? '' : 's'} submitted',
-                  style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.7))),
+                  style: TextStyle(fontSize: 12, color: maroon.withOpacity(0.7))),
               const SizedBox(height: 6),
-              Text(next, style: TextStyle(fontSize: 10, color: nude.withOpacity(0.55), height: 1.3)),
+              Text(next, style: TextStyle(fontSize: 10, color: maroon.withOpacity(0.6), height: 1.3)),
             ])),
           ]),
         ));
@@ -414,7 +413,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         // Blood type
         const Text('Blood Type',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: nude)),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: maroon)),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8, runSpacing: 8,
@@ -426,15 +425,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 duration: const Duration(milliseconds: 160),
                 width: 50, height: 36,
                 decoration: BoxDecoration(
-                  color: sel ? burgundy : Colors.white.withOpacity(0.06),
+                  color: sel ? maroon : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: sel ? Colors.transparent : Colors.white.withOpacity(0.1)),
+                    color: sel ? maroon : maroon.withOpacity(0.4)),
                 ),
                 alignment: Alignment.center,
                 child: Text(bt, style: TextStyle(
                   fontSize: 12, fontWeight: FontWeight.w700,
-                  color: sel ? Colors.white : nude,
+                  color: sel ? Colors.white : maroon,
                 )),
               ),
             );
@@ -457,7 +456,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             label: const Text('Save Medical Info',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: burgundy, foregroundColor: Colors.white,
+              backgroundColor: maroon, foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
@@ -488,22 +487,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
               ),
               child: Row(children: [
                 Container(
                   width: 38, height: 38,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: burgundy.withOpacity(0.15),
-                    border: Border.all(color: burgundy.withOpacity(0.3)),
+                    color: maroon.withOpacity(0.12),
+                    border: Border.all(color: maroon.withOpacity(0.3)),
                   ),
                   child: Center(
                     child: Text('${i + 1}',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold,
-                          color: burgundy)),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold,
+                          color: maroon)),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -511,10 +509,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(c['name']!.isNotEmpty ? c['name']! : '—',
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
-                          color: Colors.white)),
+                          color: maroon)),
                   const SizedBox(height: 2),
                   Text(c['phone']!.isNotEmpty ? c['phone']! : '—',
-                      style: TextStyle(fontSize: 12, color: nude.withOpacity(0.7))),
+                      style: TextStyle(fontSize: 12, color: maroon.withOpacity(0.65))),
                 ])),
                 // Edit / Delete buttons (only when not editing another)
                 if (!isEditing) ...[
@@ -523,12 +521,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.06),
+                        color: maroon.withOpacity(0.10),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Text('Edit',
                           style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
-                              color: Colors.white70)),
+                              color: maroon)),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -537,11 +535,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: Container(
                       width: 30, height: 30,
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.08),
+                        color: maroon.withOpacity(0.10),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(CupertinoIcons.trash,
-                          color: Colors.redAccent, size: 16),
+                          color: maroon, size: 16),
                     ),
                   ),
                 ],
@@ -560,12 +558,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               width: double.infinity, height: 44,
               child: OutlinedButton.icon(
                 onPressed: () => _startEdit(-1),
-                icon: const Icon(CupertinoIcons.add, size: 18, color: Colors.white70),
+                icon: const Icon(CupertinoIcons.add, size: 18, color: maroon),
                 label: const Text('Add New Contact',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
-                        color: Colors.white70)),
+                        color: maroon)),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.white.withOpacity(0.15)),
+                  side: BorderSide(color: maroon.withOpacity(0.45)),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
               ),
@@ -574,7 +572,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text('Maximum 3 emergency contacts reached.',
-                  style: TextStyle(fontSize: 11, color: nude.withOpacity(0.45))),
+                  style: TextStyle(fontSize: 11, color: maroon.withOpacity(0.5))),
             ),
         ],
       ]),
@@ -587,14 +585,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.04),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(isNew ? 'New Contact' : 'Edit Contact ${index + 1}',
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
-                color: Colors.white70)),
+                color: maroon)),
         const SizedBox(height: 10),
         _fieldLabel(CupertinoIcons.person, 'Name'),
         const SizedBox(height: 5),
@@ -613,12 +610,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: OutlinedButton(
                 onPressed: _cancelEdit,
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.white.withOpacity(0.15)),
+                  side: BorderSide(color: maroon.withOpacity(0.4)),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Cancel',
-                    style: TextStyle(fontSize: 13, color: Colors.white54)),
+                child: Text('Cancel',
+                    style: TextStyle(fontSize: 13, color: maroon.withOpacity(0.7))),
               ),
             ),
           ),
@@ -629,7 +626,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: ElevatedButton(
                 onPressed: _commitEdit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: burgundy, foregroundColor: Colors.white,
+                  backgroundColor: maroon, foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -650,21 +647,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          const Text('Alert me within ',
-              style: TextStyle(fontSize: 13, color: Colors.white70)),
+          Text('Alert me within ',
+              style: TextStyle(fontSize: 13, color: maroon.withOpacity(0.75))),
           Text('${_alertRadius.round()} km',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold,
-                  color: Colors.white)),
+                  color: maroon)),
         ]),
         const SizedBox(height: 4),
         Text('All reports within this radius appear in your home feed.',
-            style: TextStyle(fontSize: 11, color: nude.withOpacity(0.5))),
+            style: TextStyle(fontSize: 11, color: maroon.withOpacity(0.6))),
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
-            activeTrackColor: burgundy,
-            inactiveTrackColor: Colors.white.withOpacity(0.1),
-            thumbColor: Colors.white,
-            overlayColor: burgundy.withOpacity(0.2),
+            activeTrackColor: maroon,
+            inactiveTrackColor: maroon.withOpacity(0.2),
+            thumbColor: maroon,
+            overlayColor: maroon.withOpacity(0.2),
             trackHeight: 3,
           ),
           child: Slider(
@@ -684,8 +681,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text('1 km', style: TextStyle(fontSize: 10, color: nude.withOpacity(0.4))),
-          Text('50 km', style: TextStyle(fontSize: 10, color: nude.withOpacity(0.4))),
+          Text('1 km', style: TextStyle(fontSize: 10, color: maroon.withOpacity(0.5))),
+          Text('50 km', style: TextStyle(fontSize: 10, color: maroon.withOpacity(0.5))),
         ]),
       ]),
     ));
@@ -695,10 +692,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _fieldLabel(IconData icon, String label) {
     return Row(children: [
-      Icon(icon, color: Colors.white.withOpacity(0.5), size: 14),
+      Icon(icon, color: maroon.withOpacity(0.6), size: 14),
       const SizedBox(width: 5),
-      Text(label, style: TextStyle(
-          fontSize: 12, fontWeight: FontWeight.w600, color: nude)),
+      Text(label, style: const TextStyle(
+          fontSize: 12, fontWeight: FontWeight.w600, color: maroon)),
     ]);
   }
 
@@ -707,17 +704,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: maroon.withOpacity(0.2)),
       ),
       child: TextField(
         controller: ctrl,
         keyboardType: keyboardType,
-        style: const TextStyle(fontSize: 13, color: Colors.white),
+        style: const TextStyle(fontSize: 13, color: maroon),
+        cursorColor: maroon,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(fontSize: 12, color: nude.withOpacity(0.35)),
+          hintStyle: TextStyle(fontSize: 12, color: maroon.withOpacity(0.4)),
           border: InputBorder.none,
           isDense: true,
           contentPadding: EdgeInsets.zero,
@@ -737,7 +735,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         height: 31,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15.5),
-          color: value ? _green : Colors.white.withOpacity(0.22),
+          color: value ? maroon : maroon.withOpacity(0.25),
         ),
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 220),
@@ -771,10 +769,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Row(children: [
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(title, style: const TextStyle(
-              fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+              fontSize: 15, fontWeight: FontWeight.bold, color: maroon)),
           const SizedBox(height: 3),
           Text(subtitle, style: TextStyle(
-              fontSize: 11, color: nude.withOpacity(0.65), height: 1.3)),
+              fontSize: 11, color: maroon.withOpacity(0.7), height: 1.3)),
         ])),
         const SizedBox(width: 14),
         _iosToggle(value, onChanged),
@@ -785,7 +783,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _divider() => Container(
     height: 1,
     margin: const EdgeInsets.symmetric(horizontal: 20),
-    color: Colors.white.withOpacity(0.06),
+    color: maroon.withOpacity(0.12),
   );
 
   Widget _actionRow(String title, IconData icon, Color color, VoidCallback onTap) {
@@ -804,21 +802,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF2A1A1A),
+        backgroundColor: nude,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Log Out',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: const Text('Are you sure you want to log out?',
-            style: TextStyle(color: Colors.white70)),
+            style: TextStyle(color: maroon, fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to log out?',
+            style: TextStyle(color: maroon.withOpacity(0.75))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+            child: Text('Cancel', style: TextStyle(color: maroon.withOpacity(0.6))),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Log Out',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                style: TextStyle(color: maroon, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

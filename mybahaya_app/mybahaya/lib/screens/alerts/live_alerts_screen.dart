@@ -27,6 +27,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
   static const Color burgundy = Color(0xFFB22222);
   static const Color nude     = Color(0xFFACA494);
   static const Color pink = Colors.white;
+  static const Color maroon   = Color(0xFF341515);
 
   static const _filters = ['All', 'Fire', 'Theft', 'Assault', 'Medical', 'Other'];
 
@@ -152,9 +153,8 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF4D0A18).withOpacity(0.85),
+        color: nude,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: burgundy.withOpacity(0.35)),
       ),
       child: Column(
         children: [
@@ -163,27 +163,29 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: burgundy.withOpacity(0.25),
+                  color: const Color(0xFFCC0000).withOpacity(0.14),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: burgundy.withOpacity(0.5)),
+                  border: Border.all(color: const Color(0xFFCC0000).withOpacity(0.45)),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
+                    SizedBox(
                       width: 6, height: 6,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFFFF4444),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFFCC0000),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 5),
+                    SizedBox(width: 5),
                     Text(
                       'EMERGENCY',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFFFF8888),
+                        color: Color(0xFFCC0000),
                         letterSpacing: 1,
                       ),
                     ),
@@ -195,7 +197,8 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                 'Malaysia 24/7',
                 style: TextStyle(
                   fontSize: 10,
-                  color: Colors.white.withOpacity(0.35),
+                  fontWeight: FontWeight.w500,
+                  color: maroon.withOpacity(0.55),
                 ),
               ),
             ],
@@ -250,7 +253,8 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
             'Tap to call 999 immediately',
             style: TextStyle(
               fontSize: 11,
-              color: Colors.white.withOpacity(0.45),
+              fontWeight: FontWeight.w500,
+              color: maroon.withOpacity(0.6),
             ),
           ),
 
@@ -259,7 +263,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
           // Three quick-dial tiles
           Row(
             children: [
-              _dialTile('999', 'Polis / Bomba / Ambulans',
+              _dialTile('112', 'Talian Kecemasan Mobile',
                   CupertinoIcons.exclamationmark_circle_fill, const Color(0xFFDC2626)),
               const SizedBox(width: 8),
               _dialTile('994', 'Bomba & Penyelamat',
@@ -281,9 +285,9 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
+            color: Colors.white.withOpacity(0.18),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: color.withOpacity(0.35)),
+            border: Border.all(color: color.withOpacity(0.55)),
           ),
           child: Column(
             children: [
@@ -291,10 +295,10 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
               const SizedBox(height: 5),
               Text(
                 number,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  color: maroon,
                 ),
               ),
               const SizedBox(height: 2),
@@ -304,7 +308,8 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                   label,
                   style: TextStyle(
                     fontSize: 8,
-                    color: Colors.white.withOpacity(0.45),
+                    fontWeight: FontWeight.w500,
+                    color: maroon.withOpacity(0.65),
                     height: 1.3,
                   ),
                   textAlign: TextAlign.center,
@@ -326,40 +331,43 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
         // Section header
         Row(
           children: [
-            Text(
+            const Text(
               'Live Incidents',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
-                color: nude,
+                color: Colors.white,
               ),
             ),
             const SizedBox(width: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFF2ECC71).withOpacity(0.15),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                    color: const Color(0xFF2ECC71).withOpacity(0.4)),
+                color: Colors.white.withOpacity(0.10),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 5, height: 5,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFF2ECC71),
+                  AnimatedBuilder(
+                    animation: _pulseAnim,
+                    builder: (_, __) => Container(
+                      width: 5,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(
+                            (_pulseAnim.value - 1.0) * 6 + 0.4),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  Text(
+                  const SizedBox(width: 5),
+                  const Text(
                     'LIVE',
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF2ECC71),
+                      color: Colors.white,
                       letterSpacing: 1,
                     ),
                   ),
@@ -384,17 +392,10 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                 onTap: () => setState(() => _filter = f),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: active
-                        ? burgundy
-                        : Colors.white.withOpacity(0.07),
-                    borderRadius: BorderRadius.circular(17),
-                    border: Border.all(
-                      color: active
-                          ? Colors.transparent
-                          : Colors.white.withOpacity(0.12),
-                    ),
+                    color: active ? nude : Colors.white.withOpacity(0.10),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                   alignment: Alignment.center,
                   child: Text(
@@ -402,7 +403,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                      color: active ? Colors.white : nude,
+                      color: active ? maroon : Colors.white,
                     ),
                   ),
                 ),
@@ -479,40 +480,37 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
         _userPosition!.latitude, _userPosition!.longitude, lat, lng);
   }
 
+  // Palette-faithful verification chip (maroon / white only).
   Widget _verificationChip(String? status) {
     if (status == 'VERIFIED') {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
         decoration: BoxDecoration(
-          color: const Color(0xFF30d158).withOpacity(0.12),
+          color: maroon,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFF30d158).withOpacity(0.3)),
         ),
         child: const Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(CupertinoIcons.checkmark_shield_fill,
-              color: Color(0xFF30d158), size: 10),
+          Icon(CupertinoIcons.checkmark_seal_fill, color: Colors.white, size: 10),
           SizedBox(width: 3),
           Text('VERIFIED', style: TextStyle(
               fontSize: 8, fontWeight: FontWeight.w800,
-              color: Color(0xFF30d158), letterSpacing: 0.3)),
+              color: Colors.white, letterSpacing: 0.3)),
         ]),
       );
     }
     if (status == 'REJECTED') {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
         decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.12),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.red.withOpacity(0.3)),
+          border: Border.all(color: maroon.withOpacity(0.55)),
         ),
         child: const Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(CupertinoIcons.xmark_shield_fill,
-              color: Colors.redAccent, size: 10),
+          Icon(CupertinoIcons.xmark_seal_fill, color: maroon, size: 10),
           SizedBox(width: 3),
           Text('FALSE ALARM', style: TextStyle(
               fontSize: 8, fontWeight: FontWeight.w800,
-              color: Colors.redAccent, letterSpacing: 0.3)),
+              color: maroon, letterSpacing: 0.3)),
         ]),
       );
     }
@@ -538,33 +536,23 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF2A1515).withOpacity(0.6),
+          color: nude,
           borderRadius: BorderRadius.circular(18),
-          border: Border(
-            left: BorderSide(color: catColor, width: 3),
-            top: BorderSide(color: Colors.white.withOpacity(0.05)),
-            right: BorderSide(color: Colors.white.withOpacity(0.05)),
-            bottom: BorderSide(color: Colors.white.withOpacity(0.05)),
-          ),
+          // Left accent keeps the category's own colour.
+          border: Border(left: BorderSide(color: catColor, width: 4)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Category icon
+              // Category icon — keeps its own category colour
               Container(
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: catColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: catColor.withOpacity(0.4),
-                      blurRadius: 8,
-                    ),
-                  ],
                 ),
                 child: Icon(catIcon, color: Colors.white, size: 20),
               ),
@@ -580,10 +568,10 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                         Expanded(
                           child: Text(
                             category,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: maroon,
                             ),
                           ),
                         ),
@@ -592,7 +580,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: catColor.withOpacity(0.15),
+                              color: catColor.withOpacity(0.18),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
@@ -600,7 +588,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                               style: TextStyle(
                                 fontSize: 10,
                                 color: catColor,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
@@ -612,7 +600,7 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                         details,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.white.withOpacity(0.55),
+                          color: maroon.withOpacity(0.75),
                           height: 1.4,
                         ),
                         maxLines: 2,
@@ -623,31 +611,31 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                     Row(
                       children: [
                         Icon(CupertinoIcons.clock,
-                            size: 11, color: Colors.white.withOpacity(0.3)),
+                            size: 11, color: maroon.withOpacity(0.55)),
                         const SizedBox(width: 3),
                         Text(
                           timeAgo,
                           style: TextStyle(
                             fontSize: 10,
-                            color: Colors.white.withOpacity(0.35),
+                            color: maroon.withOpacity(0.6),
                           ),
                         ),
                         const SizedBox(width: 6),
                         _verificationChip(verificationStatus),
                         const Spacer(),
-                        Row(
+                        const Row(
                           children: [
                             Text(
                               'View on Map',
                               style: TextStyle(
                                 fontSize: 10,
-                                color: catColor,
-                                fontWeight: FontWeight.w600,
+                                color: maroon,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(width: 3),
+                            SizedBox(width: 3),
                             Icon(CupertinoIcons.chevron_forward,
-                                size: 10, color: catColor),
+                                size: 10, color: maroon),
                           ],
                         ),
                       ],

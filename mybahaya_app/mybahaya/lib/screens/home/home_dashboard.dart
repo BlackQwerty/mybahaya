@@ -32,6 +32,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
   static const Color nude     = Color(0xFFACA494);
   static const Color pink = Colors.white;
   static const Color burgundy = Color(0xFFB22222);
+  static const Color maroon   = Color(0xFF341515);
 
   @override
   void initState() {
@@ -158,16 +159,16 @@ class _HomeDashboardState extends State<HomeDashboard> {
             // ── Location chip ─────────────────────────────────────
             Container(
               padding: const EdgeInsets.symmetric(
-                  horizontal: 12, vertical: 6),
+                  horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(16),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(CupertinoIcons.location_fill,
-                      color: burgundy, size: 14),
+                  const Icon(CupertinoIcons.location_solid,
+                      color: maroon, size: 14),
                   const SizedBox(width: 6),
                   Text(
                     _locationLoading
@@ -175,10 +176,10 @@ class _HomeDashboardState extends State<HomeDashboard> {
                         : _userState.isNotEmpty
                             ? _userState
                             : 'Location unavailable',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: nude,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: maroon,
                     ),
                   ),
                 ],
@@ -411,9 +412,10 @@ class _IncidentCard extends StatefulWidget {
 class _IncidentCardState extends State<_IncidentCard> {
   String _placeName = 'Loading location...';
 
-  static const Color nude     = Color(0xFFACA494);
-  static const Color pink = Colors.white;
-  static const Color burgundy = Color(0xFFB22222);
+  // Home-page palette — strictly three colors.
+  static const Color maroon = Color(0xFF341515);
+  static const Color nude   = Color(0xFFACA494);
+  static const Color white  = Colors.white;
 
   @override
   void initState() {
@@ -428,16 +430,6 @@ class _IncidentCardState extends State<_IncidentCard> {
     final lng = (loc['longitude'] as num?)?.toDouble() ?? 0;
     final name = await GeocodingService.getPlaceName(lat, lng);
     if (mounted) setState(() => _placeName = name);
-  }
-
-  Color _catColor(String cat) {
-    switch (cat.toLowerCase()) {
-      case 'fire':    return const Color(0xFFFF6B35);
-      case 'theft':   return const Color(0xFF9B59B6);
-      case 'assault': return const Color(0xFFE74C3C);
-      case 'medical': return const Color(0xFF2ECC71);
-      default:        return burgundy;
-    }
   }
 
   IconData _catIcon(String cat) {
@@ -465,40 +457,37 @@ class _IncidentCardState extends State<_IncidentCard> {
     return '${diff.inDays}d ago';
   }
 
-  Widget _verificationBadge(String? status) {
+  // Palette-faithful verification chip (maroon / white only).
+  Widget _verificationChip(String? status) {
     if (status == 'VERIFIED') {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
         decoration: BoxDecoration(
-          color: const Color(0xFF30d158).withOpacity(0.12),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF30d158).withOpacity(0.3)),
+          color: maroon,
+          borderRadius: BorderRadius.circular(20),
         ),
         child: const Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(CupertinoIcons.checkmark_shield_fill,
-              color: Color(0xFF30d158), size: 11),
+          Icon(CupertinoIcons.checkmark_seal_fill, color: white, size: 11),
           SizedBox(width: 4),
           Text('VERIFIED', style: TextStyle(
               fontSize: 9, fontWeight: FontWeight.w800,
-              color: Color(0xFF30d158), letterSpacing: 0.4)),
+              color: white, letterSpacing: 0.4)),
         ]),
       );
     }
     if (status == 'REJECTED') {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
         decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.red.withOpacity(0.3)),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: maroon.withOpacity(0.55)),
         ),
         child: const Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(CupertinoIcons.xmark_shield_fill,
-              color: Colors.redAccent, size: 11),
+          Icon(CupertinoIcons.xmark_seal_fill, color: maroon, size: 11),
           SizedBox(width: 4),
           Text('FALSE ALARM', style: TextStyle(
               fontSize: 9, fontWeight: FontWeight.w800,
-              color: Colors.redAccent, letterSpacing: 0.4)),
+              color: maroon, letterSpacing: 0.4)),
         ]),
       );
     }
@@ -511,220 +500,214 @@ class _IncidentCardState extends State<_IncidentCard> {
     final details            = widget.data['details']  as String? ?? '';
     final imageUrl           = widget.data['imageUrl'] as String? ?? '';
     final verificationStatus = widget.data['verificationStatus'] as String?;
-    final catColor           = _catColor(category);
 
     return GestureDetector(
       onTap: () => _showDetailSheet(context),
       child: Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      decoration: BoxDecoration(
-        color: const Color(0xFF422E2E).withOpacity(0.55),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Header badge ─────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Row(
+        margin: const EdgeInsets.only(bottom: 18),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: nude,
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Top row: category + verification + time ──────────
+            Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF8B1A1A).withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 6, height: 6,
-                        decoration: const BoxDecoration(
-                          color: Colors.white, shape: BoxShape.circle),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'INCIDENT REPORT',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _categoryBadge(category),
                 const SizedBox(width: 8),
-                _verificationBadge(verificationStatus),
+                _verificationChip(verificationStatus),
                 const Spacer(),
                 Text(
                   _timeAgo(widget.data['createdAt']),
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: nude.withOpacity(0.5),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // ── Reported image ───────────────────────────────────
-          if (imageUrl.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  height: 180,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    height: 180,
-                    color: Colors.white.withOpacity(0.05),
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                          color: burgundy, strokeWidth: 1.5),
-                    ),
-                  ),
-                  errorWidget: (_, __, ___) => Container(
-                    height: 100,
-                    color: Colors.white.withOpacity(0.04),
-                    child: Icon(CupertinoIcons.photo,
-                        color: nude.withOpacity(0.3), size: 32),
-                  ),
-                ),
-              ),
-            ),
-          ],
-
-          const SizedBox(height: 14),
-
-          // ── Category + place name ────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                // Category badge
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: catColor.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: catColor.withOpacity(0.4)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(_catIcon(category),
-                          color: catColor, size: 12),
-                      const SizedBox(width: 4),
-                      Text(
-                        category.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: catColor,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // Place name
-                Expanded(
-                  child: Row(
-                    children: [
-                      Icon(CupertinoIcons.location_fill,
-                          color: pink.withOpacity(0.6), size: 12),
-                      const SizedBox(width: 3),
-                      Expanded(
-                        child: Text(
-                          _placeName,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: nude,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // ── Details ──────────────────────────────────────────
-          if (details.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                details,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.white.withOpacity(0.75),
-                  height: 1.5,
-                ),
-              ),
-            ),
-          ],
-
-          const SizedBox(height: 16),
-
-          // ── View Details button ──────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: SizedBox(
-              height: 38,
-              child: OutlinedButton.icon(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => IncidentMapScreen(
-                      report: widget.data,
-                    ),
-                  ),
-                ),
-                icon: const Icon(CupertinoIcons.map_fill,
-                    color: Colors.white, size: 15),
-                label: Text(
-                  'View Details on Map',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: maroon,
                   ),
                 ),
-                style: OutlinedButton.styleFrom(
-                  backgroundColor:
-                      const Color(0xFF261212).withOpacity(0.8),
-                  side: BorderSide(
-                      color: Colors.white.withOpacity(0.12)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(19),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // ── Large image with a details strip across the bottom ─
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Stack(
+                children: [
+                  if (imageUrl.isNotEmpty)
+                    CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      height: 250,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                        height: 250,
+                        color: maroon.withOpacity(0.10),
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                              color: maroon, strokeWidth: 1.6),
+                        ),
+                      ),
+                      errorWidget: (_, __, ___) => Container(
+                        height: 250,
+                        color: maroon.withOpacity(0.10),
+                        child: const Center(
+                          child: Icon(CupertinoIcons.photo,
+                              color: maroon, size: 36),
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      height: 250,
+                      width: double.infinity,
+                      color: maroon.withOpacity(0.10),
+                      child: const Center(
+                        child: Icon(CupertinoIcons.photo,
+                            color: maroon, size: 36),
+                      ),
+                    ),
+
+                  // Details overlay — white @ 60% so the image stays visible
+                  if (details.isNotEmpty)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+                        color: white.withOpacity(0.60),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'DETAILS:',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5,
+                                color: maroon,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              details,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                height: 1.35,
+                                fontWeight: FontWeight.w500,
+                                color: maroon,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
               ),
+            ),
+            const SizedBox(height: 12),
+
+            // ── Bottom row: View on Map + place name ─────────────
+            Row(
+              children: [
+                _viewOnMapButton(context),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const Icon(CupertinoIcons.location_solid,
+                          size: 13, color: maroon),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          _placeName,
+                          textAlign: TextAlign.right,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: maroon,
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Category badge — maroon outline pill on the nude card ────
+  Widget _categoryBadge(String category) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: maroon.withOpacity(0.55)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(_catIcon(category), color: maroon, size: 13),
+          const SizedBox(width: 5),
+          Text(
+            category.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              color: maroon,
+              letterSpacing: 0.5,
             ),
           ),
         ],
       ),
-    ),
+    );
+  }
+
+  // ── "View on Map" — maroon outline pill button ───────────────
+  Widget _viewOnMapButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => IncidentMapScreen(report: widget.data),
+        ),
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: maroon.withOpacity(0.55)),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(CupertinoIcons.map_fill, color: maroon, size: 14),
+            SizedBox(width: 6),
+            Text(
+              'View on Map',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: maroon,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1058,51 +1041,34 @@ class _FilterPill extends StatelessWidget {
     required this.onTap,
   });
 
+  // Palette: active = nude fill + maroon text, inactive = subtle raised
+  // surface (white @ 10%) + white text. Maroon / nude / white only.
+  static const Color _nude  = Color(0xFFACA494);
+  static const Color _maroon = Color(0xFF341515);
+
   @override
   Widget build(BuildContext context) {
+    final Color fg = isActive ? _maroon : Colors.white;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive
-              ? const Color(0xFFB22222)
-              : const Color(0xFF422E2E).withOpacity(0.6),
+          color: isActive ? _nude : Colors.white.withOpacity(0.10),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isActive
-                ? Colors.transparent
-                : Colors.white.withOpacity(0.08),
-          ),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: const Color(0xFFB22222).withOpacity(0.3),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  )
-                ]
-              : [],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: 13,
-                color: isActive
-                    ? Colors.white
-                    : const Color(0xFFACA494)),
+            Icon(icon, size: 13, color: fg),
             const SizedBox(width: 5),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
-                fontWeight:
-                    isActive ? FontWeight.bold : FontWeight.w500,
-                color: isActive
-                    ? Colors.white
-                    : const Color(0xFFACA494),
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: fg,
               ),
             ),
           ],

@@ -20,6 +20,7 @@
   "homepage": "https://github.com/BlackQwerty/mybahaya#readme",
   "dependencies": {
     "docx": "^9.7.1",
-    "firebase-admin": "^14.0.0"
+    "firebase-admin": "^14.0.0",
+    "pptxgenjs": "^4.0.1"
   }
 }

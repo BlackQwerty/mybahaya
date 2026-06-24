@@ -44,6 +44,7 @@ class _ReportScreenState extends State<ReportScreen> {
   static const Color nudeColor = Color(0xFFACA494);
   static const Color pinkColor = Colors.white;
   static const Color burgundyColor = Color(0xFFB22222);
+  static const Color maroonColor = Color(0xFF341515);
 
   @override
   void initState() {
@@ -542,28 +543,25 @@ class _ReportScreenState extends State<ReportScreen> {
               children: [
                 _buildLocationBadge(),
                 const Spacer(),
-                TextButton.icon(
-                  onPressed: () => Navigator.push(
+                GestureDetector(
+                  onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const MyReportsScreen()),
                   ),
-                  icon: const Icon(CupertinoIcons.clock,
-                      size: 15, color: Colors.white),
-                  label: Text(
-                    'View Reports',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                  style: TextButton.styleFrom(
-                    backgroundColor: const Color(0xFF422E2E).withOpacity(0.55),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    shape: RoundedRectangleBorder(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 9),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.10),
                       borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(color: Colors.white.withOpacity(0.06)),
+                    ),
+                    child: const Text(
+                      'My Reports',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -600,27 +598,23 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget _buildLocationBadge() {
     final hasLocation = _currentPosition != null;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
       decoration: BoxDecoration(
-        color: const Color(0xFF422E2E).withOpacity(0.55),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            hasLocation ? CupertinoIcons.location_fill : CupertinoIcons.location,
-            color: hasLocation ? Colors.greenAccent : nudeColor,
-            size: 16,
-          ),
-          const SizedBox(width: 8),
+          const Icon(CupertinoIcons.location_solid,
+              color: maroonColor, size: 14),
+          const SizedBox(width: 6),
           Text(
             hasLocation ? 'Current Location Active' : 'Locating...',
-            style: TextStyle(
-              fontSize: 12,
+            style: const TextStyle(
+              fontSize: 12.5,
               fontWeight: FontWeight.w600,
-              color: nudeColor,
+              color: maroonColor,
             ),
           ),
         ],
@@ -673,45 +667,42 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget _buildEmptyMediaBox() {
     return GestureDetector(
       onTap: _showPhotoSourceSheet,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Container(
-            width: double.infinity,
-            height: 160,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white.withOpacity(0.08),
-                  Colors.white.withOpacity(0.03),
-                ],
+      child: Container(
+        width: double.infinity,
+        height: 170,
+        decoration: BoxDecoration(
+          color: nudeColor,
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                color: maroonColor.withOpacity(0.18),
+                shape: BoxShape.circle,
               ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.06)),
+              child: const Icon(CupertinoIcons.camera_fill,
+                  color: maroonColor, size: 30),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(CupertinoIcons.camera_fill,
-                    color: pinkColor.withOpacity(0.8), size: 40),
-                const SizedBox(height: 12),
-                Text('Take a Photo or Upload',
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white70),
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 4),
-                Text('Up to $maxPhotos photos · camera or gallery',
-                    style: TextStyle(
-                        fontSize: 11, color: nudeColor.withOpacity(0.6)),
-                    textAlign: TextAlign.center),
-              ],
-            ),
-          ),
+            const SizedBox(height: 14),
+            const Text('Capture  or  Upload',
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: maroonColor),
+                textAlign: TextAlign.center),
+            const SizedBox(height: 5),
+            Text('MAKE IT CLEAR',
+                style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1,
+                    color: maroonColor.withOpacity(0.55)),
+                textAlign: TextAlign.center),
+          ],
         ),
       ),
     );
@@ -754,16 +745,15 @@ class _ReportScreenState extends State<ReportScreen> {
         width: 96,
         height: 96,
         decoration: BoxDecoration(
-          color: const Color(0xFF422E2E).withOpacity(0.55),
+          color: nudeColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.10)),
         ),
-        child: Column(
+        child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(CupertinoIcons.add, color: pinkColor.withOpacity(0.85), size: 26),
-            const SizedBox(height: 4),
-            Text('Add', style: TextStyle(fontSize: 11, color: nudeColor)),
+            Icon(CupertinoIcons.add, color: maroonColor, size: 26),
+            SizedBox(height: 4),
+            Text('Add', style: TextStyle(fontSize: 11, color: maroonColor)),
           ],
         ),
       ),
@@ -791,20 +781,22 @@ class _ReportScreenState extends State<ReportScreen> {
             onTap: _showVideoSourceSheet,
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFF422E2E).withOpacity(0.55),
+                color: nudeColor,
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(CupertinoIcons.videocam_fill,
-                      color: pinkColor.withOpacity(0.85), size: 20),
-                  const SizedBox(width: 10),
-                  Text('Record or upload a short video',
-                      style: TextStyle(fontSize: 13, color: Colors.white70)),
+                      color: maroonColor, size: 20),
+                  SizedBox(width: 10),
+                  Text('Record  or  Upload short video ( 15s )',
+                      style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: maroonColor)),
                 ],
               ),
             ),
@@ -813,9 +805,8 @@ class _ReportScreenState extends State<ReportScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF422E2E).withOpacity(0.55),
+              color: nudeColor,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withOpacity(0.08)),
             ),
             child: Row(
               children: [
@@ -823,11 +814,11 @@ class _ReportScreenState extends State<ReportScreen> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: burgundyColor.withOpacity(0.25),
+                    color: maroonColor.withOpacity(0.18),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(CupertinoIcons.play_fill,
-                      color: Colors.white, size: 18),
+                  child: const Icon(CupertinoIcons.play_fill,
+                      color: maroonColor, size: 18),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -836,19 +827,21 @@ class _ReportScreenState extends State<ReportScreen> {
                     children: [
                       const Text('Video ready',
                           style: TextStyle(
-                              color: Colors.white,
+                              color: maroonColor,
                               fontSize: 13,
                               fontWeight: FontWeight.w600)),
                       const SizedBox(height: 2),
                       Text('Will upload after you submit',
-                          style: TextStyle(color: nudeColor, fontSize: 11)),
+                          style: TextStyle(
+                              color: maroonColor.withOpacity(0.7),
+                              fontSize: 11)),
                     ],
                   ),
                 ),
                 GestureDetector(
                   onTap: () => setState(() => _selectedVideo = null),
                   child: Icon(CupertinoIcons.xmark_circle_fill,
-                      color: Colors.white.withOpacity(0.5), size: 22),
+                      color: maroonColor.withOpacity(0.6), size: 22),
                 ),
               ],
             ),
@@ -878,19 +871,18 @@ class _ReportScreenState extends State<ReportScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF422E2E).withOpacity(0.55),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withOpacity(0.06)),
+            color: nudeColor,
+            borderRadius: BorderRadius.circular(22),
           ),
           child: TextField(
             controller: descriptionController,
             maxLines: 4,
-            style: TextStyle(fontSize: 14, color: Colors.white),
+            style: const TextStyle(fontSize: 14, color: maroonColor),
+            cursorColor: maroonColor,
             decoration: InputDecoration(
-              hintText:
-                  'Provide detailed details on location, hazards, or safety threats...',
+              hintText: 'Describe the incident briefly ...',
               hintStyle:
-                  TextStyle(fontSize: 13, color: nudeColor.withOpacity(0.4)),
+                  TextStyle(fontSize: 13, color: maroonColor.withOpacity(0.5)),
               border: InputBorder.none,
               isDense: true,
               contentPadding: EdgeInsets.zero,
@@ -901,7 +893,7 @@ class _ReportScreenState extends State<ReportScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
-            'SELECT HAZARD CATEGORY',
+            'CATEGORY',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -929,22 +921,17 @@ class _ReportScreenState extends State<ReportScreen> {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? burgundyColor
-                  : const Color(0xFF422E2E).withOpacity(0.55),
+              // Selected → nude fill. Unselected → translucent white pill
+              // (same style as the "My Reports" button) with white text.
+              color: isSelected ? nudeColor : Colors.white.withOpacity(0.10),
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(
-                color:
-                    isSelected ? Colors.transparent : Colors.white.withOpacity(0.06),
-                width: 1,
-              ),
             ),
             child: Text(
               category,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? Colors.white : nudeColor,
+                color: isSelected ? maroonColor : Colors.white,
               ),
             ),
           ),
@@ -960,22 +947,21 @@ class _ReportScreenState extends State<ReportScreen> {
           flex: 4,
           child: SizedBox(
             height: 52,
-            child: OutlinedButton.icon(
+            child: OutlinedButton(
               onPressed: () => FocusScope.of(context).unfocus(),
-              icon: const Icon(CupertinoIcons.keyboard_chevron_compact_down,
-                  size: 18, color: Colors.white54),
-              label: Text(
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white.withOpacity(0.10),
+                side: BorderSide.none,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(26),
+                ),
+              ),
+              child: const Text(
                 'Cancel',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white54,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Colors.white.withOpacity(0.12)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(26),
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -993,23 +979,22 @@ class _ReportScreenState extends State<ReportScreen> {
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2),
+                          color: maroonColor, strokeWidth: 2),
                     )
                   : const Icon(CupertinoIcons.exclamationmark_triangle_fill,
-                      size: 18, color: Colors.white),
+                      size: 18, color: maroonColor),
               label: Text(
                 _isLoading ? 'Submitting...' : 'Report Incident',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: maroonColor,
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2A1010),
-                foregroundColor: Colors.white,
+                backgroundColor: nudeColor,
+                foregroundColor: maroonColor,
                 elevation: 0,
-                side: BorderSide(color: Colors.white.withOpacity(0.15)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(26),
                 ),
