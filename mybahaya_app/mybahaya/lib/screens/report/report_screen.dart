@@ -255,11 +255,13 @@ class _ReportScreenState extends State<ReportScreen> {
   void _startBackgroundVideoUpload(String reportId, File videoFile) {
     final progress = ValueNotifier<double>(0);
     final status = ValueNotifier<String>('uploading'); // uploading | done | error
+    final errorMsg = ValueNotifier<String>('');
     final overlay = Overlay.of(context, rootOverlay: true);
 
     late OverlayEntry entry;
     entry = OverlayEntry(
-      builder: (ctx) => _VideoUploadChip(progress: progress, status: status),
+      builder: (ctx) =>
+          _VideoUploadChip(progress: progress, status: status, errorMsg: errorMsg),
     );
     overlay.insert(entry);
 
@@ -269,14 +271,16 @@ class _ReportScreenState extends State<ReportScreen> {
       onProgress: (p) => progress.value = p,
     ).then((_) {
       status.value = 'done';
-    }).catchError((_) {
+    }).catchError((e) {
+      errorMsg.value = e.toString().replaceFirst('Exception: ', '');
       status.value = 'error';
     }).whenComplete(() {
-      // Leave the chip on screen briefly so the user sees the final state.
-      Future.delayed(const Duration(seconds: 3), () {
+      // Errors linger longer so the user can read the reason.
+      Future.delayed(Duration(seconds: status.value == 'error' ? 6 : 3), () {
         entry.remove();
         progress.dispose();
         status.dispose();
+        errorMsg.dispose();
       });
     });
   }
@@ -1015,8 +1019,13 @@ class _SheetOption {
 class _VideoUploadChip extends StatelessWidget {
   final ValueNotifier<double> progress;
   final ValueNotifier<String> status;
+  final ValueNotifier<String> errorMsg;
 
-  const _VideoUploadChip({required this.progress, required this.status});
+  const _VideoUploadChip({
+    required this.progress,
+    required this.status,
+    required this.errorMsg,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1077,6 +1086,19 @@ class _VideoUploadChip extends StatelessWidget {
                               fontSize: 13,
                               fontWeight: FontWeight.w600),
                         ),
+                        if (error) ...[
+                          const SizedBox(height: 3),
+                          ValueListenableBuilder<String>(
+                            valueListenable: errorMsg,
+                            builder: (context, msg, _) => Text(
+                              msg.isEmpty ? 'Please try again.' : msg,
+                              style: TextStyle(
+                                  color: Colors.white.withOpacity(0.7),
+                                  fontSize: 11,
+                                  height: 1.3),
+                            ),
+                          ),
+                        ],
                         if (!done && !error) ...[
                           const SizedBox(height: 6),
                           ValueListenableBuilder<double>(

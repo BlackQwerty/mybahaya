@@ -89,6 +89,29 @@ public class ReportController {
         }
     }
 
+    /* ── PATCH /api/reports/{reportId}/verify — org/admin verifies or rejects ── */
+
+    @PatchMapping("/{reportId}/verify")
+    public ResponseEntity<Map<String, Object>> verifyReport(
+            @PathVariable String reportId,
+            @RequestBody Map<String, String> body) {
+        try {
+            String uid = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (uid == null || uid.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            String action = body.get("action");
+            if (action == null || action.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "action field required"));
+            }
+            reportService.verifyReport(reportId, action.toUpperCase());
+            return ResponseEntity.ok(Map.of("ok", true, "verificationStatus", action.toUpperCase()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("ok", false, "message", e.getMessage() != null ? e.getMessage() : "Verify failed"));
+        }
+    }
+
     /* ── PATCH /api/reports/{reportId}/status — org/admin updates status ── */
     // The state machine in ReportService validates the transition.
     // On success, it also fires an FCM push to the citizen.

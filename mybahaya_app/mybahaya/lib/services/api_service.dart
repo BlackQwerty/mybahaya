@@ -107,33 +107,55 @@ class ApiService {
     final token = await user.getIdToken();
     if (token == null) throw Exception('Failed to get authentication token');
 
+    // Guard against files that exceed the server's 200MB limit — fail early
+    // with a clear message instead of a confusing timeout/500 mid-upload.
+    final sizeBytes = await videoFile.length();
+    const maxBytes = 200 * 1024 * 1024;
+    if (sizeBytes > maxBytes) {
+      final mb = (sizeBytes / (1024 * 1024)).toStringAsFixed(0);
+      throw Exception('Video is too large (${mb}MB). Max 200MB — pick a shorter clip.');
+    }
+
     final dio = Dio();
     final formData = FormData.fromMap({
       'video': await MultipartFile.fromFile(videoFile.path),
     });
 
-    final response = await dio.post(
-      '$baseUrl/reports/$reportId/video',
-      data: formData,
-      options: Options(
-        headers: {'Authorization': 'Bearer $token'},
-        sendTimeout: const Duration(minutes: 3),
-        receiveTimeout: const Duration(minutes: 1),
-      ),
-      onSendProgress: (sent, total) {
-        if (total > 0 && onProgress != null) {
-          onProgress(sent / total);
-        }
-      },
-    );
+    try {
+      final response = await dio.post(
+        '$baseUrl/reports/$reportId/video',
+        data: formData,
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+          sendTimeout: const Duration(minutes: 8),
+          receiveTimeout: const Duration(minutes: 2),
+        ),
+        onSendProgress: (sent, total) {
+          if (total > 0 && onProgress != null) {
+            onProgress(sent / total);
+          }
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final data = response.data;
-      if (data is Map && data['videoUrl'] != null) {
-        return data['videoUrl'] as String;
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map && data['videoUrl'] != null) {
+          return data['videoUrl'] as String;
+        }
+        return null;
       }
-      return null;
+      throw Exception('Server returned ${response.statusCode}');
+    } on DioException catch (e) {
+      // Surface the real reason instead of a swallowed silent failure.
+      final code = e.response?.statusCode;
+      if (code == 413) {
+        throw Exception('Video rejected by server (too large). Try a shorter clip.');
+      }
+      if (e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.connectionTimeout) {
+        throw Exception('Upload timed out — connection too slow for this video size.');
+      }
+      throw Exception('Upload failed${code != null ? ' ($code)' : ''}: ${e.message}');
     }
-    throw Exception('Video upload failed (${response.statusCode})');
   }
 }

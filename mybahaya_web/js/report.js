@@ -163,6 +163,26 @@ window.updateReportStatus = async function (reportId, nextStatus) {
   }
 };
 
+/* ── Verify / Reject report ── */
+window.verifyReport = async function (reportId, action) {
+  const label = action === 'VERIFIED' ? 'Verify as real' : 'Mark as False Alarm';
+  if (!confirm(`${label}? This will be visible to all citizens in the community feed.`)) return;
+  try {
+    const token = await firebase.auth().currentUser.getIdToken();
+    const res = await fetch(`${API_BASE}/reports/${reportId}/verify`, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || 'Failed');
+    window.showToast?.(action === 'VERIFIED' ? '✓ Report verified' : '✗ Marked as false alarm', 'success');
+    closeDetailModal();
+  } catch (e) {
+    window.showToast?.('Failed: ' + e.message, 'error');
+  }
+};
+
 /* ══════════════════════════════════════════════════════════
    DETAIL MODAL — opens when you click a report card
    ══════════════════════════════════════════════════════════ */
@@ -300,6 +320,24 @@ function openDetailModal(r) {
           <div class="rdm-section-label"><ion-icon name="time-outline"></ion-icon> Reported</div>
           <p class="rdm-time">${fmtFullDate(r.createdAt)}</p>
         </div>
+
+        <!-- Verification (only shown while PENDING) -->
+        ${(!r.verificationStatus || r.verificationStatus === 'PENDING') ? `
+        <div class="rdm-verify-row">
+          <span class="rdm-verify-label"><ion-icon name="shield-checkmark-outline"></ion-icon> Verification</span>
+          <div class="rdm-verify-btns">
+            <button class="rdm-verify-btn rdm-verify-yes" onclick="verifyReport('${r.reportId || r.id}','VERIFIED')">
+              <ion-icon name="checkmark-circle-outline"></ion-icon> Confirm Real
+            </button>
+            <button class="rdm-verify-btn rdm-verify-no" onclick="verifyReport('${r.reportId || r.id}','REJECTED')">
+              <ion-icon name="close-circle-outline"></ion-icon> False Alarm
+            </button>
+          </div>
+        </div>` : `
+        <div class="rdm-verify-badge ${r.verificationStatus === 'VERIFIED' ? 'rdm-vb-verified' : 'rdm-vb-rejected'}">
+          <ion-icon name="${r.verificationStatus === 'VERIFIED' ? 'shield-checkmark-outline' : 'warning-outline'}"></ion-icon>
+          ${r.verificationStatus === 'VERIFIED' ? 'Verified — Confirmed real incident' : 'False Alarm — This report was rejected'}
+        </div>`}
 
         <!-- Status Update Button -->
         ${next ? `

@@ -148,10 +148,15 @@ class _AppNavigatorState extends State<AppNavigator> {
             );
             final token = await FirebaseMessaging.instance.getToken();
             if (token != null) {
+              final prefs = await SharedPreferences.getInstance();
+              final radius = prefs.getDouble('alert_radius') ?? 5.0;
               await FirebaseFirestore.instance
                   .collection('users')
                   .doc(user.uid)
-                  .update({'fcmToken': token});
+                  .update({
+                    'fcmToken': token,
+                    'alertRadiusKm': radius,
+                  });
             }
           } catch (_) {
             // Non-fatal — app works without push notifications

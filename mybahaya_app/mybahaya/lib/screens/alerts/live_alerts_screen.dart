@@ -479,9 +479,50 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
         _userPosition!.latitude, _userPosition!.longitude, lat, lng);
   }
 
+  Widget _verificationChip(String? status) {
+    if (status == 'VERIFIED') {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: const Color(0xFF30d158).withOpacity(0.12),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFF30d158).withOpacity(0.3)),
+        ),
+        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(CupertinoIcons.checkmark_shield_fill,
+              color: Color(0xFF30d158), size: 10),
+          SizedBox(width: 3),
+          Text('VERIFIED', style: TextStyle(
+              fontSize: 8, fontWeight: FontWeight.w800,
+              color: Color(0xFF30d158), letterSpacing: 0.3)),
+        ]),
+      );
+    }
+    if (status == 'REJECTED') {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.red.withOpacity(0.3)),
+        ),
+        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(CupertinoIcons.xmark_shield_fill,
+              color: Colors.redAccent, size: 10),
+          SizedBox(width: 3),
+          Text('FALSE ALARM', style: TextStyle(
+              fontSize: 8, fontWeight: FontWeight.w800,
+              color: Colors.redAccent, letterSpacing: 0.3)),
+        ]),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
   Widget _buildAlertCard(Map<String, dynamic> data) {
-    final category = data['category'] as String? ?? 'Other';
-    final details  = data['details']  as String? ?? '';
+    final category           = data['category'] as String? ?? 'Other';
+    final details            = data['details']  as String? ?? '';
+    final verificationStatus = data['verificationStatus'] as String?;
     final catColor = _catColor(category);
     final catIcon  = _catIcon(category);
     final dist     = _userPosition != null ? _docDistance(data) : null;
@@ -591,6 +632,8 @@ class _LiveAlertsScreenState extends State<LiveAlertsScreen>
                             color: Colors.white.withOpacity(0.35),
                           ),
                         ),
+                        const SizedBox(width: 6),
+                        _verificationChip(verificationStatus),
                         const Spacer(),
                         Row(
                           children: [

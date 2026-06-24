@@ -673,6 +673,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChangeEnd: (v) async {
               final prefs = await SharedPreferences.getInstance();
               await prefs.setDouble('alert_radius', v);
+              // Sync to Firestore so backend uses the latest radius for geo-radius alerts
+              final uid = FirebaseAuth.instance.currentUser?.uid;
+              if (uid != null) {
+                FirebaseFirestore.instance.collection('users').doc(uid).update({
+                  'alertRadiusKm': v,
+                }).catchError((_) {});
+              }
             },
           ),
         ),

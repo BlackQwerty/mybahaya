@@ -85,6 +85,12 @@ firebase.auth().onAuthStateChanged(async function (user) {
     });
   }
 
+  // Phase 3 — register browser push for org users so they get notified
+  // when a new incident is assigned to them (even with the tab closed).
+  if (org) {
+    _registerOrgPush(org.id).catch(e => console.warn('[Push]', e));
+  }
+
   // Let page scripts proceed
   _resolveAuthReady({ isAdmin, org, role: window.currentUserRole });
 
@@ -101,3 +107,29 @@ firebase.auth().onAuthStateChanged(async function (user) {
     }
   });
 });
+
+/* ── Phase 3: register browser push for org and save token to Firestore ── */
+async function _registerOrgPush(orgId) {
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+
+  // Register the service worker that handles background notifications
+  const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+
+  const messaging = firebase.messaging();
+
+  // Request permission — browser shows a one-time dialog
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') return;
+
+  // VAPID key from Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
+  // Go to: https://console.firebase.google.com → mybahaya-fyp → Project Settings → Cloud Messaging
+  // Scroll to "Web configuration" and copy the Key pair value, paste it below.
+  const VAPID_KEY = 'YOUR_VAPID_KEY_FROM_FIREBASE_CONSOLE';
+
+  const token = await messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+  if (!token) return;
+
+  // Save to Firestore so the backend can push to this browser
+  await db.collection('organizations').doc(orgId).update({ browserFcmToken: token });
+  console.log('[Push] Browser push token saved for org', orgId);
+}

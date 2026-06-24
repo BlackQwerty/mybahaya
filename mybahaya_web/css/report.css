@@ -415,6 +415,49 @@ video.rdm-main-media { object-fit: contain; background: #000; }
 .rdm-location-text { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.5; margin: 0; }
 .rdm-time { font-size: 13px; color: rgba(255,255,255,0.6); margin: 0; }
 
+/* Verification row */
+.rdm-verify-row {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 14px; border-radius: 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.rdm-verify-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: rgba(255,255,255,0.4);
+}
+.rdm-verify-label ion-icon { font-size: 13px; }
+.rdm-verify-btns { display: flex; gap: 8px; }
+.rdm-verify-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 12px; border-radius: 10px;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  border: 1px solid; transition: all 0.15s;
+}
+.rdm-verify-yes {
+  background: rgba(48,209,88,0.1); color: #30d158; border-color: rgba(48,209,88,0.3);
+}
+.rdm-verify-yes:hover { background: rgba(48,209,88,0.2); }
+.rdm-verify-no {
+  background: rgba(255,59,48,0.1); color: #ff6b6b; border-color: rgba(255,59,48,0.3);
+}
+.rdm-verify-no:hover { background: rgba(255,59,48,0.2); }
+
+/* Verification badge (already decided) */
+.rdm-verify-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 12px;
+  font-size: 12px; font-weight: 600; border: 1px solid;
+}
+.rdm-verify-badge ion-icon { font-size: 16px; flex-shrink: 0; }
+.rdm-vb-verified {
+  background: rgba(48,209,88,0.08); color: #30d158; border-color: rgba(48,209,88,0.25);
+}
+.rdm-vb-rejected {
+  background: rgba(255,59,48,0.08); color: #ff6b6b; border-color: rgba(255,59,48,0.25);
+}
+
 .rdm-update-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; padding: 12px; border-radius: 14px;

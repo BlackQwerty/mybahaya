@@ -2,7 +2,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar.dart';
@@ -68,6 +70,15 @@ class _HomeDashboardState extends State<HomeDashboard> {
       final state = await GeocodingService.getState(
           pos.latitude, pos.longitude);
       if (mounted) setState(() => _userState = state);
+
+      // Save location to Firestore so backend can find nearby users for geo-radius alerts
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid != null) {
+        FirebaseFirestore.instance.collection('users').doc(uid).update({
+          'latitude': pos.latitude,
+          'longitude': pos.longitude,
+        }).catchError((_) {});
+      }
 
     } catch (_) {
       // Silently fall through — finally always runs
@@ -454,14 +465,57 @@ class _IncidentCardState extends State<_IncidentCard> {
     return '${diff.inDays}d ago';
   }
 
+  Widget _verificationBadge(String? status) {
+    if (status == 'VERIFIED') {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: const Color(0xFF30d158).withOpacity(0.12),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFF30d158).withOpacity(0.3)),
+        ),
+        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(CupertinoIcons.checkmark_shield_fill,
+              color: Color(0xFF30d158), size: 11),
+          SizedBox(width: 4),
+          Text('VERIFIED', style: TextStyle(
+              fontSize: 9, fontWeight: FontWeight.w800,
+              color: Color(0xFF30d158), letterSpacing: 0.4)),
+        ]),
+      );
+    }
+    if (status == 'REJECTED') {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.red.withOpacity(0.3)),
+        ),
+        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(CupertinoIcons.xmark_shield_fill,
+              color: Colors.redAccent, size: 11),
+          SizedBox(width: 4),
+          Text('FALSE ALARM', style: TextStyle(
+              fontSize: 9, fontWeight: FontWeight.w800,
+              color: Colors.redAccent, letterSpacing: 0.4)),
+        ]),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final category = widget.data['category'] as String? ?? 'Unknown';
-    final details  = widget.data['details']  as String? ?? '';
-    final imageUrl = widget.data['imageUrl'] as String? ?? '';
-    final catColor = _catColor(category);
+    final category           = widget.data['category'] as String? ?? 'Unknown';
+    final details            = widget.data['details']  as String? ?? '';
+    final imageUrl           = widget.data['imageUrl'] as String? ?? '';
+    final verificationStatus = widget.data['verificationStatus'] as String?;
+    final catColor           = _catColor(category);
 
-    return Container(
+    return GestureDetector(
+      onTap: () => _showDetailSheet(context),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: const Color(0xFF422E2E).withOpacity(0.55),
@@ -504,6 +558,8 @@ class _IncidentCardState extends State<_IncidentCard> {
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
+                _verificationBadge(verificationStatus),
                 const Spacer(),
                 Text(
                   _timeAgo(widget.data['createdAt']),
@@ -668,6 +724,310 @@ class _IncidentCardState extends State<_IncidentCard> {
           ),
         ],
       ),
+    ),
+    );
+  }
+
+  void _showDetailSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _IncidentDetailSheet(data: widget.data),
+    );
+  }
+}
+
+// ── Report detail bottom sheet ────────────────────────────────────────────
+class _IncidentDetailSheet extends StatefulWidget {
+  final Map<String, dynamic> data;
+  const _IncidentDetailSheet({required this.data});
+
+  @override
+  State<_IncidentDetailSheet> createState() => _IncidentDetailSheetState();
+}
+
+class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
+  int _photoIndex = 0;
+  String _placeName = 'Loading...';
+
+  static const Color nude     = Color(0xFFACA494);
+  static const Color burgundy = Color(0xFFB22222);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPlace();
+  }
+
+  Future<void> _loadPlace() async {
+    final loc = widget.data['location'] as Map<String, dynamic>?;
+    if (loc == null) return;
+    final lat = (loc['latitude']  as num?)?.toDouble() ?? 0;
+    final lng = (loc['longitude'] as num?)?.toDouble() ?? 0;
+    final name = await GeocodingService.getPlaceName(lat, lng);
+    if (mounted) setState(() => _placeName = name);
+  }
+
+  // Rewrite raw MinIO URLs to the HTTPS proxy (same as the web's safeImageUrl).
+  String _safe(String url) =>
+      url.replaceFirst('http://178.105.158.80:9000', 'https://api.mybahaya.com/minio');
+
+  List<String> _photos() {
+    final urls = widget.data['imageUrls'];
+    if (urls is List && urls.isNotEmpty) {
+      return urls.map((e) => _safe(e.toString())).toList();
+    }
+    final single = widget.data['imageUrl'] as String?;
+    if (single != null && single.isNotEmpty) return [_safe(single)];
+    return [];
+  }
+
+  String? _videoUrl() {
+    final v = widget.data['videoUrl'] as String?;
+    return (v != null && v.isNotEmpty) ? _safe(v) : null;
+  }
+
+  Future<void> _playVideo(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Color _catColor(String cat) {
+    switch (cat.toLowerCase()) {
+      case 'fire':    return const Color(0xFFFF6B35);
+      case 'theft':   return const Color(0xFF9B59B6);
+      case 'assault': return const Color(0xFFE74C3C);
+      case 'medical': return const Color(0xFF2ECC71);
+      default:        return burgundy;
+    }
+  }
+
+  IconData _catIcon(String cat) {
+    switch (cat.toLowerCase()) {
+      case 'fire':    return CupertinoIcons.flame_fill;
+      case 'theft':   return CupertinoIcons.lock_open_fill;
+      case 'assault': return CupertinoIcons.exclamationmark_circle_fill;
+      case 'medical': return CupertinoIcons.plus_circle_fill;
+      default:        return CupertinoIcons.exclamationmark_triangle_fill;
+    }
+  }
+
+  String _timeAgo(dynamic ts) {
+    if (ts == null) return '';
+    final dt = ts is Timestamp ? ts.toDate() : null;
+    if (dt == null) return '';
+    final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 1)  return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours   < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final category           = widget.data['category'] as String? ?? 'Unknown';
+    final details            = widget.data['details']  as String? ?? '';
+    final verificationStatus = widget.data['verificationStatus'] as String?;
+    final catColor           = _catColor(category);
+    final photos             = _photos();
+    final videoUrl           = _videoUrl();
+
+    return Container(
+      margin: const EdgeInsets.only(top: 60),
+      decoration: const BoxDecoration(
+        color: Color(0xFF1A0A0A),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            width: 40, height: 4,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  // ── Photo gallery ──────────────────────────────
+                  if (photos.isNotEmpty) ...[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: SizedBox(
+                        height: 220,
+                        child: PageView.builder(
+                          itemCount: photos.length,
+                          onPageChanged: (i) => setState(() => _photoIndex = i),
+                          itemBuilder: (_, i) => CachedNetworkImage(
+                            imageUrl: photos[i],
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            placeholder: (_, __) => Container(
+                              color: Colors.white.withOpacity(0.05),
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                    color: Color(0xFFB22222), strokeWidth: 1.5)),
+                            ),
+                            errorWidget: (_, __, ___) => Container(
+                              color: Colors.white.withOpacity(0.04),
+                              child: Icon(CupertinoIcons.photo,
+                                  color: nude.withOpacity(0.3), size: 40),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (photos.length > 1) ...[
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(photos.length, (i) => Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          width: _photoIndex == i ? 16 : 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: _photoIndex == i
+                                ? burgundy
+                                : Colors.white.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        )),
+                      ),
+                    ],
+                    const SizedBox(height: 18),
+                  ],
+
+                  // ── Video (opens in player) ────────────────────
+                  if (videoUrl != null) ...[
+                    GestureDetector(
+                      onTap: () => _playVideo(videoUrl),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        decoration: BoxDecoration(
+                          color: burgundy.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: burgundy.withOpacity(0.35)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(CupertinoIcons.play_circle_fill,
+                                color: burgundy, size: 22),
+                            const SizedBox(width: 8),
+                            const Text('Play Video',
+                                style: TextStyle(fontSize: 14,
+                                    fontWeight: FontWeight.w700, color: Colors.white)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                  ],
+
+                  // ── Badges row ─────────────────────────────────
+                  Row(children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: catColor.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: catColor.withOpacity(0.4)),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(_catIcon(category), color: catColor, size: 13),
+                        const SizedBox(width: 5),
+                        Text(category.toUpperCase(),
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800,
+                                color: catColor, letterSpacing: 0.5)),
+                      ]),
+                    ),
+                    const SizedBox(width: 8),
+                    if (verificationStatus == 'VERIFIED')
+                      _chip('VERIFIED', CupertinoIcons.checkmark_shield_fill,
+                          const Color(0xFF30d158)),
+                    if (verificationStatus == 'REJECTED')
+                      _chip('FALSE ALARM', CupertinoIcons.xmark_shield_fill,
+                          Colors.redAccent),
+                    const Spacer(),
+                    Text(_timeAgo(widget.data['createdAt']),
+                        style: TextStyle(fontSize: 11, color: nude.withOpacity(0.5))),
+                  ]),
+                  const SizedBox(height: 16),
+
+                  // ── Details ────────────────────────────────────
+                  if (details.isNotEmpty) ...[
+                    Text(details,
+                        style: TextStyle(fontSize: 14,
+                            color: Colors.white.withOpacity(0.85), height: 1.6)),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // ── Location ───────────────────────────────────
+                  Row(children: [
+                    Icon(CupertinoIcons.location_fill, color: burgundy, size: 14),
+                    const SizedBox(width: 6),
+                    Expanded(child: Text(_placeName,
+                        style: TextStyle(fontSize: 13, color: nude))),
+                  ]),
+                  const SizedBox(height: 20),
+
+                  // ── View on map button ─────────────────────────
+                  SizedBox(
+                    width: double.infinity, height: 44,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (_) => IncidentMapScreen(report: widget.data)));
+                      },
+                      icon: const Icon(CupertinoIcons.map_fill,
+                          color: Colors.white, size: 16),
+                      label: const Text('View on Map',
+                          style: TextStyle(fontSize: 13,
+                              fontWeight: FontWeight.w700, color: Colors.white)),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: const Color(0xFF261212).withOpacity(0.8),
+                        side: BorderSide(color: Colors.white.withOpacity(0.12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _chip(String label, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, color: color, size: 11),
+        const SizedBox(width: 4),
+        Text(label, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800,
+            color: color, letterSpacing: 0.4)),
+      ]),
     );
   }
 }
