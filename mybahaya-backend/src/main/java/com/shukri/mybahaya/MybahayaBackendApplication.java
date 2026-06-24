@@ -11,7 +11,7 @@ public class MybahayaBackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(MybahayaBackendApplication.class, args);
 		System.out.println("========================================");
-		System.out.println("  MYBAHAYA_BUILD: geo-radius-fcm-v2");
+		System.out.println("  MYBAHAYA_BUILD: video-original-v4");
 		System.out.println("========================================");
 	}
 

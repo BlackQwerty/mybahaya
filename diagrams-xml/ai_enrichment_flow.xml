@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- TITLE -->
+    <mxCell id="2" value="MyBahaya — AI Enrichment Flow (AiEnrichmentService)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="185" y="10" width="800" height="34" as="geometry"/>
+    </mxCell>
+
+    <!-- Async trigger note -->
+    <mxCell id="3" value="This entire flow runs ASYNCHRONOUSLY (@Async Spring annotation) — it does not block the HTTP response to the citizen." style="text;html=1;strokeColor=#b85450;fillColor=#f8cecc;align=center;verticalAlign=middle;rounded=1;arcSize=5;fontSize=11;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="185" y="52" width="800" height="28" as="geometry"/>
+    </mxCell>
+
+    <!-- ══════════════════ LEFT COLUMN — SPRING BOOT STEPS ══ -->
+
+    <!-- START -->
+    <mxCell id="S1" value="ReportService.saveReport()&lt;br/&gt;COMPLETE (report in Firestore)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="80" y="100" width="260" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 1: Call enrichReport async -->
+    <mxCell id="S2" value="Call AiEnrichmentService&lt;br/&gt;.enrichReport(reportId, imageUrl, category, details)&lt;br/&gt;[@Async — fires new thread]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="80" y="200" width="260" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 2: Download image from MinIO -->
+    <mxCell id="S3" value="Download Image from MinIO URL&lt;br/&gt;(HttpURLConnection, 30s timeout)&lt;br/&gt;Read all bytes into byte[]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="80" y="310" width="260" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 3: Base64 encode -->
+    <mxCell id="S4" value="Base64 Encode Image Bytes&lt;br/&gt;Detect MIME type (jpeg/png)&lt;br/&gt;from URL extension" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="80" y="420" width="260" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 4: Build Gemini request -->
+    <mxCell id="S5" value="Build Gemini API Request&lt;br/&gt;Parts: [text_prompt + inline_image]&lt;br/&gt;Model: gemini-2.5-flash" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="80" y="530" width="260" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 5: POST to Gemini -->
+    <mxCell id="S6" value="POST to Gemini API&lt;br/&gt;generativelanguage.googleapis.com&lt;br/&gt;/v1beta/models/gemini-2.5-flash&lt;br/&gt;:generateContent?key={API_KEY}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="80" y="640" width="260" height="85" as="geometry"/>
+    </mxCell>
+
+    <!-- ══════════════════ RIGHT COLUMN — RESPONSE HANDLING ══ -->
+
+    <!-- Decision: Response OK? -->
+    <mxCell id="D1" value="Gemini API&lt;br/&gt;Response OK?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="570" y="640" width="150" height="85" as="geometry"/>
+    </mxCell>
+
+    <!-- Error path -->
+    <mxCell id="S_ERR" value="Log Error to console&lt;br/&gt;[AI] Failed for reportId...&lt;br/&gt;Report remains without ai.* fields" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="770" y="580" width="230" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 6: Extract text from response -->
+    <mxCell id="S7" value="Extract raw text from&lt;br/&gt;candidates[0].content.parts[0].text" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="530" width="260" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 7: Strip markdown fences -->
+    <mxCell id="S8" value="Strip markdown code fences&lt;br/&gt;if model returns ```json ... ```" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="430" width="260" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 8: Parse JSON -->
+    <mxCell id="S9" value="ObjectMapper.readValue(jsonText)&lt;br/&gt;Extract fields:&lt;br/&gt;severity · summary · hazards&lt;br/&gt;suggestedCategory · looksFake" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="320" width="260" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 9: Write to Firestore -->
+    <mxCell id="S10" value="Update Firestore Report Document&lt;br/&gt;ai.severity · ai.summary&lt;br/&gt;ai.hazards · ai.suggestedCategory&lt;br/&gt;ai.looksFake · ai.processedAt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="200" width="260" height="85" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 10: Web dashboard updates -->
+    <mxCell id="S11" value="Organization Web Dashboard&lt;br/&gt;Auto-Updates via Firestore&lt;br/&gt;Realtime Listener&lt;br/&gt;AI panel renders ai.* fields" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="100" width="260" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- END -->
+    <mxCell id="END" value="AI ENRICHMENT COMPLETE" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="565" y="38" width="190" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- PROMPT BOX (shown as annotation) -->
+    <mxCell id="PROMPT" value="&lt;b&gt;Gemini Prompt Structure:&lt;/b&gt;&lt;br/&gt;'You are an emergency incident analyzer for Malaysia.&lt;br/&gt;Return ONLY valid JSON with:&lt;br/&gt;severity (1-5), summary (1-2 sentences),&lt;br/&gt;hazards (array), suggestedCategory (string),&lt;br/&gt;looksFake (boolean).'&lt;br/&gt;+ Reported category + Additional details" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#999999;fontSize=10;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="830" y="200" width="300" height="135" as="geometry"/>
+    </mxCell>
+
+    <!-- ══════════════════════════════════════ EDGES ══ -->
+
+    <!-- S1 → S2 -->
+    <mxCell id="E01" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S1" target="S2" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S2 → S3 -->
+    <mxCell id="E02" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S2" target="S3" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S3 → S4 -->
+    <mxCell id="E03" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S3" target="S4" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S4 → S5 -->
+    <mxCell id="E04" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S4" target="S5" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S5 → S6 -->
+    <mxCell id="E05" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S5" target="S6" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S6 → D1 (cross to right column) -->
+    <mxCell id="E06" value="HTTP Response" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;dashed=1;" edge="1" source="S6" target="D1" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- D1 → S_ERR (No) -->
+    <mxCell id="E07" value="Error / null" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;" edge="1" source="D1" target="S_ERR" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- D1 → S7 (OK) -->
+    <mxCell id="E08" value="200 OK" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;" edge="1" source="D1" target="S7" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S7 → S8 -->
+    <mxCell id="E09" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S7" target="S8" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S8 → S9 -->
+    <mxCell id="E10" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S8" target="S9" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S9 → S10 -->
+    <mxCell id="E11" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S9" target="S10" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S10 → S11 -->
+    <mxCell id="E12" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S10" target="S11" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S11 → END -->
+    <mxCell id="E13" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S11" target="END" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Prompt annotation connector -->
+    <mxCell id="E14" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=none;strokeColor=#999999;fontSize=10;" edge="1" source="S5" target="PROMPT" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

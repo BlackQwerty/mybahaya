@@ -107,13 +107,13 @@ class ApiService {
     final token = await user.getIdToken();
     if (token == null) throw Exception('Failed to get authentication token');
 
-    // Guard against files that exceed the server's 200MB limit — fail early
-    // with a clear message instead of a confusing timeout/500 mid-upload.
+    // Safety net — the report screen already rejects oversized videos at pick
+    // time, but guard here too so we never start a doomed upload.
     final sizeBytes = await videoFile.length();
-    const maxBytes = 200 * 1024 * 1024;
+    const maxBytes = 100 * 1024 * 1024;
     if (sizeBytes > maxBytes) {
       final mb = (sizeBytes / (1024 * 1024)).toStringAsFixed(0);
-      throw Exception('Video is too large (${mb}MB). Max 200MB — pick a shorter clip.');
+      throw Exception('Video is too large (${mb}MB). Max 100MB — pick a shorter clip.');
     }
 
     final dio = Dio();

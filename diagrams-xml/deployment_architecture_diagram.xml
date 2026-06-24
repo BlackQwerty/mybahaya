@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- TITLE -->
+    <mxCell id="2" value="MyBahaya — Deployment Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="285" y="14" width="600" height="36" as="geometry"/>
+    </mxCell>
+
+    <!-- ══════════════════════════════════ CLIENT ZONE (left) ══ -->
+    <mxCell id="10" value="CLIENT ZONE" style="swimlane;fontStyle=1;align=center;startSize=28;fillColor=#f9f9f9;strokeColor=#999999;fontSize=12;dashed=0;" vertex="1" parent="1">
+      <mxGeometry x="20" y="80" width="190" height="650" as="geometry"/>
+    </mxCell>
+
+    <!-- Android Device -->
+    <mxCell id="11" value="&lt;b&gt;Android Device&lt;/b&gt;&lt;br/&gt;MyBahaya App&lt;br/&gt;(Flutter)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=10;" vertex="1" parent="10">
+      <mxGeometry x="15" y="50" width="160" height="100" as="geometry"/>
+    </mxCell>
+
+    <!-- Browser -->
+    <mxCell id="12" value="&lt;b&gt;Web Browser&lt;/b&gt;&lt;br/&gt;Org Dashboard&lt;br/&gt;(Chrome / Firefox)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=10;" vertex="1" parent="10">
+      <mxGeometry x="15" y="200" width="160" height="100" as="geometry"/>
+    </mxCell>
+
+    <!-- ══════════════════════════════ VPS ZONE (center) ══ -->
+    <mxCell id="20" value="VPS — api.mybahaya.com  (Ubuntu 22.04 LTS | 4 vCPU | 8 GB RAM)" style="swimlane;fontStyle=1;align=center;startSize=30;fillColor=#fffde7;strokeColor=#f9a825;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="250" y="80" width="590" height="650" as="geometry"/>
+    </mxCell>
+
+    <!-- Nginx reverse proxy -->
+    <mxCell id="21" value="&lt;b&gt;Nginx Reverse Proxy&lt;/b&gt;&lt;br/&gt;HTTPS :443 · SSL/TLS (Let&apos;s Encrypt)&lt;br/&gt;Routes: / → :8080 · /minio/* → :9000" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#e65100;fontSize=11;arcSize=10;" vertex="1" parent="20">
+      <mxGeometry x="80" y="60" width="430" height="90" as="geometry"/>
+    </mxCell>
+
+    <!-- Spring Boot service -->
+    <mxCell id="22" value="&lt;b&gt;Spring Boot REST API&lt;/b&gt;&lt;br/&gt;Java 21 · Maven · Port :8080&lt;br/&gt;Managed by systemd service&lt;br/&gt;ReportController · AiEnrichmentService · RoutingService&lt;br/&gt;FcmService · MinioService · ReportService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="20">
+      <mxGeometry x="80" y="220" width="430" height="130" as="geometry"/>
+    </mxCell>
+
+    <!-- MinIO Docker container -->
+    <mxCell id="23" value="&lt;b&gt;MinIO Object Storage&lt;/b&gt;&lt;br/&gt;Docker Container · Port :9000&lt;br/&gt;Bucket: mybahaya-media&lt;br/&gt;Stores: images, videos, attachments&lt;br/&gt;Volume: /data (persistent)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;arcSize=10;" vertex="1" parent="20">
+      <mxGeometry x="80" y="430" width="430" height="130" as="geometry"/>
+    </mxCell>
+
+    <!-- Docker label for MinIO -->
+    <mxCell id="24" value="Docker" style="shape=mxgraph.cisco.computers_and_peripherals.pc;fillColor=#023d5d;fontColor=#ffffff;strokeColor=none;fontSize=9;fontStyle=1;" vertex="1" parent="20">
+      <mxGeometry x="460" y="390" width="40" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="25" value="Docker Container" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=9;fontStyle=1;fontColor=#555555;" vertex="1" parent="20">
+      <mxGeometry x="418" y="380" width="100" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- ══════════════════════════ EXTERNAL SERVICES ZONE (right) ══ -->
+    <mxCell id="30" value="GOOGLE CLOUD &amp; FIREBASE" style="swimlane;fontStyle=1;align=center;startSize=28;fillColor=#e8f5e9;strokeColor=#388e3c;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="890" y="80" width="255" height="650" as="geometry"/>
+    </mxCell>
+
+    <!-- Firebase Auth -->
+    <mxCell id="31" value="&lt;b&gt;Firebase Authentication&lt;/b&gt;&lt;br/&gt;JWT token issuance&lt;br/&gt;Email/password auth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9c4;strokeColor=#f9a825;fontSize=11;arcSize=10;" vertex="1" parent="30">
+      <mxGeometry x="20" y="50" width="215" height="90" as="geometry"/>
+    </mxCell>
+
+    <!-- Firebase Firestore -->
+    <mxCell id="32" value="&lt;b&gt;Firebase Firestore&lt;/b&gt;&lt;br/&gt;Managed NoSQL DB&lt;br/&gt;Real-time listeners&lt;br/&gt;Global replication" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9c4;strokeColor=#f9a825;fontSize=11;arcSize=10;" vertex="1" parent="30">
+      <mxGeometry x="20" y="180" width="215" height="100" as="geometry"/>
+    </mxCell>
+
+    <!-- Firebase FCM -->
+    <mxCell id="33" value="&lt;b&gt;Firebase Cloud Messaging&lt;/b&gt;&lt;br/&gt;Push to Android (APNs/FCM)&lt;br/&gt;Push to Web (VAPID)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9c4;strokeColor=#f9a825;fontSize=11;arcSize=10;" vertex="1" parent="30">
+      <mxGeometry x="20" y="320" width="215" height="100" as="geometry"/>
+    </mxCell>
+
+    <!-- Gemini API -->
+    <mxCell id="34" value="&lt;b&gt;Google Gemini 2.5 Flash&lt;/b&gt;&lt;br/&gt;Multimodal AI REST API&lt;br/&gt;Image analysis + JSON output&lt;br/&gt;Async — called post-save" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;arcSize=10;" vertex="1" parent="30">
+      <mxGeometry x="20" y="460" width="215" height="110" as="geometry"/>
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════ EDGES ══ -->
+
+    <!-- Android → Nginx (HTTPS) -->
+    <mxCell id="40" value="HTTPS :443" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="11" target="21" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Browser → Nginx (HTTPS) -->
+    <mxCell id="41" value="HTTPS :443" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="12" target="21" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Browser → Firestore direct (Firebase SDK) -->
+    <mxCell id="42" value="Firebase JS SDK&lt;br/&gt;(realtime listener)" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;fontSize=10;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="12" target="32" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Nginx → Spring Boot -->
+    <mxCell id="43" value="proxy :8080" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="21" target="22" parent="20">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Nginx → MinIO -->
+    <mxCell id="44" value="proxy /minio/* :9000" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;fontSize=10;exitX=0.2;exitY=1;exitDx=0;exitDy=0;entryX=0.2;entryY=0;entryDx=0;entryDy=0;" edge="1" source="21" target="23" parent="20">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Spring Boot → MinIO (internal) -->
+    <mxCell id="45" value="upload / read (internal :9000)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="22" target="23" parent="20">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Spring Boot → Firebase Auth -->
+    <mxCell id="46" value="JWT verify" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.2;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="22" target="31" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Spring Boot → Firestore -->
+    <mxCell id="47" value="Read / Write" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="22" target="32" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Spring Boot → FCM -->
+    <mxCell id="48" value="sendMessage() push" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="22" target="33" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Spring Boot → Gemini API -->
+    <mxCell id="49" value="POST image+prompt (async)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;dashed=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="22" target="34" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- FCM → Android (push notification) -->
+    <mxCell id="50" value="Push notification (FCM)" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;fontSize=10;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="33" target="11" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

@@ -29,7 +29,11 @@ public class MinioService {
         return uploadFile(file);
     }
 
-    /** Uploads a single video and returns its public URL. */
+    /**
+     * Uploads a video as-is (original quality, untouched), returns its public URL.
+     * Length is gated by file size on the client + the multipart limit, not by
+     * re-encoding — so the uploaded video plays exactly like the user's original.
+     */
     public String uploadReportVideo(MultipartFile file) throws Exception {
         return uploadFile(file);
     }

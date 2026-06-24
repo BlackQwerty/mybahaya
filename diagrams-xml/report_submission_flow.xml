@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- TITLE -->
+    <mxCell id="2" value="MyBahaya — Report Submission Flow" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="285" y="10" width="600" height="34" as="geometry"/>
+    </mxCell>
+
+    <!-- ══════════════════════════════ COLUMN HEADERS ══ -->
+    <mxCell id="3" value="CITIZEN (Mobile App)" style="text;html=1;strokeColor=none;fillColor=#dae8fc;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;rounded=1;arcSize=5;" vertex="1" parent="1">
+      <mxGeometry x="40" y="50" width="220" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="BACKEND (Spring Boot API)" style="text;html=1;strokeColor=none;fillColor=#ffe6cc;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;rounded=1;arcSize=5;" vertex="1" parent="1">
+      <mxGeometry x="430" y="50" width="220" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="SERVICES (Async)" style="text;html=1;strokeColor=none;fillColor=#d5e8d4;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;rounded=1;arcSize=5;" vertex="1" parent="1">
+      <mxGeometry x="850" y="50" width="260" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- ══════════════════════ COLUMN 1 — CITIZEN STEPS ══ -->
+
+    <!-- S1: START -->
+    <mxCell id="S1" value="START" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="115" y="100" width="80" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- S2: Open App & Login -->
+    <mxCell id="S2" value="Open MyBahaya App&lt;br/&gt;Authenticate (Firebase Auth)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="170" width="220" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- S3: Select Category -->
+    <mxCell id="S3" value="Select Incident Category&lt;br/&gt;(Fire / Medical / Theft / Other)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="255" width="220" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- S4: Take Photo(s) -->
+    <mxCell id="S4" value="Capture Photo(s) (1–3)&lt;br/&gt;Optional: Record Video" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="340" width="220" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- S5: GPS captured -->
+    <mxCell id="S5" value="GPS Location Auto-Captured&lt;br/&gt;(Geolocator package)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="425" width="220" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- D1: Valid inputs? -->
+    <mxCell id="D1" value="Photo &amp; Location&lt;br/&gt;available?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="80" y="510" width="160" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- S_ERR: Show error -->
+    <mxCell id="S_ERR" value="Show Validation Error&lt;br/&gt;(UI toast message)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="250" y="522" width="160" height="47" as="geometry"/>
+    </mxCell>
+
+    <!-- S6: Tap Submit -->
+    <mxCell id="S6" value="Tap &apos;Submit Report&apos;&lt;br/&gt;(POST /api/reports)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="615" width="220" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- S7: Show confirmation -->
+    <mxCell id="S15" value="Display Confirmation Screen&lt;br/&gt;(Assigned Org name + ETA)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="700" width="220" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- END -->
+    <mxCell id="END" value="END" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;fontColor=#ffffff;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="115" y="775" width="80" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- ══════════════════════ COLUMN 2 — BACKEND STEPS ══ -->
+
+    <!-- S7: Validate JWT -->
+    <mxCell id="S7" value="Validate Firebase JWT Token&lt;br/&gt;(Spring Security Filter)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="430" y="170" width="220" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- D2: Auth valid? -->
+    <mxCell id="D2" value="Token&lt;br/&gt;valid?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="475" y="255" width="130" height="65" as="geometry"/>
+    </mxCell>
+
+    <!-- S_401 -->
+    <mxCell id="S_401" value="Return HTTP 401&lt;br/&gt;Unauthorized" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="650" y="266" width="150" height="45" as="geometry"/>
+    </mxCell>
+
+    <!-- S8: Upload to MinIO -->
+    <mxCell id="S8" value="Upload Image(s) to MinIO&lt;br/&gt;(MinioService — presigned URLs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="430" y="355" width="220" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- S9: Geolocation routing -->
+    <mxCell id="S9" value="Geolocation Routing&lt;br/&gt;(Haversine → Nearest Org)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="430" y="440" width="220" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- S10: Save to Firestore -->
+    <mxCell id="S10" value="Save Report to Firestore&lt;br/&gt;(status=RECEIVED, assignedOrgId)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="430" y="525" width="220" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- S11: Mirror to public_incidents -->
+    <mxCell id="S11" value="Mirror to public_incidents&lt;br/&gt;(sanitized, no PII)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="430" y="610" width="220" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- S12: Return response -->
+    <mxCell id="S12" value="Return HTTP 201 Response&lt;br/&gt;{reportId, orgName, etaMinutes}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="430" y="695" width="220" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- ══════════════════════ COLUMN 3 — ASYNC SERVICES ══ -->
+
+    <!-- Async label -->
+    <mxCell id="A0" value="[All async — do not block response]" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontStyle=2;fontColor=#555555;" vertex="1" parent="1">
+      <mxGeometry x="840" y="82" width="290" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- AS1: Notify nearby citizens -->
+    <mxCell id="AS1" value="Send FCM Push to&lt;br/&gt;Nearby Citizens&lt;br/&gt;(within alertRadius km)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=10;dashed=1;dashPattern=8 8;" vertex="1" parent="1">
+      <mxGeometry x="845" y="430" width="225" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- AS2: Notify assigned org -->
+    <mxCell id="AS2" value="Send FCM Push to&lt;br/&gt;Assigned Organization&lt;br/&gt;(new assignment alert)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=10;dashed=1;dashPattern=8 8;" vertex="1" parent="1">
+      <mxGeometry x="845" y="540" width="225" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- AS3: AI Enrichment -->
+    <mxCell id="AS3" value="AI Enrichment (Gemini 2.5 Flash)&lt;br/&gt;Download image → base64 encode&lt;br/&gt;→ POST to Gemini API&lt;br/&gt;→ Write ai.* fields to Firestore" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;arcSize=10;dashed=1;dashPattern=8 8;" vertex="1" parent="1">
+      <mxGeometry x="845" y="650" width="225" height="85" as="geometry"/>
+    </mxCell>
+
+    <!-- ══════════════════════════════════════ EDGES ══ -->
+
+    <!-- S1 → S2 -->
+    <mxCell id="E01" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S1" target="S2" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S2 → S3 -->
+    <mxCell id="E02" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S2" target="S3" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S3 → S4 -->
+    <mxCell id="E03" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S3" target="S4" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S4 → S5 -->
+    <mxCell id="E04" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S4" target="S5" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S5 → D1 -->
+    <mxCell id="E05" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S5" target="D1" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- D1 → S_ERR (No) -->
+    <mxCell id="E06" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;" edge="1" source="D1" target="S_ERR" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- D1 → S6 (Yes) -->
+    <mxCell id="E07" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;" edge="1" source="D1" target="S6" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S6 → S7 (crosses to backend column) -->
+    <mxCell id="E08" value="POST /api/reports" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;dashed=1;" edge="1" source="S6" target="S7" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S7 → D2 -->
+    <mxCell id="E09" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S7" target="D2" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- D2 → S_401 (No) -->
+    <mxCell id="E10" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;" edge="1" source="D2" target="S_401" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- D2 → S8 (Yes) -->
+    <mxCell id="E11" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;" edge="1" source="D2" target="S8" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S8 → S9 -->
+    <mxCell id="E12" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S8" target="S9" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S9 → S10 -->
+    <mxCell id="E13" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S9" target="S10" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S10 → S11 -->
+    <mxCell id="E14" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S10" target="S11" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S11 → S12 -->
+    <mxCell id="E15" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S11" target="S12" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S12 → S15 (response back to citizen) -->
+    <mxCell id="E16" value="HTTP 201 Created" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;dashed=1;" edge="1" source="S12" target="S15" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S15 → END -->
+    <mxCell id="E17" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="S15" target="END" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- S9 → AS1 (async notify citizens) -->
+    <mxCell id="E18" value="@Async" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;dashed=1;endArrow=open;endFill=0;" edge="1" source="S9" target="AS1" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S10 → AS2 (async notify org) -->
+    <mxCell id="E19" value="@Async" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;dashed=1;endArrow=open;endFill=0;" edge="1" source="S10" target="AS2" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- S10 → AS3 (async AI) -->
+    <mxCell id="E20" value="@Async" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;dashed=1;endArrow=open;endFill=0;" edge="1" source="S11" target="AS3" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

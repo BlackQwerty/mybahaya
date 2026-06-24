@@ -26,6 +26,13 @@ class _ReportScreenState extends State<ReportScreen> {
 
   static const int maxPhotos = 3;
   final List<File> _selectedImages = [];
+
+  // Videos are uploaded at original quality (no compression, no trimming) so
+  // they play exactly like in the user's gallery. Instead, oversized videos are
+  // rejected up front — the same approach used by WhatsApp, Telegram, etc.
+  // Change this one number to adjust the cap.
+  static const int maxVideoMB = 100;
+  static const int _maxVideoBytes = maxVideoMB * 1024 * 1024;
   File? _selectedVideo;
 
   bool _isLoading = false;
@@ -99,19 +106,30 @@ class _ReportScreenState extends State<ReportScreen> {
       source: ImageSource.camera,
       maxDuration: const Duration(seconds: 15),
     );
-    if (picked != null) {
-      setState(() => _selectedVideo = File(picked.path));
-    }
+    if (picked != null) await _acceptVideo(File(picked.path));
   }
 
   Future<void> _pickVideoFromGallery() async {
-    final picked = await ImagePicker().pickVideo(
-      source: ImageSource.gallery,
-      maxDuration: const Duration(seconds: 15),
-    );
-    if (picked != null) {
-      setState(() => _selectedVideo = File(picked.path));
+    final picked = await ImagePicker().pickVideo(source: ImageSource.gallery);
+    if (picked != null) await _acceptVideo(File(picked.path));
+  }
+
+  /// Accepts a video only if it's under the size cap; otherwise shows a clear
+  /// message and rejects it (no broken/oversized uploads).
+  Future<void> _acceptVideo(File file) async {
+    final bytes = await file.length();
+    if (bytes > _maxVideoBytes) {
+      final mb = (bytes / (1024 * 1024)).round();
+      if (!mounted) return;
+      setState(() => _errorMessage =
+          'Video is too large (${mb}MB). Please choose a video under ${maxVideoMB}MB.');
+      return;
     }
+    if (!mounted) return;
+    setState(() {
+      _selectedVideo = file;
+      _errorMessage = null;
+    });
   }
 
   void _showPhotoSourceSheet() {
@@ -823,8 +841,7 @@ class _ReportScreenState extends State<ReportScreen> {
                               fontWeight: FontWeight.w600)),
                       const SizedBox(height: 2),
                       Text('Will upload after you submit',
-                          style: TextStyle(
-                              color: nudeColor, fontSize: 11)),
+                          style: TextStyle(color: nudeColor, fontSize: 11)),
                     ],
                   ),
                 ),

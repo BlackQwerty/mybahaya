@@ -790,8 +790,20 @@ class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
 
   Future<void> _playVideo(String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    // Don't gate on canLaunchUrl — it falsely returns false on Android 11+ when
+    // the http/https intent isn't declared in <queries>. Just try to launch,
+    // falling back to the in-app browser view, and surface any failure.
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && mounted) {
+        await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open the video.')),
+        );
+      }
     }
   }
 
