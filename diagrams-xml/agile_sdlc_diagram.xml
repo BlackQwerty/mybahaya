@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- ═══════════════════════ TITLE ═══════════════════════ -->
+    <mxCell id="2" value="MyBahaya — Agile Software Development Lifecycle (SDLC)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="250" y="14" width="1150" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="Iterative 2-week sprints · Flutter (Mobile) · Spring Boot (Backend) · Firebase · Google Gemini AI" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=12;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="250" y="50" width="1150" height="24" as="geometry"/>
+    </mxCell>
+
+    <!-- ═══════════════════════ OUTER INPUTS / OUTPUTS ═══════════════════════ -->
+
+    <!-- Product Backlog (input) -->
+    <mxCell id="10" value="&lt;b&gt;Product Backlog&lt;/b&gt;&lt;br/&gt;User stories · priorities&lt;br/&gt;acceptance criteria" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;arcSize=8;" vertex="1" parent="1">
+      <mxGeometry x="40" y="370" width="165" height="75" as="geometry"/>
+    </mxCell>
+
+    <!-- Potentially Shippable Increment (output) -->
+    <mxCell id="11" value="&lt;b&gt;Shippable Increment&lt;/b&gt;&lt;br/&gt;Tested feature set&lt;br/&gt;deployed to Hetzner VPS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=8;" vertex="1" parent="1">
+      <mxGeometry x="1445" y="370" width="165" height="75" as="geometry"/>
+    </mxCell>
+
+    <!-- Stakeholder / Supervisor -->
+    <mxCell id="12" value="&lt;b&gt;Stakeholders&lt;/b&gt;&lt;br/&gt;Supervisor · FYP panel&lt;br/&gt;test users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=8;" vertex="1" parent="1">
+      <mxGeometry x="1445" y="560" width="165" height="65" as="geometry"/>
+    </mxCell>
+
+    <!-- ═══════════════════════ SPRINT CONTAINER ═══════════════════════ -->
+
+    <!-- Sprint cycle background oval / container -->
+    <mxCell id="13" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#cccccc;strokeWidth=2;dashed=1;dashPattern=6 3;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="220" y="100" width="1190" height="640" as="geometry"/>
+    </mxCell>
+
+    <!-- Center label -->
+    <mxCell id="14" value="&lt;b&gt;&lt;font style='font-size: 15px;'&gt;SPRINT&lt;/font&gt;&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size: 13px;'&gt;2 Weeks&lt;/font&gt;&lt;br/&gt;&lt;br/&gt;&lt;font style='font-size: 10px; color: #888888;'&gt;Daily Standup&lt;br/&gt;Scrum Board&lt;br/&gt;Velocity Tracking&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="680" y="358" width="160" height="130" as="geometry"/>
+    </mxCell>
+
+    <!-- Clockwise direction hint arrow (center) -->
+    <mxCell id="15" value="↻" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=40;fontColor=#cccccc;" vertex="1" parent="1">
+      <mxGeometry x="735" y="300" width="60" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- ═══════════════════════ 6 AGILE PHASES (circular layout, CW from top) ═══════════════════════ -->
+
+    <!--
+      Circle centre: (825, 420), r=240
+      Phase 1 (top):          (825, 180)  → box (740, 140)
+      Phase 2 (top-right):    (1033, 300) → box (948, 260)
+      Phase 3 (bottom-right): (1033, 540) → box (948, 500)
+      Phase 4 (bottom):       (825, 660)  → box (740, 620)
+      Phase 5 (bottom-left):  (617, 540)  → box (532, 500)
+      Phase 6 (top-left):     (617, 300)  → box (532, 260)
+    -->
+
+    <!-- PHASE 1: Sprint Planning -->
+    <mxCell id="20" value="&lt;b&gt;1. Sprint Planning&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;'&gt;• Backlog refinement&lt;br/&gt;• Story point estimation&lt;br/&gt;• Sprint goal definition&lt;br/&gt;• Sprint backlog creation&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="740" y="108" width="170" height="95" as="geometry"/>
+    </mxCell>
+
+    <!-- PHASE 2: Design & Architecture -->
+    <mxCell id="21" value="&lt;b&gt;2. Design &amp; Architecture&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;'&gt;• System architecture diagrams&lt;br/&gt;• UI wireframes (Flutter)&lt;br/&gt;• API contract design&lt;br/&gt;• Data model (Firestore)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="948" y="230" width="175" height="95" as="geometry"/>
+    </mxCell>
+
+    <!-- PHASE 3: Implementation -->
+    <mxCell id="22" value="&lt;b&gt;3. Implementation&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;'&gt;• Flutter mobile features&lt;br/&gt;• Spring Boot REST API&lt;br/&gt;• Firebase integration&lt;br/&gt;• Gemini AI service calls&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="948" y="500" width="175" height="95" as="geometry"/>
+    </mxCell>
+
+    <!-- PHASE 4: Testing & QA -->
+    <mxCell id="23" value="&lt;b&gt;4. Testing &amp; QA&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;'&gt;• Unit &amp; integration tests&lt;br/&gt;• API endpoint testing&lt;br/&gt;• UI/UX usability testing&lt;br/&gt;• Bug tracking &amp; fixes&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="740" y="620" width="170" height="95" as="geometry"/>
+    </mxCell>
+
+    <!-- PHASE 5: Review & Deploy -->
+    <mxCell id="24" value="&lt;b&gt;5. Review &amp; Deploy&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;'&gt;• Sprint demo to supervisor&lt;br/&gt;• Stakeholder feedback&lt;br/&gt;• Deploy to Hetzner VPS&lt;br/&gt;• Docker compose up&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="527" y="500" width="175" height="95" as="geometry"/>
+    </mxCell>
+
+    <!-- PHASE 6: Retrospective & Adapt -->
+    <mxCell id="25" value="&lt;b&gt;6. Retrospective &amp; Adapt&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;'&gt;• What went well?&lt;br/&gt;• What to improve?&lt;br/&gt;• Update backlog priorities&lt;br/&gt;• Refine next sprint scope&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="527" y="230" width="175" height="95" as="geometry"/>
+    </mxCell>
+
+    <!-- ═══════════════════════ CLOCKWISE PHASE ARROWS ═══════════════════════ -->
+
+    <!-- P1 → P2: Planning → Design -->
+    <mxCell id="30" value="sprint backlog" style="curved=1;edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" source="20" target="21" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="960" y="155"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- P2 → P3: Design → Implementation -->
+    <mxCell id="31" value="design specs" style="curved=1;edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=2;" edge="1" source="21" target="22" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- P3 → P4: Implementation → Testing -->
+    <mxCell id="32" value="code builds" style="curved=1;edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#d6b656;strokeWidth=2;" edge="1" source="22" target="23" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="988" y="750"/>
+          <mxPoint x="910" y="667"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- P4 → P5: Testing → Review & Deploy -->
+    <mxCell id="33" value="tested build" style="curved=1;edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.7;entryY=1;entryDx=0;entryDy=0;strokeColor=#b85450;strokeWidth=2;" edge="1" source="23" target="24" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="665" y="667"/>
+          <mxPoint x="648" y="595"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- P5 → P6: Review → Retrospective -->
+    <mxCell id="34" value="feedback &amp; metrics" style="curved=1;edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=#9673a6;strokeWidth=2;" edge="1" source="24" target="25" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- P6 → P1: Retrospective → Planning (next sprint) -->
+    <mxCell id="35" value="refined backlog" style="curved=1;edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;exitX=0.7;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#d6b656;strokeWidth=2;" edge="1" source="25" target="20" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="650" y="200"/>
+          <mxPoint x="700" y="155"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ═══════════════════════ EXTERNAL CONNECTORS ═══════════════════════ -->
+
+    <!-- Product Backlog → P1 Sprint Planning -->
+    <mxCell id="36" value="prioritised&lt;br/&gt;user stories" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#d6b656;strokeWidth=2;" edge="1" source="10" target="20" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="250" y="407"/>
+          <mxPoint x="250" y="155"/>
+          <mxPoint x="740" y="155"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- P5 Review → Shippable Increment -->
+    <mxCell id="37" value="working software" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=2;" edge="1" source="24" target="11" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1415" y="547"/>
+          <mxPoint x="1415" y="407"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Shippable Increment → Stakeholders -->
+    <mxCell id="38" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=1;" edge="1" source="11" target="12" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Stakeholders → Product Backlog (feedback loop, dashed) -->
+    <mxCell id="39" value="new requirements&lt;br/&gt;/ change requests" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;fontStyle=2;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=#999999;" edge="1" source="12" target="10" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1415" y="592"/>
+          <mxPoint x="1415" y="780"/>
+          <mxPoint x="122" y="780"/>
+          <mxPoint x="122" y="445"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ═══════════════════════ SPRINT ROADMAP ═══════════════════════ -->
+
+    <!-- Section divider -->
+    <mxCell id="40" value="" style="line;strokeWidth=1;fillColor=none;strokeColor=#cccccc;" vertex="1" parent="1">
+      <mxGeometry x="40" y="800" width="1600" height="10" as="geometry"/>
+    </mxCell>
+
+    <!-- Roadmap title -->
+    <mxCell id="41" value="&lt;b&gt;MyBahaya Sprint Roadmap (FYP 1 &amp; FYP 2)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="400" y="808" width="840" height="28" as="geometry"/>
+    </mxCell>
+
+    <!-- Sprint 1 -->
+    <mxCell id="50" value="&lt;b&gt;Sprint 1&lt;/b&gt;&lt;br/&gt;Authentication &amp;&lt;br/&gt;User Registration&lt;br/&gt;&lt;font style='font-size:9px;color:#555;'&gt;Firebase Auth · login&lt;br/&gt;citizen registration&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=8;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="40" y="843" width="230" height="105" as="geometry"/>
+    </mxCell>
+
+    <!-- Sprint 2 -->
+    <mxCell id="51" value="&lt;b&gt;Sprint 2&lt;/b&gt;&lt;br/&gt;Report Submission&lt;br/&gt;&amp; Media Upload&lt;br/&gt;&lt;font style='font-size:9px;color:#555;'&gt;Flutter form · MinIO&lt;br/&gt;GPS location&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=8;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="290" y="843" width="230" height="105" as="geometry"/>
+    </mxCell>
+
+    <!-- Sprint 3 -->
+    <mxCell id="52" value="&lt;b&gt;Sprint 3&lt;/b&gt;&lt;br/&gt;AI Enrichment&lt;br/&gt;&amp; Routing&lt;br/&gt;&lt;font style='font-size:9px;color:#555;'&gt;Gemini 2.5 Flash&lt;br/&gt;Haversine algorithm&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;arcSize=8;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="540" y="843" width="230" height="105" as="geometry"/>
+    </mxCell>
+
+    <!-- Sprint 4 -->
+    <mxCell id="53" value="&lt;b&gt;Sprint 4&lt;/b&gt;&lt;br/&gt;Organisation&lt;br/&gt;Dashboard&lt;br/&gt;&lt;font style='font-size:9px;color:#555;'&gt;Web portal · React&lt;br/&gt;report management&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;arcSize=8;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="790" y="843" width="230" height="105" as="geometry"/>
+    </mxCell>
+
+    <!-- Sprint 5 -->
+    <mxCell id="54" value="&lt;b&gt;Sprint 5&lt;/b&gt;&lt;br/&gt;Push Notifications&lt;br/&gt;&amp; Admin Portal&lt;br/&gt;&lt;font style='font-size:9px;color:#555;'&gt;FCM · admin panel&lt;br/&gt;public incident map&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;arcSize=8;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="1040" y="843" width="230" height="105" as="geometry"/>
+    </mxCell>
+
+    <!-- Sprint 6 -->
+    <mxCell id="55" value="&lt;b&gt;Sprint 6&lt;/b&gt;&lt;br/&gt;Testing, Refinement&lt;br/&gt;&amp; FYP Report&lt;br/&gt;&lt;font style='font-size:9px;color:#555;'&gt;UAT · bug fixes&lt;br/&gt;documentation&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;arcSize=8;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="1290" y="843" width="330" height="105" as="geometry"/>
+    </mxCell>
+
+    <!-- Sprint flow arrows -->
+    <mxCell id="60" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#555555;" edge="1" source="50" target="51" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="61" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#555555;" edge="1" source="51" target="52" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="62" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#555555;" edge="1" source="52" target="53" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="63" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#555555;" edge="1" source="53" target="54" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="64" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#555555;" edge="1" source="54" target="55" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- ═══════════════════════ AGILE PRINCIPLES BOX ═══════════════════════ -->
+    <mxCell id="70" value="&lt;b&gt;Agile Principles Applied&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;'&gt;✔ Working software over comprehensive documentation&lt;br/&gt;✔ Customer collaboration over contract negotiation&lt;br/&gt;✔ Responding to change over following a plan&lt;br/&gt;✔ Continuous improvement through retrospectives&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#999999;fontSize=11;arcSize=6;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="40" y="100" width="310" height="110" as="geometry"/>
+    </mxCell>
+
+    <!-- Agile Tools -->
+    <mxCell id="71" value="&lt;b&gt;Tools &amp; Artefacts&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;'&gt;📋 Product Backlog (GitHub Issues)&lt;br/&gt;📊 Sprint Backlog (Scrum Board)&lt;br/&gt;📈 Burndown Chart&lt;br/&gt;📝 Definition of Done (DoD)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#999999;fontSize=11;arcSize=6;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="1300" y="100" width="310" height="110" as="geometry"/>
+    </mxCell>
+
+    <!-- FYP 1 bracket label -->
+    <mxCell id="80" value="◄──────────────────── FYP 1 ────────────────────►" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="40" y="955" width="730" height="24" as="geometry"/>
+    </mxCell>
+
+    <!-- FYP 2 bracket label -->
+    <mxCell id="81" value="◄────────────── FYP 2 ──────────────►" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="790" y="955" width="830" height="24" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

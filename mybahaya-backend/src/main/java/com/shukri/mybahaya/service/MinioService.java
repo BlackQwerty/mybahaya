@@ -4,6 +4,7 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.SetBucketPolicyArgs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,9 @@ public class MinioService {
 
     @Value("${minio.url}")
     private String minioUrl;
+
+    @Value("${minio.public-url}")
+    private String minioPublicUrl;
 
     /** Uploads a single image and returns its public URL. */
     public String uploadReportImage(MultipartFile file) throws Exception {
@@ -45,6 +49,7 @@ public class MinioService {
         if (!found) {
             minioClient.makeBucket(MakeBucketArgs.builder().bucket(reportsBucket).build());
         }
+        ensurePublicReadPolicy();
 
         // Generate unique filename
         String extension = getFileExtension(file.getOriginalFilename());
@@ -62,8 +67,31 @@ public class MinioService {
             );
         }
 
-        // Return public URL (bucket policy allows public read)
-        return minioUrl + "/" + reportsBucket + "/" + objectName;
+        // Return a URL the phone/browser can reach, not the Docker-internal URL.
+        return minioPublicUrl + "/" + reportsBucket + "/" + objectName;
+    }
+
+    private void ensurePublicReadPolicy() throws Exception {
+        String policy = """
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": "*",
+                  "Action": ["s3:GetObject"],
+                  "Resource": ["arn:aws:s3:::%s/*"]
+                }
+              ]
+            }
+            """.formatted(reportsBucket);
+
+        minioClient.setBucketPolicy(
+            SetBucketPolicyArgs.builder()
+                .bucket(reportsBucket)
+                .config(policy)
+                .build()
+        );
     }
 
     private String getFileExtension(String filename) {

@@ -4,11 +4,17 @@
 
 'use strict';
 
-const API_BASE = 'https://api.mybahaya.com/api';
+// const API_BASE = 'https://api.mybahaya.com/api';
+const API_BASE = 'http://192.168.0.34:8080/api';
+const OLD_MINIO_URL = 'http://178.105.158.80:9000';
+const MINIO_BASE_URL = 'http://192.168.0.34:9000';
 
 function safeImageUrl(url) {
   if (!url) return '';
-  return url.replace('http://178.105.158.80:9000', 'https://api.mybahaya.com/minio');
+  return url
+    .replace(OLD_MINIO_URL, MINIO_BASE_URL)
+    .replace('http://minio:9000', MINIO_BASE_URL)
+    .replace('http://localhost:9000', MINIO_BASE_URL);
 }
 
 /* ── AI Analysis is computed SERVER-SIDE (Spring Boot + Gemini 2.5 Flash).

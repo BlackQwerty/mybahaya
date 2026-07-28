@@ -24,7 +24,7 @@ class ApiService {
       return configuredBaseUrl;
     }
 
-    return 'https://api.mybahaya.com/api'; // was http://178.105.158.80:8080/api
+    return 'http://192.168.0.34:8080/api';
   }
 
   /// Submits a report with 1–3 photos (multipart/form-data) to the backend.

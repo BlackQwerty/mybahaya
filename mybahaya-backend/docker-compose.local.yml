@@ -1,0 +1,36 @@
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: mybahaya-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
+
+  mybahaya-backend:
+    build: .
+    image: mybahaya-backend:latest
+    container_name: mybahaya-backend
+    depends_on:
+      - minio
+    ports:
+      - "8080:8080"
+    environment:
+      JAVA_TOOL_OPTIONS: -Dio.netty.handler.ssl.noOpenSsl=true -Dio.netty.transport.noNative=true -Dio.grpc.netty.shaded.io.netty.handler.ssl.noOpenSsl=true -Dio.grpc.netty.shaded.io.netty.transport.noNative=true
+      MINIO_URL: http://minio:9000
+      MINIO_PUBLIC_URL: http://192.168.0.34:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      FIREBASE_SERVICE_ACCOUNT_PATH: /secrets/firebase-service-account.json
+    volumes:
+      - ../mybahaya-fyp-firebase-adminsdk-fbsvc-fdac908045.json:/secrets/firebase-service-account.json:ro
+    env_file:
+      - .env
+
+volumes:
+  minio-data:

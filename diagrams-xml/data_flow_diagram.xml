@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="700" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- ══ TITLE ══ -->
+    <mxCell id="title" value="MyBahaya — Level 1 Data Flow Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="350" y="10" width="600" height="30" as="geometry" />
+    </mxCell>
+
+    <!-- ══ EXTERNAL ENTITIES (left) ══ -->
+    <mxCell id="e1" value="Citizen" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="20" y="65" width="120" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="e2" value="Organisation Staff" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="20" y="255" width="120" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="e3" value="System Admin" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="20" y="435" width="120" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- ══ PROCESSES — left column ══ -->
+    <mxCell id="p1" value="P1&#xa;Authenticate User" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="215" y="50" width="155" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="p2" value="P2&#xa;Submit Report" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="215" y="235" width="155" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="p5" value="P5&#xa;Manage Report" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="215" y="415" width="155" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- ══ PROCESSES — right column ══ -->
+    <mxCell id="p3" value="P3&#xa;AI Enrich Report" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="510" y="235" width="165" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="p4" value="P4&#xa;Route &amp; Notify" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="510" y="415" width="165" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- ══ EXTERNAL SERVICES (right) ══ -->
+    <mxCell id="s1" value="Firebase Auth" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="860" y="50" width="145" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="s2" value="Google Gemini AI" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="860" y="240" width="145" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="s3" value="FCM Service" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="860" y="430" width="145" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- ══ DATA STORES (bottom) ══ -->
+    <mxCell id="d1" value="D1: users" style="shape=mxgraph.dfd.dataStore;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="20" y="570" width="145" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="d2" value="D2: reports" style="shape=mxgraph.dfd.dataStore;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="205" y="570" width="145" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="d3" value="D3: organizations" style="shape=mxgraph.dfd.dataStore;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="390" y="570" width="165" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="d4" value="D4: MinIO Media" style="shape=mxgraph.dfd.dataStore;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="595" y="570" width="155" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- ══ EDGES ══ -->
+
+    <!-- Auth flow -->
+    <mxCell id="f1" value="login credentials" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="e1" target="p1" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f2" value="verify credentials" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;" edge="1" source="p1" target="s1" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f3" value="auth result" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;dashed=1;exitX=0;exitY=0.7;exitDx=0;exitDy=0;entryX=1;entryY=0.7;entryDx=0;entryDy=0;" edge="1" source="s1" target="p1" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f4" value="save user profile" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="p1" target="d1" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Report submission flow -->
+    <mxCell id="f5" value="report + photos + GPS" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="e1" target="p2" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f6" value="save report" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="p2" target="d2" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f7" value="upload media" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=0.7;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="p2" target="d4" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f8" value="trigger AI enrichment" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="p2" target="p3" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f9" value="trigger routing" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;" edge="1" source="p2" target="p4" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- AI enrichment flow -->
+    <mxCell id="f10" value="image + prompt" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;" edge="1" source="p3" target="s2" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f11" value="AI analysis result" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;dashed=1;exitX=0;exitY=0.7;exitDx=0;exitDy=0;entryX=1;entryY=0.7;entryDx=0;entryDy=0;" edge="1" source="s2" target="p3" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f12" value="update AI fields" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" source="p3" target="d2" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Routing and notification flow -->
+    <mxCell id="f13" value="org lookup" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" source="d3" target="p4" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f14" value="assign org + ETA" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" source="p4" target="d2" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f15" value="send notifications" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="p4" target="s3" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Manage report flow -->
+    <mxCell id="f16" value="update status / ETA" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="e2" target="p5" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f17" value="read assigned reports" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;dashed=1;exitX=0.3;exitY=0;exitDx=0;exitDy=0;entryX=0.3;entryY=1;entryDx=0;entryDy=0;" edge="1" source="d2" target="p5" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f18" value="update report status" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=0.7;exitY=1;exitDx=0;exitDy=0;entryX=0.7;entryY=0;entryDx=0;entryDy=0;" edge="1" source="p5" target="d2" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Admin flow -->
+    <mxCell id="f19" value="manage system" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="e3" target="p5" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f20" value="manage orgs" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=0.7;exitY=1;exitDx=0;exitDy=0;entryX=0.7;entryY=0;entryDx=0;entryDy=0;" edge="1" source="p5" target="d3" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f21" value="manage users" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="p5" target="d1" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>

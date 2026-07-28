@@ -3,7 +3,8 @@
 const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   Header, Footer, AlignmentType, LevelFormat, HeadingLevel,
-  BorderStyle, WidthType, ShadingType, VerticalAlign, PageNumber, PageBreak
+  BorderStyle, WidthType, ShadingType, VerticalAlign, PageNumber, PageBreak,
+  TableOfContents, StyleLevel, NumberFormat, TabStopType, TabStopPosition, LeaderType
 } = require('docx');
 const fs = require('fs');
 
@@ -96,6 +97,70 @@ function imgPlaceholder(label) {
   });
 }
 
+// Figure caption (placed under the figure). Styled so it can be collected into List of Figures.
+function figCaption(numberLabel, title) {
+  return new Paragraph({
+    style: "FigureCaption",
+    alignment: AlignmentType.CENTER,
+    spacing: { before: 60, after: 240 },
+    children: [
+      new TextRun({ text: `Figure ${numberLabel}: `, bold: true, size: 22, font: "Times New Roman", color: BLACK }),
+      new TextRun({ text: title, size: 22, font: "Times New Roman", color: BLACK })
+    ]
+  });
+}
+
+// Returns [ figure placeholder , caption ] so the figure and its caption stay together.
+function figure(numberLabel, title, placeholderLabel) {
+  return [imgPlaceholder(placeholderLabel || title), figCaption(numberLabel, title)];
+}
+
+// Table caption (placed above the table). Styled so it can be collected into List of Tables.
+function tblCaption(numberLabel, title) {
+  return new Paragraph({
+    style: "TableCaption",
+    spacing: { before: 120, after: 60 },
+    children: [
+      new TextRun({ text: `Table ${numberLabel}: `, bold: true, size: 22, font: "Times New Roman", color: BLACK }),
+      new TextRun({ text: title, size: 22, font: "Times New Roman", color: BLACK })
+    ]
+  });
+}
+
+// Front-matter centered title (e.g., "ABSTRACT", "DECLARATION")
+function fmTitle(text) {
+  return new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { before: 0, after: 360 },
+    children: [new TextRun({ text, bold: true, size: 28, font: "Times New Roman", color: BLACK })]
+  });
+}
+
+// Harvard-style reference list entry with hanging indent
+function refItem(text) {
+  return new Paragraph({
+    alignment: AlignmentType.JUSTIFIED,
+    spacing: { before: 0, after: 160, line: 360, lineRule: "auto" },
+    indent: { left: 360, hanging: 360 },
+    children: [new TextRun({ text, size: 24, font: "Times New Roman", color: BLACK })]
+  });
+}
+
+// Two-column row helper for List of Abbreviations
+function abbrRow(abbr, meaning) {
+  const border = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
+  const borders = { top: border, bottom: border, left: border, right: border };
+  function cell(text, w, bold) {
+    return new TableCell({
+      borders, width: { size: w, type: WidthType.DXA },
+      margins: { top: 40, bottom: 40, left: 0, right: 120 },
+      children: [new Paragraph({ spacing: { before: 0, after: 0 },
+        children: [new TextRun({ text, size: 24, font: "Times New Roman", bold: !!bold, color: BLACK })] })]
+    });
+  }
+  return new TableRow({ children: [cell(abbr, 2400, true), cell(meaning, 6626, false)] });
+}
+
 // Simple table helper: header row + data rows
 function simpleTable(headers, rows) {
   const colCount = headers.length;
@@ -132,6 +197,7 @@ function simpleTable(headers, rows) {
 // ─── Document ─────────────────────────────────────────────────────────────────
 
 const doc = new Document({
+  features: { updateFields: true },
   numbering: {
     config: [
       {
@@ -172,6 +238,16 @@ const doc = new Document({
         id: "Heading3", name: "Heading 3", basedOn: "Normal", next: "Normal", quickFormat: true,
         run: { size: 24, bold: true, font: "Times New Roman", color: BLACK },
         paragraph: { spacing: { before: 240, after: 120 }, outlineLevel: 2 }
+      },
+      {
+        id: "FigureCaption", name: "Figure Caption", basedOn: "Normal", next: "Normal", quickFormat: true,
+        run: { size: 22, font: "Times New Roman", color: BLACK },
+        paragraph: { spacing: { before: 60, after: 240 }, alignment: AlignmentType.CENTER }
+      },
+      {
+        id: "TableCaption", name: "Table Caption", basedOn: "Normal", next: "Normal", quickFormat: true,
+        run: { size: 22, font: "Times New Roman", color: BLACK },
+        paragraph: { spacing: { before: 120, after: 60 } }
       }
     ]
   },
@@ -187,51 +263,320 @@ const doc = new Document({
         }
       },
       children: [
+        spacer(), spacer(), spacer(), spacer(), spacer(),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 480 },
+          children: [new TextRun({ text: "MYBAHAYA: AN AI-POWERED EMERGENCY REPORTING AND REAL-TIME COMMUNITY ALERT PLATFORM FOR MALAYSIA", bold: true, size: 32, font: "Times New Roman", color: BLACK })]
+        }),
+        spacer(), spacer(), spacer(), spacer(),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 480 },
+          children: [new TextRun({ text: "AHMAD SHUKRI BIN BAKRI", bold: true, size: 28, font: "Times New Roman", color: BLACK })]
+        }),
+        spacer(), spacer(), spacer(), spacer(), spacer(), spacer(),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 120 },
+          children: [new TextRun({ text: "FACULTY OF INFORMATION AND COMMUNICATION TECHNOLOGY", bold: true, size: 26, font: "Times New Roman", color: BLACK })]
+        }),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 480 },
+          children: [new TextRun({ text: "UNIVERSITI TEKNIKAL MALAYSIA MELAKA", bold: true, size: 26, font: "Times New Roman", color: BLACK })]
+        }),
         spacer(), spacer(), spacer(),
         new Paragraph({
           alignment: AlignmentType.CENTER,
-          spacing: { before: 0, after: 240 },
-          children: [new TextRun({ text: "UNIVERSITI TEKNOLOGI MARA", bold: true, size: 28, font: "Times New Roman", color: BLACK })]
+          spacing: { before: 0, after: 120 },
+          children: [new TextRun({ text: "2026", bold: true, size: 26, font: "Times New Roman", color: BLACK })]
+        }),
+        pageBreak(),
+
+        // ── BORANG PENGESAHAN STATUS LAPORAN (unnumbered) ──
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 60 },
+          children: [new TextRun({ text: "UNIVERSITI TEKNIKAL MALAYSIA MELAKA", bold: true, size: 24, font: "Times New Roman", color: BLACK })]
         }),
         new Paragraph({
           alignment: AlignmentType.CENTER,
           spacing: { before: 0, after: 240 },
-          children: [new TextRun({ text: "FACULTY OF COMPUTER AND MATHEMATICAL SCIENCES", bold: true, size: 24, font: "Times New Roman", color: BLACK })]
+          children: [new TextRun({ text: "BORANG PENGESAHAN STATUS LAPORAN", bold: true, size: 24, font: "Times New Roman", color: BLACK })]
+        }),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 240 },
+          children: [new TextRun({ text: "JUDUL: MYBAHAYA: AN AI-POWERED EMERGENCY REPORTING AND REAL-TIME COMMUNITY ALERT PLATFORM FOR MALAYSIA", bold: true, size: 22, font: "Times New Roman", color: BLACK })]
+        }),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 240 },
+          children: [new TextRun({ text: "SESI PENGAJIAN: 2025/2026", bold: true, size: 22, font: "Times New Roman", color: BLACK })]
+        }),
+        new Paragraph({
+          alignment: AlignmentType.JUSTIFIED,
+          spacing: { before: 0, after: 160, line: 360, lineRule: "auto" },
+          children: [new TextRun({ text: "Saya AHMAD SHUKRI BIN BAKRI mengaku membenarkan laporan Projek Sarjana Muda ini disimpan di Perpustakaan Universiti Teknikal Malaysia Melaka (UTeM) dengan syarat-syarat kegunaan seperti berikut:", size: 22, font: "Times New Roman", color: BLACK })]
+        }),
+        numbered("Laporan ini adalah hak milik Universiti Teknikal Malaysia Melaka."),
+        numbered("Perpustakaan Universiti Teknikal Malaysia Melaka dibenarkan membuat salinan untuk tujuan pengajian sahaja."),
+        numbered("Perpustakaan dibenarkan membuat salinan laporan ini sebagai bahan pertukaran antara institusi pengajian tinggi."),
+        numbered("** Sila tandakan (/)"),
+        new Paragraph({
+          spacing: { before: 60, after: 120, line: 360, lineRule: "auto" },
+          children: [new TextRun({ text: "[   ]  SULIT          (Mengandungi maklumat yang berdarjah keselamatan atau kepentingan Malaysia sebagaimana yang termaktub di dalam AKTA RAHSIA RASMI 1972)", size: 20, font: "Times New Roman", color: BLACK })]
+        }),
+        new Paragraph({
+          spacing: { before: 0, after: 120, line: 360, lineRule: "auto" },
+          children: [new TextRun({ text: "[   ]  TERHAD     (Mengandungi maklumat TERHAD yang telah ditentukan oleh organisasi/badan di mana penyelidikan dijalankan)", size: 20, font: "Times New Roman", color: BLACK })]
+        }),
+        new Paragraph({
+          spacing: { before: 0, after: 360, line: 360, lineRule: "auto" },
+          children: [new TextRun({ text: "[ / ]  TIDAK TERHAD", size: 20, font: "Times New Roman", color: BLACK })]
+        }),
+        new Paragraph({
+          spacing: { before: 240, after: 0 },
+          tabStops: [{ type: TabStopType.LEFT, position: 5400 }],
+          children: [
+            new TextRun({ text: "_______________________________", size: 22, font: "Times New Roman", color: BLACK }),
+            new TextRun({ text: "\t_______________________________", size: 22, font: "Times New Roman", color: BLACK })
+          ]
+        }),
+        new Paragraph({
+          spacing: { before: 0, after: 0 },
+          tabStops: [{ type: TabStopType.LEFT, position: 5400 }],
+          children: [
+            new TextRun({ text: "(TANDATANGAN PENULIS)", size: 22, font: "Times New Roman", color: BLACK }),
+            new TextRun({ text: "\t(TANDATANGAN PENYELIA)", size: 22, font: "Times New Roman", color: BLACK })
+          ]
+        }),
+        new Paragraph({
+          spacing: { before: 360, after: 0 },
+          tabStops: [{ type: TabStopType.LEFT, position: 5400 }],
+          children: [
+            new TextRun({ text: "Tarikh: ____________________", size: 22, font: "Times New Roman", color: BLACK }),
+            new TextRun({ text: "\tTarikh: ____________________", size: 22, font: "Times New Roman", color: BLACK })
+          ]
+        }),
+        new Paragraph({
+          spacing: { before: 480, after: 0 },
+          children: [new TextRun({ text: "CATATAN: ** Jika laporan ini SULIT atau TERHAD, sila lampirkan surat daripada pihak berkuasa/organisasi berkenaan dengan menyatakan sekali sebab dan tempoh laporan ini perlu dikelaskan sebagai SULIT atau TERHAD.", italics: true, size: 18, font: "Times New Roman", color: BLACK })]
+        }),
+        pageBreak()
+      ]
+    },
+
+    // ════════════════════════════════════════════════════════════
+    // FRONT MATTER  (Title page → Lists ; lower-roman page numbers)
+    // ════════════════════════════════════════════════════════════
+    {
+      properties: {
+        page: {
+          size: { width: 11906, height: 16838 },
+          margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
+          pageNumbers: { start: 1, formatType: NumberFormat.LOWER_ROMAN }
+        },
+        titlePage: true
+      },
+      footers: {
+        // Title page = page i, number not shown
+        first: new Footer({ children: [new Paragraph({ children: [new TextRun({ text: "", size: 20, font: "Times New Roman" })] })] }),
+        default: new Footer({
+          children: [new Paragraph({
+            alignment: AlignmentType.CENTER,
+            children: [new TextRun({ children: [PageNumber.CURRENT], size: 20, font: "Times New Roman", color: BLACK })]
+          })]
+        })
+      },
+      children: [
+        // ── TITLE PAGE (page i) ──
+        spacer(), spacer(), spacer(),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 600 },
+          children: [new TextRun({ text: "MYBAHAYA: AN AI-POWERED EMERGENCY REPORTING AND REAL-TIME COMMUNITY ALERT PLATFORM FOR MALAYSIA", bold: true, size: 30, font: "Times New Roman", color: BLACK })]
         }),
         spacer(), spacer(),
         new Paragraph({
           alignment: AlignmentType.CENTER,
-          spacing: { before: 0, after: 240 },
-          children: [new TextRun({ text: "BACHELOR OF COMPUTER SCIENCE (HONS.)", size: 24, font: "Times New Roman", color: BLACK })]
+          spacing: { before: 0, after: 600 },
+          children: [new TextRun({ text: "AHMAD SHUKRI BIN BAKRI", bold: true, size: 26, font: "Times New Roman", color: BLACK })]
         }),
-        spacer(), spacer(), spacer(),
+        spacer(), spacer(),
         new Paragraph({
           alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 160, line: 360, lineRule: "auto" },
+          children: [new TextRun({ text: "This report is submitted in partial fulfilment of the requirements for the Bachelor of Computer Science (Software Development) with Honours.", size: 24, font: "Times New Roman", color: BLACK })]
+        }),
+        spacer(), spacer(),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 120 },
+          children: [new TextRun({ text: "FACULTY OF INFORMATION AND COMMUNICATION TECHNOLOGY", bold: true, size: 24, font: "Times New Roman", color: BLACK })]
+        }),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 480 },
+          children: [new TextRun({ text: "UNIVERSITI TEKNIKAL MALAYSIA MELAKA", bold: true, size: 24, font: "Times New Roman", color: BLACK })]
+        }),
+        spacer(), spacer(),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 0, after: 120 },
+          children: [new TextRun({ text: "2026", bold: true, size: 24, font: "Times New Roman", color: BLACK })]
+        }),
+        pageBreak(),
+
+        // ── DECLARATION ──
+        fmTitle("DECLARATION"),
+        new Paragraph({
+          alignment: AlignmentType.JUSTIFIED,
+          spacing: { before: 0, after: 240, line: 360, lineRule: "auto" },
+          children: [
+            new TextRun({ text: "I hereby declare that this project report entitled ", size: 24, font: "Times New Roman", color: BLACK }),
+            new TextRun({ text: "“MyBahaya: An AI-Powered Emergency Reporting and Real-Time Community Alert Platform for Malaysia”", italics: true, size: 24, font: "Times New Roman", color: BLACK }),
+            new TextRun({ text: " is written by me and is my own effort and that no part has been plagiarized without citations.", size: 24, font: "Times New Roman", color: BLACK })
+          ]
+        }),
+        spacer(), spacer(),
+        new Paragraph({
+          spacing: { before: 240, after: 0 },
+          tabStops: [{ type: TabStopType.LEFT, position: 1800 }],
+          children: [
+            new TextRun({ text: "STUDENT", size: 24, font: "Times New Roman", color: BLACK }),
+            new TextRun({ text: "\t: _______________________________", size: 24, font: "Times New Roman", color: BLACK })
+          ]
+        }),
+        new Paragraph({
           spacing: { before: 0, after: 360 },
-          children: [new TextRun({ text: "FINAL YEAR PROJECT (BITS : SOFTWARE DEVELOPMENT)", bold: true, size: 28, font: "Times New Roman", color: BLACK })]
+          tabStops: [{ type: TabStopType.LEFT, position: 1800 }],
+          children: [
+            new TextRun({ text: "", size: 24, font: "Times New Roman", color: BLACK }),
+            new TextRun({ text: "\t  (AHMAD SHUKRI BIN BAKRI)", size: 24, font: "Times New Roman", color: BLACK })
+          ]
+        }),
+        new Paragraph({
+          spacing: { before: 0, after: 360 },
+          tabStops: [{ type: TabStopType.LEFT, position: 1800 }],
+          children: [
+            new TextRun({ text: "Date", size: 24, font: "Times New Roman", color: BLACK }),
+            new TextRun({ text: "\t: _______________________________", size: 24, font: "Times New Roman", color: BLACK })
+          ]
         }),
         spacer(), spacer(),
         new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 0, after: 240 },
-          children: [new TextRun({ text: "MyBahaya: An AI-Powered Emergency Reporting and Real-Time Community Alert Platform for Malaysia", bold: true, size: 30, font: "Times New Roman", color: BLACK })]
-        }),
-        spacer(), spacer(), spacer(),
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 0, after: 120 },
-          children: [new TextRun({ text: "Prepared by:", size: 24, font: "Times New Roman", color: BLACK })]
+          spacing: { before: 240, after: 0 },
+          tabStops: [{ type: TabStopType.LEFT, position: 1800 }],
+          children: [
+            new TextRun({ text: "SUPERVISOR", size: 24, font: "Times New Roman", color: BLACK }),
+            new TextRun({ text: "\t: _______________________________", size: 24, font: "Times New Roman", color: BLACK })
+          ]
         }),
         new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 0, after: 120 },
-          children: [new TextRun({ text: "AHMAD SHUKRI", bold: true, size: 24, font: "Times New Roman", color: BLACK })]
+          spacing: { before: 0, after: 360 },
+          tabStops: [{ type: TabStopType.LEFT, position: 1800 }],
+          children: [
+            new TextRun({ text: "", size: 24, font: "Times New Roman", color: BLACK }),
+            new TextRun({ text: "\t  (____________________________)", size: 24, font: "Times New Roman", color: BLACK })
+          ]
         }),
-        spacer(), spacer(),
         new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 0, after: 120 },
-          children: [new TextRun({ text: "Session: 2025/2026", size: 24, font: "Times New Roman", color: BLACK })]
+          spacing: { before: 0, after: 360 },
+          tabStops: [{ type: TabStopType.LEFT, position: 1800 }],
+          children: [
+            new TextRun({ text: "Date", size: 24, font: "Times New Roman", color: BLACK }),
+            new TextRun({ text: "\t: _______________________________", size: 24, font: "Times New Roman", color: BLACK })
+          ]
+        }),
+        pageBreak(),
+
+        // ── ACKNOWLEDGEMENT ──
+        fmTitle("ACKNOWLEDGEMENT"),
+        body("First and foremost, I express my deepest gratitude to Allah S.W.T. for granting me the strength, patience, and perseverance to complete this Final Year Project. I would like to extend my sincere appreciation to my supervisor for the invaluable guidance, constructive feedback, and continuous encouragement provided throughout the development of the MyBahaya project. Their expertise and support have been instrumental in shaping both the technical direction and the academic quality of this work."),
+        body("I am also grateful to the lecturers of the Faculty of Information and Communication Technology, Universiti Teknikal Malaysia Melaka, for the knowledge and skills imparted during my studies, which formed the foundation for this project. My heartfelt thanks go to my family for their unwavering moral and emotional support, and to my fellow course mates who participated in user acceptance testing and offered helpful suggestions. Finally, I acknowledge everyone who contributed directly or indirectly to the successful completion of this project."),
+        pageBreak(),
+
+        // ── ABSTRACT (English) ──
+        fmTitle("ABSTRACT"),
+        new Paragraph({
+          alignment: AlignmentType.JUSTIFIED,
+          spacing: { before: 0, after: 160, line: 360, lineRule: "auto" },
+          children: [new TextRun({ text: "Emergency reporting in Malaysia remains heavily dependent on voice-based channels such as the 999 hotline, which require callers to verbally describe incidents, provide no facility for multimedia evidence, and rely on manual operator triage to route cases to the appropriate agency. These limitations introduce delays and the risk of miscommunication during time-critical situations. This project, MyBahaya, addresses these gaps by developing an AI-powered emergency reporting and real-time community alert platform tailored for Malaysia. The system comprises a Flutter-based mobile application for citizens, a web dashboard for emergency organizations, and a Spring Boot backend that integrates Firebase Firestore, MinIO object storage, Firebase Cloud Messaging, and the Google Gemini 2.5 Flash multimodal artificial intelligence model. Citizens submit reports containing photographs, an optional video, and automatically captured GPS coordinates. The backend stores the media, asynchronously analyses the imagery with Gemini to determine incident severity, generate a summary, identify hazards, and detect potentially fake reports, then routes the report to the nearest appropriate organization using the Haversine distance formula. Nearby citizens and the assigned organization are notified in real time through push notifications. The platform was developed using the Agile methodology and validated through sixteen functional, security, performance, and usability test cases, all of which passed. The results demonstrate that integrating mobile technology, cloud services, and multimodal AI can meaningfully improve the speed, richness, and accuracy of emergency reporting in Malaysia.", size: 24, font: "Times New Roman", color: BLACK })]
+        }),
+        pageBreak(),
+
+        // ── ABSTRAK (Bahasa Melayu) ──
+        fmTitle("ABSTRAK"),
+        new Paragraph({
+          alignment: AlignmentType.JUSTIFIED,
+          spacing: { before: 0, after: 160, line: 360, lineRule: "auto" },
+          children: [new TextRun({ text: "Pelaporan kecemasan di Malaysia masih bergantung sepenuhnya kepada saluran berasaskan suara seperti talian 999, yang memerlukan pemanggil menerangkan kejadian secara lisan, tidak menyediakan kemudahan untuk bukti multimedia, dan bergantung kepada penilaian manual oleh operator untuk menghalakan kes kepada agensi yang sesuai. Keterbatasan ini menyebabkan kelewatan dan risiko salah faham dalam situasi yang kritikal masa. Projek ini, MyBahaya, menangani jurang tersebut dengan membangunkan sebuah platform pelaporan kecemasan dan amaran komuniti masa nyata berkuasa kecerdasan buatan (AI) yang dikhususkan untuk Malaysia. Sistem ini terdiri daripada aplikasi mudah alih berasaskan Flutter untuk orang awam, papan pemuka web untuk organisasi kecemasan, dan pelayan belakang Spring Boot yang menyepadukan Firebase Firestore, storan objek MinIO, Firebase Cloud Messaging, serta model kecerdasan buatan multimodal Google Gemini 2.5 Flash. Orang awam menghantar laporan yang mengandungi gambar, video pilihan, dan koordinat GPS yang ditangkap secara automatik. Pelayan belakang menyimpan media tersebut, menganalisis imej secara tak segerak menggunakan Gemini untuk menentukan tahap keterukan, menjana ringkasan, mengenal pasti bahaya, dan mengesan laporan palsu, kemudian menghalakan laporan kepada organisasi terdekat yang sesuai menggunakan formula jarak Haversine. Orang awam berhampiran dan organisasi yang ditugaskan dimaklumkan secara masa nyata melalui pemberitahuan tolak. Platform ini dibangunkan menggunakan metodologi Agile dan disahkan melalui enam belas kes ujian fungsian, keselamatan, prestasi, dan kebolehgunaan, yang kesemuanya lulus. Hasil kajian menunjukkan bahawa penyepaduan teknologi mudah alih, perkhidmatan awan, dan AI multimodal dapat meningkatkan kelajuan, kekayaan maklumat, dan ketepatan pelaporan kecemasan di Malaysia secara bermakna.", size: 24, font: "Times New Roman", color: BLACK })]
+        }),
+        pageBreak(),
+
+        // ── TABLE OF CONTENTS ──
+        fmTitle("TABLE OF CONTENTS"),
+        new TableOfContents("Table of Contents", { hyperlink: true, headingStyleRange: "1-3" }),
+        pageBreak(),
+
+        // ── LIST OF TABLES ──
+        fmTitle("LIST OF TABLES"),
+        new TableOfContents("List of Tables", { hyperlink: true, stylesWithLevels: [new StyleLevel("TableCaption", 1)] }),
+        pageBreak(),
+
+        // ── LIST OF FIGURES ──
+        fmTitle("LIST OF FIGURES"),
+        new TableOfContents("List of Figures", { hyperlink: true, stylesWithLevels: [new StyleLevel("FigureCaption", 1)] }),
+        pageBreak(),
+
+        // ── LIST OF ABBREVIATIONS ──
+        fmTitle("LIST OF ABBREVIATIONS"),
+        new Table({
+          width: { size: 9026, type: WidthType.DXA },
+          columnWidths: [2400, 6626],
+          rows: [
+            abbrRow("AI", "Artificial Intelligence"),
+            abbrRow("API", "Application Programming Interface"),
+            abbrRow("APM / JPAM", "Angkatan Pertahanan Awam Malaysia (Civil Defence Force)"),
+            abbrRow("Bomba / JBPM", "Jabatan Bomba dan Penyelamat Malaysia (Fire and Rescue Department)"),
+            abbrRow("CNN", "Convolutional Neural Network"),
+            abbrRow("DFD", "Data Flow Diagram"),
+            abbrRow("ERD", "Entity Relationship Diagram"),
+            abbrRow("ETA", "Estimated Time of Arrival"),
+            abbrRow("FCM", "Firebase Cloud Messaging"),
+            abbrRow("FICT", "Faculty of Information and Communication Technology"),
+            abbrRow("FYP", "Final Year Project"),
+            abbrRow("GPS", "Global Positioning System"),
+            abbrRow("HTTPS", "Hypertext Transfer Protocol Secure"),
+            abbrRow("JSON", "JavaScript Object Notation"),
+            abbrRow("JWT", "JSON Web Token"),
+            abbrRow("MVC", "Model-View-Controller"),
+            abbrRow("NoSQL", "Not Only Structured Query Language"),
+            abbrRow("PDRM", "Polis Diraja Malaysia (Royal Malaysia Police)"),
+            abbrRow("REST", "Representational State Transfer"),
+            abbrRow("SDLC", "Software Development Lifecycle"),
+            abbrRow("UAT", "User Acceptance Testing"),
+            abbrRow("UI", "User Interface"),
+            abbrRow("UTeM", "Universiti Teknikal Malaysia Melaka"),
+            abbrRow("VPS", "Virtual Private Server"),
+          ]
+        }),
+        pageBreak(),
+
+        // ── LIST OF ATTACHMENTS ──
+        fmTitle("LIST OF ATTACHMENTS"),
+        new Table({
+          width: { size: 9026, type: WidthType.DXA },
+          columnWidths: [2400, 6626],
+          rows: [
+            abbrRow("Appendix A", "MyBahaya Mobile Application User Guide"),
+            abbrRow("Appendix B", "Organization Web Dashboard User Guide"),
+            abbrRow("Appendix C", "API Endpoint Specifications"),
+            abbrRow("Appendix D", "Firebase Firestore Security Rules"),
+            abbrRow("Appendix E", "Turnitin Plagiarism Report (First Page)"),
+          ]
         }),
         pageBreak()
       ]
@@ -244,15 +589,15 @@ const doc = new Document({
       properties: {
         page: {
           size: { width: 11906, height: 16838 },
-          margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 }
+          margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
+          pageNumbers: { start: 1, formatType: NumberFormat.DECIMAL }
         }
       },
       footers: {
         default: new Footer({
           children: [new Paragraph({
-            alignment: AlignmentType.RIGHT,
+            alignment: AlignmentType.CENTER,
             children: [
-              new TextRun({ text: "Page ", size: 20, font: "Times New Roman", color: BLACK }),
               new TextRun({ children: [PageNumber.CURRENT], size: 20, font: "Times New Roman", color: BLACK })
             ]
           })]
@@ -364,6 +709,9 @@ const doc = new Document({
         numbered("Phase 4 — Testing: Unit testing of individual modules, integration testing of the complete system, and user acceptance testing with representative users from both citizen and organization perspectives."),
         numbered("Phase 5 — Documentation: Preparation of the FYP report, user manual, and deployment documentation."),
         spacer(),
+        body("Figure 2.1 illustrates the iterative Agile Software Development Lifecycle adopted for this project, in which the phases of planning, analysis, design, implementation, and testing are repeated across successive sprints, allowing continuous feedback and refinement of each component of the MyBahaya platform."),
+        ...figure("2.1", "Agile Software Development Lifecycle (SDLC) adopted for MyBahaya", "Agile SDLC Methodology Diagram"),
+        spacer(),
 
         h2("2.4     Project Requirements"),
 
@@ -397,8 +745,9 @@ const doc = new Document({
         spacer(),
 
         h2("2.5     Project Schedule and Milestones"),
-        body("The following table outlines the project schedule and key milestones:"),
+        body("The project schedule and key milestones are summarized in Table 2.1, while Figure 2.2 presents the same schedule as a one-page Gantt chart that visualizes the duration and overlap of each activity across the project timeline."),
         spacer(),
+        tblCaption("2.1", "MyBahaya Project Schedule and Milestones"),
         simpleTable(
           ["Phase", "Activity", "Duration", "Status"],
           [
@@ -414,6 +763,8 @@ const doc = new Document({
             ["Phase 5", "Documentation & Report Writing", "Weeks 20–21", "Completed"],
           ]
         ),
+        spacer(),
+        ...figure("2.2", "MyBahaya Project Gantt Chart", "Project Gantt Chart (one-page view)"),
         spacer(),
 
         h2("2.6     Conclusion"),
@@ -462,7 +813,9 @@ const doc = new Document({
         spacer(),
 
         h3("3.3.2     Functional Requirement"),
-        body("The functional requirements of the MyBahaya system are categorized by user role:"),
+        body("The functional requirements of the MyBahaya system are illustrated using the use case diagram in Figure 3.1, which defines the system boundary and the interactions between the three actors — Citizen, Organisation Staff, and System Administrator — and the use cases they perform. The detailed functional requirements are subsequently categorized by user role."),
+        ...figure("3.1", "MyBahaya Use Case Diagram", "Use Case Diagram (Citizen, Organisation Staff, System Administrator)"),
+        spacer(),
         body("Citizen Mobile Application:"),
         bullet("FR-C1: Users shall be able to register and log in using email and password via Firebase Authentication."),
         bullet("FR-C2: Users shall be able to submit emergency reports by selecting an incident category, capturing one to three photos, optionally recording a video, and providing an optional text description."),
@@ -524,9 +877,9 @@ const doc = new Document({
         bullet("Data Layer: Firebase Firestore (structured document database for reports, users, organizations, and notifications) and MinIO (S3-compatible object storage for images and videos)."),
         bullet("Notification Layer: Firebase Cloud Messaging (FCM) for push notifications to citizen mobile devices and organization browser sessions."),
         spacer(),
-        imgPlaceholder("System Architecture Diagram"),
+        ...figure("4.1", "MyBahaya System Architecture", "System Architecture Diagram"),
         spacer(),
-        body("The architecture diagram above illustrates the interaction between the five system layers. The citizen's mobile app communicates exclusively with the Spring Boot API over HTTPS. The API coordinates with Firebase Firestore for data persistence, MinIO for media storage, Gemini API for AI analysis, and FCM for push notifications. The organization's web dashboard accesses Firestore directly via the Firebase JS SDK (for real-time updates) and communicates with the API for status updates."),
+        body("The architecture diagram in Figure 4.1 illustrates the interaction between the five system layers. The citizen's mobile app communicates exclusively with the Spring Boot API over HTTPS. The API coordinates with Firebase Firestore for data persistence, MinIO for media storage, Gemini API for AI analysis, and FCM for push notifications. The organization's web dashboard accesses Firestore directly via the Firebase JS SDK (for real-time updates) and communicates with the API for status updates."),
         spacer(),
 
         h3("4.2.2     User Interface Design"),
@@ -543,7 +896,7 @@ const doc = new Document({
         bullet("Location: Automatically captured on screen load using the Geolocator package. A status indicator shows whether location has been acquired."),
         bullet("Submit Button: Disabled until at least one photo and one category are selected. Shows a loading state during upload."),
         spacer(),
-        imgPlaceholder("Report Submission Screen UI"),
+        ...figure("4.2", "Report Submission Screen (Flutter Mobile Application)", "report submission screen — flutter app"),
         spacer(),
         body("(c). Output Design"),
         body("The system produces the following outputs:"),
@@ -552,16 +905,17 @@ const doc = new Document({
         bullet("AI Analysis Panel (Web Dashboard): Displayed within each report detail view on the organization dashboard. Shows severity rating (1–5 with color coding), AI-generated summary, detected hazards as tags, AI-suggested category, and a fake report warning flag if applicable."),
         bullet("Push Notifications: Real-time FCM notifications sent to citizens (nearby alerts, status updates) and organizations (new assignments)."),
         spacer(),
-        imgPlaceholder("Home Dashboard Feed UI"),
+        ...figure("4.3", "Home Dashboard Community Feed (Flutter Mobile Application)", "home page — flutter app"),
         spacer(),
-        imgPlaceholder("Organization Web Dashboard — Report Detail with AI Analysis"),
+        ...figure("4.4", "Organization Web Dashboard — Report Detail with AI Analysis Panel", "organization web dashboard — report detail with AI analysis"),
         spacer(),
 
         h3("4.2.3     Database Design"),
 
         h3("4.2.3.1     Conceptual and Logical Database Design"),
-        body("Firebase Firestore is a NoSQL document-oriented database. The logical data model for MyBahaya is organized into the following top-level collections:"),
+        body("Firebase Firestore is a NoSQL document-oriented database. The logical data model for MyBahaya is organized into the top-level collections summarized in Table 4.1."),
         spacer(),
+        tblCaption("4.1", "Firestore Collections Summary"),
         simpleTable(
           ["Collection", "Key Fields", "Purpose"],
           [
@@ -569,23 +923,104 @@ const doc = new Document({
             ["organizations", "orgId, name, type, latitude, longitude, status, fcmToken", "Stores emergency organization profiles used for geolocation routing"],
             ["reports", "reportId, userId, category, status, location, imageUrls, ai.*", "Primary incident report collection including AI enrichment sub-document"],
             ["public_incidents", "reportId, category, imageUrl, location, verificationStatus", "Sanitized public copy of reports for the community feed (no PII)"],
+            ["admins", "adminId, email, fullName, role, isActive", "Stores system administrator accounts for moderation and management"],
           ]
         ),
         spacer(),
-        body("Entity Relationships:"),
-        bullet("One User can submit Many Reports (one-to-many relationship via userId field in reports)."),
-        bullet("One Organization can be assigned Many Reports (one-to-many relationship via assignedOrgId field in reports)."),
+        body("The conceptual relationships between these collections are illustrated in the Entity Relationship Diagram (ERD) shown in Figure 4.5. The relationships are described as follows:"),
+        bullet("One User can submit Many Reports (one-to-many relationship via the userId field in reports)."),
+        bullet("One Organization can be assigned Many Reports (one-to-many relationship via the assignedOrgId field in reports)."),
         bullet("Each Report contains one AI Enrichment sub-document (embedded document within the report document)."),
-        bullet("Each Report has one corresponding Public Incident document (mirrored document in public_incidents collection)."),
+        bullet("Each Report has one corresponding Public Incident document (mirrored document in the public_incidents collection)."),
+        bullet("System Administrators moderate and manage Reports, Users, and Organizations across the platform."),
         spacer(),
-        imgPlaceholder("Entity Relationship Diagram (ERD)"),
+        ...figure("4.5", "Entity Relationship Diagram (ERD)", "Entity Relationship Diagram (ERD)"),
+        spacer(),
+
+        h3("4.2.3.2     Data Dictionary and NoSQL Data Modelling"),
+        body("Because Firebase Firestore is a NoSQL document database rather than a relational database, the traditional relational normalization forms (First, Second, and Third Normal Form) do not apply directly. Relational normalization is concerned with eliminating data redundancy across tables joined by foreign keys, whereas Firestore is a schemaless, document-oriented store optimized for fast reads and horizontal scalability. Consequently, the database design for MyBahaya is governed by document modelling decisions rather than normalization rules. The two principal techniques applied are embedding and referencing:"),
+        bullet("Embedding (denormalization): The AI enrichment result is embedded as a nested sub-document (the ai.* fields) directly within each report document rather than stored in a separate collection. Because the AI analysis is always read together with the report it describes, embedding avoids an additional read operation and keeps related data together for a single, atomic fetch."),
+        bullet("Referencing: Relationships between distinct entities are expressed by storing the document identifier of a related entity as a field. For example, each report stores the userId of its author and the assignedOrgId of its handling organization, rather than embedding the full user or organization document. This avoids duplicating large, frequently-updated profile records inside every report."),
+        bullet("Intentional Data Duplication: A sanitized copy of each report is duplicated into the public_incidents collection. This deliberate denormalization separates the public community feed (which must exclude personally identifiable information) from the operational reports collection used by organizations. The trade-off of maintaining two copies is accepted in exchange for stronger privacy isolation and faster, simpler public-feed queries."),
+        body("The detailed data dictionary for each Firestore collection is presented in Table 4.2 through Table 4.5. Each table lists the field name, data type, and a description of the field's purpose."),
+        spacer(),
+        tblCaption("4.2", "Data Dictionary — users Collection"),
+        simpleTable(
+          ["Field", "Data Type", "Description"],
+          [
+            ["userId", "String", "Unique Firebase Authentication UID (document ID)"],
+            ["email", "String", "User's registered email address"],
+            ["fullName", "String", "User's full name"],
+            ["phoneNumber", "String", "User's contact phone number"],
+            ["fcmToken", "String", "Firebase Cloud Messaging device token for push notifications"],
+            ["alertRadius", "Number", "Radius in kilometres within which the user receives nearby alerts"],
+            ["role", "String", "User role (citizen)"],
+            ["createdAt", "Timestamp", "Account creation date and time"],
+          ]
+        ),
+        spacer(),
+        tblCaption("4.3", "Data Dictionary — organizations Collection"),
+        simpleTable(
+          ["Field", "Data Type", "Description"],
+          [
+            ["orgId", "String", "Unique organization identifier (document ID)"],
+            ["name", "String", "Organization name (e.g., Balai Bomba Melaka)"],
+            ["type", "String", "Organization type (fire, police, medical)"],
+            ["latitude", "Number", "Organization location latitude"],
+            ["longitude", "Number", "Organization location longitude"],
+            ["status", "String", "Operational status (active / inactive)"],
+            ["fcmToken", "String", "Browser FCM token for new-assignment notifications"],
+            ["contactEmail", "String", "Organization contact email address"],
+          ]
+        ),
+        spacer(),
+        tblCaption("4.4", "Data Dictionary — reports Collection"),
+        simpleTable(
+          ["Field", "Data Type", "Description"],
+          [
+            ["reportId", "String", "Unique report identifier (UUID, document ID)"],
+            ["userId", "String", "Reference to the submitting user (foreign key)"],
+            ["assignedOrgId", "String", "Reference to the assigned organization (foreign key)"],
+            ["assignedOrgName", "String", "Cached name of the assigned organization"],
+            ["category", "String", "Incident category (Fire, Medical, Theft, Assault, Other)"],
+            ["details", "String", "Optional text description provided by the user"],
+            ["imageUrls", "Array<String>", "List of MinIO URLs for uploaded photos"],
+            ["videoUrl", "String", "MinIO URL for the optional uploaded video"],
+            ["location", "Map", "Incident coordinates { latitude, longitude }"],
+            ["status", "String", "Report status (NEW, RECEIVED, IN_PROGRESS, RESOLVED)"],
+            ["verificationStatus", "String", "Moderation status (PENDING, VERIFIED, REJECTED)"],
+            ["etaMinutes", "Number", "Estimated time of arrival in minutes"],
+            ["ai.severity", "Number", "AI-assessed severity score (1–5)"],
+            ["ai.summary", "String", "AI-generated incident summary"],
+            ["ai.hazards", "Array<String>", "AI-identified hazards present in the image"],
+            ["ai.suggestedCategory", "String", "AI-suggested incident category"],
+            ["ai.looksFake", "Boolean", "AI flag indicating a potentially fake report"],
+            ["ai.processedAt", "Timestamp", "Time the AI enrichment completed"],
+            ["createdAt", "Timestamp", "Report submission date and time"],
+          ]
+        ),
+        spacer(),
+        tblCaption("4.5", "Data Dictionary — public_incidents Collection"),
+        simpleTable(
+          ["Field", "Data Type", "Description"],
+          [
+            ["reportId", "String", "Reference to the source report (primary/foreign key)"],
+            ["category", "String", "Incident category"],
+            ["imageUrl", "String", "Primary incident image URL"],
+            ["imageUrls", "Array<String>", "List of incident image URLs"],
+            ["location", "Map", "Incident coordinates { latitude, longitude }"],
+            ["verificationStatus", "String", "Moderation status (PENDING, VERIFIED, REJECTED)"],
+            ["createdAt", "Timestamp", "Incident creation date and time"],
+          ]
+        ),
         spacer(),
 
         h2("4.3     Detailed Design"),
 
         h3("4.3.1     Software Design"),
-        body("The backend follows a layered MVC-like architecture with the following key classes:"),
+        body("The backend follows a layered MVC-like architecture with the key classes summarized in Table 4.6."),
         spacer(),
+        tblCaption("4.6", "Backend Service Classes and Responsibilities"),
         simpleTable(
           ["Class", "Layer", "Responsibility"],
           [
@@ -662,7 +1097,8 @@ const doc = new Document({
         bullet("MinIO: Docker container on port 9000, persisted to local volume"),
         bullet("Nginx: Reverse proxy routing api.mybahaya.com to the Spring Boot service and /minio/* to MinIO"),
         spacer(),
-        imgPlaceholder("Deployment Architecture Diagram"),
+        body("The production deployment topology is illustrated in Figure 5.1."),
+        ...figure("5.1", "MyBahaya Deployment Architecture", "Deployment Architecture Diagram"),
         spacer(),
 
         h2("5.3     Software Configuration Management"),
@@ -684,8 +1120,9 @@ const doc = new Document({
         spacer(),
 
         h2("5.4     Implementation Status"),
-        body("The following table summarizes the implementation status of each module in the MyBahaya system:"),
+        body("The implementation status of each module in the MyBahaya system is summarized in Table 5.1."),
         spacer(),
+        tblCaption("5.1", "Implementation Status of System Modules"),
         simpleTable(
           ["Module", "Description", "Status", "Key Files"],
           [
@@ -709,15 +1146,121 @@ const doc = new Document({
           ]
         ),
         spacer(),
-        imgPlaceholder("Mobile App — Report Screen Screenshot"),
+        ...figure("5.2", "Implemented Report Submission Screen (Flutter Mobile Application)", "report screen — flutter app"),
         spacer(),
-        imgPlaceholder("Mobile App — Home Dashboard Screenshot"),
+        ...figure("5.3", "Implemented Home Dashboard Feed (Flutter Mobile Application)", "home page — flutter app"),
         spacer(),
-        imgPlaceholder("Web Dashboard — Reports Management Screenshot"),
+        ...figure("5.4", "Implemented Reports Management View (Organization Web Dashboard)", "reports management — web dashboard"),
         spacer(),
 
-        h2("5.5     Conclusion"),
-        body("All planned modules for the MyBahaya FYP 1 scope have been successfully implemented. The system is deployed on a production VPS with HTTPS access, and all major features — report submission, AI enrichment, geolocation routing, FCM notifications, and the organization web dashboard — are operational. Chapter 6 will present the testing strategy and results for the implemented system."),
+        h2("5.5     System User Interface"),
+        body("This section presents the complete user interface of the MyBahaya system across all screens of the Flutter mobile application, the organisation web dashboard, and the administrator portal. The screenshots were captured from the deployed production build."),
+        spacer(),
+
+        h3("5.5.1     Mobile Application Interface (Flutter)"),
+        body("The following figures document every screen of the MyBahaya citizen mobile application, organised by functional flow."),
+        spacer(),
+
+        body("(a)  Authentication Screens"),
+        body("Figure 5.5 shows the login screen presented to returning users, and Figure 5.6 shows the registration screen for new citizens. Both screens use Firebase Authentication; the app validates credentials in real time and prevents submission of empty or malformed fields."),
+        ...figure("5.5", "Mobile Application — Login Screen", "Flutter app: Login screen"),
+        spacer(),
+        ...figure("5.6", "Mobile Application — Registration Screen", "Flutter app: Registration / sign-up screen"),
+        spacer(),
+
+        body("(b)  Home Dashboard and Community Feed"),
+        body("Figure 5.7 shows the home dashboard, which displays a proximity-sorted list of nearby public incidents retrieved from the public_incidents Firestore collection. Each card shows the incident category, a thumbnail image, distance from the user, elapsed time, and verification status badge. Figure 5.8 shows the same incidents plotted on an interactive OpenStreetMap map view, where each marker represents a reported incident."),
+        ...figure("5.7", "Mobile Application — Home Dashboard Community Feed", "Flutter app: Home dashboard community feed"),
+        spacer(),
+        ...figure("5.8", "Mobile Application — Map View with Incident Markers", "Flutter app: Map view with incident markers"),
+        spacer(),
+
+        body("(c)  Report Submission Flow"),
+        body("Figures 5.9 through 5.11 illustrate the complete report submission flow. Figure 5.9 shows the category selection step. Figure 5.10 shows the photo capture and optional description entry step. Figure 5.11 shows the submission confirmation dialog, which displays the assigned organisation name, ETA in minutes, and the report identifier."),
+        ...figure("5.9", "Mobile Application — Report Submission: Category Selection", "Flutter app: Report submission — category selection"),
+        spacer(),
+        ...figure("5.10", "Mobile Application — Report Submission: Photo Capture and Description", "Flutter app: Report submission — photo capture and description"),
+        spacer(),
+        ...figure("5.11", "Mobile Application — Report Submission Confirmation Dialog", "Flutter app: Report submission confirmation dialog"),
+        spacer(),
+
+        body("(d)  My Reports and Report Detail"),
+        body("Figure 5.12 shows the My Reports screen, which lists all reports previously submitted by the authenticated citizen in reverse chronological order, with a status badge for each entry (NEW, RECEIVED, IN_PROGRESS, or RESOLVED). Figure 5.13 shows the Report Detail screen for an individual report, displaying the submitted photos, the incident category, description, assigned organisation name, ETA in minutes, and the current status timeline."),
+        ...figure("5.12", "Mobile Application — My Reports List", "Flutter app: My Reports list screen"),
+        spacer(),
+        ...figure("5.13", "Mobile Application — Report Detail Screen", "Flutter app: Report detail screen (status, assigned org, ETA, photos)"),
+        spacer(),
+
+        body("(e)  Live Alerts Screen"),
+        body("Figure 5.14 shows the Live Alerts screen, which displays incoming FCM push-notification alerts for emergencies reported within the user's configured alert radius. Each alert card shows the incident category, distance, and time of the event."),
+        ...figure("5.14", "Mobile Application — Live Alerts Screen", "Flutter app: Live alerts / push notification feed"),
+        spacer(),
+
+        body("(f)  Profile and Settings"),
+        body("Figure 5.15 shows the Profile and Settings screen, where the citizen can update their display name, configure the community alert radius (in kilometres), and sign out of the application."),
+        ...figure("5.15", "Mobile Application — Profile and Settings Screen", "Flutter app: Profile and settings screen"),
+        spacer(),
+
+        h3("5.5.2     Organisation Web Dashboard Interface"),
+        body("The following figures document all major screens of the MyBahaya organisation web dashboard, used by emergency response organisations to manage their assigned reports."),
+        spacer(),
+
+        body("(a)  Login Page"),
+        body("Figure 5.16 shows the organisation dashboard login page. Organisation accounts are pre-provisioned by the system administrator; staff log in with their registered email and password via Firebase Authentication."),
+        ...figure("5.16", "Organisation Web Dashboard — Login Page", "Web dashboard: Login page"),
+        spacer(),
+
+        body("(b)  Dashboard Overview"),
+        body("Figure 5.17 shows the main dashboard overview, which presents summary cards for total assigned reports and counts broken down by status (NEW, RECEIVED, IN_PROGRESS, RESOLVED), together with a recent-activity feed of the latest assigned reports."),
+        ...figure("5.17", "Organisation Web Dashboard — Overview and Summary Cards", "Web dashboard: Dashboard overview with summary cards"),
+        spacer(),
+
+        body("(c)  Report Management List"),
+        body("Figure 5.18 shows the report management table, which lists all reports assigned to the organisation. Columns include report ID, category, submission time, status badge, and an action button to open the full detail view. Reports can be filtered by status and sorted by date."),
+        ...figure("5.18", "Organisation Web Dashboard — Report Management List", "Web dashboard: Report list / management table"),
+        spacer(),
+
+        body("(d)  Report Detail with AI Analysis Panel"),
+        body("Figure 5.19 shows the report detail view, which displays the submitted photos, the incident GPS location, the AI enrichment panel (severity rating, summary, detected hazards, suggested category, and fake-report flag), and the status update controls with ETA input."),
+        ...figure("5.19", "Organisation Web Dashboard — Report Detail and AI Analysis Panel", "Web dashboard: Report detail with AI analysis panel"),
+        spacer(),
+
+        body("(e)  Incident Map View"),
+        body("Figure 5.20 shows the interactive Leaflet.js map view, which plots all incident markers assigned to the organisation on an OpenStreetMap base layer. Clicking a marker opens a popup with the report category, status, and a link to the full detail view."),
+        ...figure("5.20", "Organisation Web Dashboard — Incident Map View", "Web dashboard: Incident map view (Leaflet.js)"),
+        spacer(),
+
+        body("(f)  Analytics Dashboard"),
+        body("Figure 5.21 shows the analytics dashboard, which presents Chart.js bar and doughnut charts visualising the distribution of assigned reports by category and by status. This view enables supervisors to identify incident trends and monitor team workload over time."),
+        ...figure("5.21", "Organisation Web Dashboard — Analytics Charts", "Web dashboard: Analytics charts by category and status"),
+        spacer(),
+
+        h3("5.5.3     Administrator Portal Interface"),
+        body("The administrator portal is accessible only to accounts with the admin role and provides global visibility and management capabilities across all organisations and citizens."),
+        spacer(),
+
+        body("(a)  Admin Dashboard Overview"),
+        body("Figure 5.22 shows the administrator dashboard, which presents a system-wide summary of total reports, registered citizens, active organisations, and pending verification requests."),
+        ...figure("5.22", "Administrator Portal — Admin Dashboard Overview", "Admin portal: Dashboard overview"),
+        spacer(),
+
+        body("(b)  User Management"),
+        body("Figure 5.23 shows the user management screen, where administrators can view all registered citizen accounts, search by name or email, and deactivate accounts where necessary."),
+        ...figure("5.23", "Administrator Portal — User Management Screen", "Admin portal: User management screen"),
+        spacer(),
+
+        body("(c)  Organisation Management"),
+        body("Figure 5.24 shows the organisation management screen, where administrators can add, edit, or deactivate emergency organisation profiles including their type, GPS coordinates, and operational status."),
+        ...figure("5.24", "Administrator Portal — Organisation Management Screen", "Admin portal: Organisation management screen"),
+        spacer(),
+
+        body("(d)  Report Moderation"),
+        body("Figure 5.25 shows the report moderation view, which lists all reports system-wide. Administrators can verify or reject reports, override the assigned organisation, and review AI analysis results to support moderation decisions."),
+        ...figure("5.25", "Administrator Portal — Report Moderation View", "Admin portal: Report moderation view"),
+        spacer(),
+
+        h2("5.6     Conclusion"),
+        body("All planned modules for the MyBahaya FYP 1 scope have been successfully implemented. The system is deployed on a production VPS with HTTPS access, and all major features — report submission, AI enrichment, geolocation routing, FCM notifications, and the organisation web dashboard — are operational. The complete user interface across all three portals (citizen mobile application, organisation web dashboard, and administrator portal) has been documented in Section 5.5. Chapter 6 will present the testing strategy and results for the implemented system."),
         pageBreak(),
 
         // ════════════════════════════════════════════════════════════
@@ -764,8 +1307,9 @@ const doc = new Document({
         h2("6.4     Test Design"),
 
         h3("6.4.1     Test Description"),
-        body("The following test cases were designed and executed:"),
+        body("The test cases that were designed and executed are listed in Table 6.1."),
         spacer(),
+        tblCaption("6.1", "Test Cases and Expected Results"),
         simpleTable(
           ["Test ID", "Module", "Test Case", "Expected Result"],
           [
@@ -797,8 +1341,9 @@ const doc = new Document({
         spacer(),
 
         h2("6.5     Test Results and Analysis"),
-        body("The following table summarizes the test results:"),
+        body("The test results are summarized in Table 6.2."),
         spacer(),
+        tblCaption("6.2", "Test Results Summary"),
         simpleTable(
           ["Test ID", "Result", "Notes"],
           [
@@ -882,27 +1427,27 @@ const doc = new Document({
           spacing: { before: 0, after: 360 },
           children: [new TextRun({ text: "REFERENCES", bold: true, size: 28, font: "Times New Roman", color: BLACK })]
         }),
-        body("Google LLC. (2024). Gemini API Documentation — Gemini 2.5 Flash Model. Google AI for Developers. Retrieved from https://ai.google.dev/gemini-api/docs"),
-        body("Firebase. (2024). Cloud Firestore Documentation. Google LLC. Retrieved from https://firebase.google.com/docs/firestore"),
-        body("Flutter. (2024). Flutter Documentation. Google LLC. Retrieved from https://docs.flutter.dev"),
-        body("Spring Boot. (2024). Spring Boot Reference Documentation (Version 3.x). VMware Inc. Retrieved from https://docs.spring.io/spring-boot/docs"),
-        body("MinIO Inc. (2024). MinIO Object Storage Documentation. Retrieved from https://min.io/docs/minio/linux/index.html"),
-        body("Malaysian Communications and Multimedia Commission (MCMC). (2024). Internet Users Survey 2024. MCMC Malaysia."),
-        body("Turoff, M., Chumer, M., Van de Walle, B., & Yao, X. (2004). The Design of a Dynamic Emergency Response Management Information System (DERMIS). Journal of Information Technology Theory and Application (JITTA), 5(4), 1–35."),
-        body("OpenStreetMap Foundation. (2024). OpenStreetMap Wiki. Retrieved from https://wiki.openstreetmap.org"),
-        body("Firebase Cloud Messaging. (2024). FCM Architecture Overview. Google LLC. Retrieved from https://firebase.google.com/docs/cloud-messaging"),
-        body("Leaflet. (2024). Leaflet JavaScript Library Documentation (v1.9). Retrieved from https://leafletjs.com"),
+        refItem("Firebase (2024). Cloud Firestore Documentation. Google LLC. Available at: https://firebase.google.com/docs/firestore (Accessed: 29 June 2026)."),
+        refItem("Firebase Cloud Messaging (2024). FCM Architecture Overview. Google LLC. Available at: https://firebase.google.com/docs/cloud-messaging (Accessed: 29 June 2026)."),
+        refItem("Flutter (2024). Flutter Documentation. Google LLC. Available at: https://docs.flutter.dev (Accessed: 29 June 2026)."),
+        refItem("Google LLC (2024). Gemini API Documentation — Gemini 2.5 Flash Model. Google AI for Developers. Available at: https://ai.google.dev/gemini-api/docs (Accessed: 29 June 2026)."),
+        refItem("Leaflet (2024). Leaflet JavaScript Library Documentation (v1.9). Available at: https://leafletjs.com (Accessed: 29 June 2026)."),
+        refItem("Malaysian Communications and Multimedia Commission (MCMC) (2024). Internet Users Survey 2024. Cyberjaya: MCMC Malaysia."),
+        refItem("MinIO Inc. (2024). MinIO Object Storage Documentation. Available at: https://min.io/docs/minio/linux/index.html (Accessed: 29 June 2026)."),
+        refItem("OpenStreetMap Foundation (2024). OpenStreetMap Wiki. Available at: https://wiki.openstreetmap.org (Accessed: 29 June 2026)."),
+        refItem("Spring Boot (2024). Spring Boot Reference Documentation (Version 3.x). VMware Inc. Available at: https://docs.spring.io/spring-boot/docs (Accessed: 29 June 2026)."),
+        refItem("Turoff, M., Chumer, M., Van de Walle, B. and Yao, X. (2004). The Design of a Dynamic Emergency Response Management Information System (DERMIS). Journal of Information Technology Theory and Application (JITTA), 5(4), pp. 1–35."),
         spacer(),
         new Paragraph({
           alignment: AlignmentType.CENTER,
           spacing: { before: 360, after: 360 },
           children: [new TextRun({ text: "BIBLIOGRAPHY", bold: true, size: 28, font: "Times New Roman", color: BLACK })]
         }),
-        body("Ushahidi Inc. (2024). Ushahidi Platform Documentation. Retrieved from https://www.ushahidi.com"),
-        body("PulsePoint Foundation. (2024). PulsePoint Respond Application Overview. Retrieved from https://www.pulsepoint.org"),
-        body("Haversine Formula. (2024). In Wikipedia. Retrieved from https://en.wikipedia.org/wiki/Haversine_formula"),
-        body("National Security Council Malaysia. (2022). National Disaster Management Policy. Prime Minister's Department, Malaysia."),
-        body("Ahmad, R. & Ismail, N. (2021). Mobile Application Adoption for Emergency Response in Malaysia: A Review. International Journal of Advanced Computer Science and Applications, 12(3), 45–53."),
+        refItem("Ahmad, R. and Ismail, N. (2021). Mobile Application Adoption for Emergency Response in Malaysia: A Review. International Journal of Advanced Computer Science and Applications, 12(3), pp. 45–53."),
+        refItem("National Security Council Malaysia (2022). National Disaster Management Policy. Putrajaya: Prime Minister's Department, Malaysia."),
+        refItem("PulsePoint Foundation (2024). PulsePoint Respond Application Overview. Available at: https://www.pulsepoint.org (Accessed: 29 June 2026)."),
+        refItem("Sinnott, R.W. (1984). Virtues of the Haversine. Sky and Telescope, 68(2), p. 159."),
+        refItem("Ushahidi Inc. (2024). Ushahidi Platform Documentation. Available at: https://www.ushahidi.com (Accessed: 29 June 2026)."),
         spacer(),
         new Paragraph({
           alignment: AlignmentType.CENTER,
@@ -914,12 +1459,21 @@ const doc = new Document({
         body("Appendix C: API Endpoint Specifications"),
         body("Appendix D: Firebase Firestore Security Rules"),
         body("Appendix E: Turnitin Plagiarism Report (First Page)"),
+        spacer(),
+        new Paragraph({
+          alignment: AlignmentType.JUSTIFIED,
+          spacing: { before: 120, after: 160, line: 360, lineRule: "auto" },
+          children: [new TextRun({ text: "Note: The full content of the appendices listed above will be compiled and attached during the PSM 2 (FYP 2) phase.", italics: true, size: 24, font: "Times New Roman", color: BLACK })]
+        }),
       ]
     }
   ]
 });
 
+const OUT_PRIMARY = '/Users/user/sem6/FYP/report/MyBahaya_FYP_Report.docx';
+const OUT_LOCAL = '/Users/user/my_bahaya_fyp/MyBahaya_FYP_Report.docx';
 Packer.toBuffer(doc).then(buffer => {
-  fs.writeFileSync('/Users/user/my_bahaya_fyp/MyBahaya_FYP_Report.docx', buffer);
+  fs.writeFileSync(OUT_LOCAL, buffer);
+  try { fs.writeFileSync(OUT_PRIMARY, buffer); } catch (e) { console.warn('Could not write primary path:', e.message); }
   console.log('Done: MyBahaya_FYP_Report.docx created');
 });

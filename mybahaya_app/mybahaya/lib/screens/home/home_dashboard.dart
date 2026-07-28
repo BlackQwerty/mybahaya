@@ -30,10 +30,10 @@ class _HomeDashboardState extends State<HomeDashboard> {
   String _userState = '';
   bool _locationLoading = true;
 
-  static const Color nude     = Color(0xFFACA494);
+  static const Color nude = Color(0xFFACA494);
   static const Color pink = Colors.white;
   static const Color burgundy = Color(0xFFB22222);
-  static const Color maroon   = Color(0xFF341515);
+  static const Color maroon = Color(0xFF341515);
 
   @override
   void initState() {
@@ -51,7 +51,8 @@ class _HomeDashboardState extends State<HomeDashboard> {
         perm = await Geolocator.requestPermission();
       }
       if (perm == LocationPermission.denied ||
-          perm == LocationPermission.deniedForever) return;
+          perm == LocationPermission.deniedForever)
+        return;
 
       final pos = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.medium,
@@ -60,7 +61,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
       // Phase 1 — GPS obtained: stop spinner immediately, show coordinates
       if (mounted) {
         setState(() {
-          _userPosition    = pos;
+          _userPosition = pos;
           _locationLoading = false;
           // Show coordinates as fallback while geocoding runs
           _userState =
@@ -70,18 +71,20 @@ class _HomeDashboardState extends State<HomeDashboard> {
 
       // Phase 2 — geocode in background; doesn't block the UI
       final state = await GeocodingService.getState(
-          pos.latitude, pos.longitude);
+        pos.latitude,
+        pos.longitude,
+      );
       if (mounted) setState(() => _userState = state);
 
       // Save location to Firestore so backend can find nearby users for geo-radius alerts
       final uid = FirebaseAuth.instance.currentUser?.uid;
       if (uid != null) {
-        FirebaseFirestore.instance.collection('users').doc(uid).update({
-          'latitude': pos.latitude,
-          'longitude': pos.longitude,
-        }).catchError((_) {});
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .update({'latitude': pos.latitude, 'longitude': pos.longitude})
+            .catchError((_) {});
       }
-
     } catch (_) {
       // Silently fall through — finally always runs
     } finally {
@@ -96,17 +99,16 @@ class _HomeDashboardState extends State<HomeDashboard> {
     const r = 6371.0;
     final dLat = _rad(lat2 - lat1);
     final dLng = _rad(lng2 - lng1);
-    final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_rad(lat1)) * cos(_rad(lat2)) *
-            sin(dLng / 2) * sin(dLng / 2);
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
+        cos(_rad(lat1)) * cos(_rad(lat2)) * sin(dLng / 2) * sin(dLng / 2);
     return r * 2 * atan2(sqrt(a), sqrt(1 - a));
   }
 
   double _rad(double deg) => deg * pi / 180;
 
   // Apply the selected filter to a list of Firestore docs
-  List<QueryDocumentSnapshot> _applyFilter(
-      List<QueryDocumentSnapshot> docs) {
+  List<QueryDocumentSnapshot> _applyFilter(List<QueryDocumentSnapshot> docs) {
     switch (_filter) {
       case _FeedFilter.malaysia:
         return docs;
@@ -115,13 +117,17 @@ class _HomeDashboardState extends State<HomeDashboard> {
         if (_userPosition == null) return docs;
         return docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>;
-          final loc  = data['location'] as Map<String, dynamic>?;
+          final loc = data['location'] as Map<String, dynamic>?;
           if (loc == null) return false;
-          final lat = (loc['latitude']  as num?)?.toDouble() ?? 0;
+          final lat = (loc['latitude'] as num?)?.toDouble() ?? 0;
           final lng = (loc['longitude'] as num?)?.toDouble() ?? 0;
           return _distanceKm(
-                _userPosition!.latitude, _userPosition!.longitude,
-                lat, lng) <= 5;
+                _userPosition!.latitude,
+                _userPosition!.longitude,
+                lat,
+                lng,
+              ) <=
+              5;
         }).toList();
 
       case _FeedFilter.state:
@@ -149,9 +155,10 @@ class _HomeDashboardState extends State<HomeDashboard> {
               stream: UserService.profileStream(),
               builder: (context, snapshot) {
                 final username = snapshot.data?.username;
-                final greeting = (username != null && username.isNotEmpty)
-                    ? 'Hello, $username'
-                    : 'Hello';
+                final greeting =
+                    (username != null && username.isNotEmpty)
+                        ? 'Hello, $username'
+                        : 'Hello';
                 return AppHeader(title: greeting);
               },
             ),
@@ -159,8 +166,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
 
             // ── Location chip ─────────────────────────────────────
             Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 14, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
@@ -168,15 +174,18 @@ class _HomeDashboardState extends State<HomeDashboard> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(CupertinoIcons.location_solid,
-                      color: maroon, size: 14),
+                  const Icon(
+                    CupertinoIcons.location_solid,
+                    color: maroon,
+                    size: 14,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     _locationLoading
                         ? 'Locating...'
                         : _userState.isNotEmpty
-                            ? _userState
-                            : 'Location unavailable',
+                        ? _userState
+                        : 'Location unavailable',
                     style: const TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
@@ -209,8 +218,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
                   label: 'Malaysia',
                   icon: CupertinoIcons.globe,
                   isActive: _filter == _FeedFilter.malaysia,
-                  onTap: () =>
-                      setState(() => _filter = _FeedFilter.malaysia),
+                  onTap: () => setState(() => _filter = _FeedFilter.malaysia),
                 ),
               ],
             ),
@@ -219,18 +227,20 @@ class _HomeDashboardState extends State<HomeDashboard> {
             // ── Feed ─────────────────────────────────────────────
             StreamBuilder<QuerySnapshot>(
               // Community feed reads the sanitized public feed (not locked reports).
-              stream: FirebaseFirestore.instance
-                  .collection('public_incidents')
-                  .orderBy('createdAt', descending: true)
-                  .limit(50)
-                  .snapshots(),
+              stream:
+                  FirebaseFirestore.instance
+                      .collection('public_incidents')
+                      .orderBy('createdAt', descending: true)
+                      .limit(50)
+                      .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return _buildSkeleton();
                 }
                 if (snapshot.hasError) {
                   return _buildEmpty(
-                      'Could not load reports. Check your connection.');
+                    'Could not load reports. Check your connection.',
+                  );
                 }
 
                 final allDocs = snapshot.data?.docs ?? [];
@@ -270,14 +280,16 @@ class _HomeDashboardState extends State<HomeDashboard> {
       child: Center(
         child: Column(
           children: [
-            Icon(CupertinoIcons.shield,
-                size: 52, color: nude.withOpacity(0.25)),
+            Icon(
+              CupertinoIcons.shield,
+              size: 52,
+              color: nude.withOpacity(0.25),
+            ),
             const SizedBox(height: 16),
             Text(
               msg,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 13, color: nude.withOpacity(0.45)),
+              style: TextStyle(fontSize: 13, color: nude.withOpacity(0.45)),
             ),
           ],
         ),
@@ -347,14 +359,18 @@ class _FeedListState extends State<_FeedList> {
     final results = <QueryDocumentSnapshot>[];
     for (final doc in widget.docs) {
       final data = doc.data() as Map<String, dynamic>;
-      final loc  = data['location'] as Map<String, dynamic>?;
+      final loc = data['location'] as Map<String, dynamic>?;
       if (loc == null) continue;
-      final lat = (loc['latitude']  as num?)?.toDouble() ?? 0;
+      final lat = (loc['latitude'] as num?)?.toDouble() ?? 0;
       final lng = (loc['longitude'] as num?)?.toDouble() ?? 0;
       final state = await GeocodingService.getState(lat, lng);
       if (state == widget.userState) results.add(doc);
     }
-    if (mounted) setState(() { _stateDocs = results; _stateLoading = false; });
+    if (mounted)
+      setState(() {
+        _stateDocs = results;
+        _stateLoading = false;
+      });
   }
 
   @override
@@ -365,7 +381,9 @@ class _FeedListState extends State<_FeedList> {
           child: Padding(
             padding: EdgeInsets.all(40),
             child: CircularProgressIndicator(
-                color: Color(0xFFB22222), strokeWidth: 2),
+              color: Color(0xFFB22222),
+              strokeWidth: 2,
+            ),
           ),
         );
       }
@@ -377,8 +395,9 @@ class _FeedListState extends State<_FeedList> {
               'No incidents reported in ${widget.userState}.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 13,
-                  color: const Color(0xFFACA494).withOpacity(0.45)),
+                fontSize: 13,
+                color: const Color(0xFFACA494).withOpacity(0.45),
+              ),
             ),
           ),
         );
@@ -415,8 +434,8 @@ class _IncidentCardState extends State<_IncidentCard> {
 
   // Home-page palette — strictly three colors.
   static const Color maroon = Color(0xFF341515);
-  static const Color nude   = Color(0xFFACA494);
-  static const Color white  = Colors.white;
+  static const Color nude = Color(0xFFACA494);
+  static const Color white = Colors.white;
 
   @override
   void initState() {
@@ -427,7 +446,7 @@ class _IncidentCardState extends State<_IncidentCard> {
   Future<void> _loadPlace() async {
     final loc = widget.data['location'] as Map<String, dynamic>?;
     if (loc == null) return;
-    final lat = (loc['latitude']  as num?)?.toDouble() ?? 0;
+    final lat = (loc['latitude'] as num?)?.toDouble() ?? 0;
     final lng = (loc['longitude'] as num?)?.toDouble() ?? 0;
     final name = await GeocodingService.getPlaceName(lat, lng);
     if (mounted) setState(() => _placeName = name);
@@ -435,11 +454,16 @@ class _IncidentCardState extends State<_IncidentCard> {
 
   IconData _catIcon(String cat) {
     switch (cat.toLowerCase()) {
-      case 'fire':    return CupertinoIcons.flame_fill;
-      case 'theft':   return CupertinoIcons.lock_open_fill;
-      case 'assault': return CupertinoIcons.exclamationmark_circle_fill;
-      case 'medical': return CupertinoIcons.plus_circle_fill;
-      default:        return CupertinoIcons.exclamationmark_triangle_fill;
+      case 'fire':
+        return CupertinoIcons.flame_fill;
+      case 'theft':
+        return CupertinoIcons.lock_open_fill;
+      case 'assault':
+        return CupertinoIcons.exclamationmark_circle_fill;
+      case 'medical':
+        return CupertinoIcons.plus_circle_fill;
+      default:
+        return CupertinoIcons.exclamationmark_triangle_fill;
     }
   }
 
@@ -452,9 +476,9 @@ class _IncidentCardState extends State<_IncidentCard> {
       return '';
     }
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1)  return 'Just now';
+    if (diff.inMinutes < 1) return 'Just now';
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours   < 24) return '${diff.inHours}h ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
     return '${diff.inDays}d ago';
   }
 
@@ -467,13 +491,22 @@ class _IncidentCardState extends State<_IncidentCard> {
           color: maroon,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(CupertinoIcons.checkmark_seal_fill, color: white, size: 11),
-          SizedBox(width: 4),
-          Text('VERIFIED', style: TextStyle(
-              fontSize: 9, fontWeight: FontWeight.w800,
-              color: white, letterSpacing: 0.4)),
-        ]),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(CupertinoIcons.checkmark_seal_fill, color: white, size: 11),
+            SizedBox(width: 4),
+            Text(
+              'VERIFIED',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                color: white,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ],
+        ),
       );
     }
     if (status == 'REJECTED') {
@@ -483,13 +516,22 @@ class _IncidentCardState extends State<_IncidentCard> {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: maroon.withOpacity(0.55)),
         ),
-        child: const Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(CupertinoIcons.xmark_seal_fill, color: maroon, size: 11),
-          SizedBox(width: 4),
-          Text('FALSE ALARM', style: TextStyle(
-              fontSize: 9, fontWeight: FontWeight.w800,
-              color: maroon, letterSpacing: 0.4)),
-        ]),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(CupertinoIcons.xmark_seal_fill, color: maroon, size: 11),
+            SizedBox(width: 4),
+            Text(
+              'FALSE ALARM',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                color: maroon,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ],
+        ),
       );
     }
     return const SizedBox.shrink();
@@ -497,9 +539,9 @@ class _IncidentCardState extends State<_IncidentCard> {
 
   @override
   Widget build(BuildContext context) {
-    final category           = widget.data['category'] as String? ?? 'Unknown';
-    final details            = widget.data['details']  as String? ?? '';
-    final imageUrl           = widget.data['imageUrl'] as String? ?? '';
+    final category = widget.data['category'] as String? ?? 'Unknown';
+    final details = widget.data['details'] as String? ?? '';
+    final imageUrl = widget.data['imageUrl'] as String? ?? '';
     final verificationStatus = widget.data['verificationStatus'] as String?;
 
     return GestureDetector(
@@ -544,22 +586,29 @@ class _IncidentCardState extends State<_IncidentCard> {
                       height: 250,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
-                        height: 250,
-                        color: maroon.withOpacity(0.10),
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                              color: maroon, strokeWidth: 1.6),
-                        ),
-                      ),
-                      errorWidget: (_, __, ___) => Container(
-                        height: 250,
-                        color: maroon.withOpacity(0.10),
-                        child: const Center(
-                          child: Icon(CupertinoIcons.photo,
-                              color: maroon, size: 36),
-                        ),
-                      ),
+                      placeholder:
+                          (_, __) => Container(
+                            height: 250,
+                            color: maroon.withOpacity(0.10),
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                color: maroon,
+                                strokeWidth: 1.6,
+                              ),
+                            ),
+                          ),
+                      errorWidget:
+                          (_, __, ___) => Container(
+                            height: 250,
+                            color: maroon.withOpacity(0.10),
+                            child: const Center(
+                              child: Icon(
+                                CupertinoIcons.photo,
+                                color: maroon,
+                                size: 36,
+                              ),
+                            ),
+                          ),
                     )
                   else
                     Container(
@@ -567,8 +616,11 @@ class _IncidentCardState extends State<_IncidentCard> {
                       width: double.infinity,
                       color: maroon.withOpacity(0.10),
                       child: const Center(
-                        child: Icon(CupertinoIcons.photo,
-                            color: maroon, size: 36),
+                        child: Icon(
+                          CupertinoIcons.photo,
+                          color: maroon,
+                          size: 36,
+                        ),
                       ),
                     ),
 
@@ -623,8 +675,11 @@ class _IncidentCardState extends State<_IncidentCard> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      const Icon(CupertinoIcons.location_solid,
-                          size: 13, color: maroon),
+                      const Icon(
+                        CupertinoIcons.location_solid,
+                        size: 13,
+                        color: maroon,
+                      ),
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
@@ -681,12 +736,13 @@ class _IncidentCardState extends State<_IncidentCard> {
   // ── "View on Map" — maroon outline pill button ───────────────
   Widget _viewOnMapButton(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => IncidentMapScreen(report: widget.data),
-        ),
-      ),
+      onTap:
+          () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => IncidentMapScreen(report: widget.data),
+            ),
+          ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
@@ -735,7 +791,7 @@ class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
   int _photoIndex = 0;
   String _placeName = 'Loading...';
 
-  static const Color nude     = Color(0xFFACA494);
+  static const Color nude = Color(0xFFACA494);
   static const Color burgundy = Color(0xFFB22222);
 
   @override
@@ -747,15 +803,14 @@ class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
   Future<void> _loadPlace() async {
     final loc = widget.data['location'] as Map<String, dynamic>?;
     if (loc == null) return;
-    final lat = (loc['latitude']  as num?)?.toDouble() ?? 0;
+    final lat = (loc['latitude'] as num?)?.toDouble() ?? 0;
     final lng = (loc['longitude'] as num?)?.toDouble() ?? 0;
     final name = await GeocodingService.getPlaceName(lat, lng);
     if (mounted) setState(() => _placeName = name);
   }
 
-  // Rewrite raw MinIO URLs to the HTTPS proxy (same as the web's safeImageUrl).
-  String _safe(String url) =>
-      url.replaceFirst('http://178.105.158.80:9000', 'https://api.mybahaya.com/minio');
+  
+  String _safe(String url) => safeMediaUrl(url);
 
   List<String> _photos() {
     final urls = widget.data['imageUrls'];
@@ -793,21 +848,31 @@ class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
 
   Color _catColor(String cat) {
     switch (cat.toLowerCase()) {
-      case 'fire':    return const Color(0xFFFF6B35);
-      case 'theft':   return const Color(0xFF9B59B6);
-      case 'assault': return const Color(0xFFE74C3C);
-      case 'medical': return const Color(0xFF2ECC71);
-      default:        return burgundy;
+      case 'fire':
+        return const Color(0xFFFF6B35);
+      case 'theft':
+        return const Color(0xFF9B59B6);
+      case 'assault':
+        return const Color(0xFFE74C3C);
+      case 'medical':
+        return const Color(0xFF2ECC71);
+      default:
+        return burgundy;
     }
   }
 
   IconData _catIcon(String cat) {
     switch (cat.toLowerCase()) {
-      case 'fire':    return CupertinoIcons.flame_fill;
-      case 'theft':   return CupertinoIcons.lock_open_fill;
-      case 'assault': return CupertinoIcons.exclamationmark_circle_fill;
-      case 'medical': return CupertinoIcons.plus_circle_fill;
-      default:        return CupertinoIcons.exclamationmark_triangle_fill;
+      case 'fire':
+        return CupertinoIcons.flame_fill;
+      case 'theft':
+        return CupertinoIcons.lock_open_fill;
+      case 'assault':
+        return CupertinoIcons.exclamationmark_circle_fill;
+      case 'medical':
+        return CupertinoIcons.plus_circle_fill;
+      default:
+        return CupertinoIcons.exclamationmark_triangle_fill;
     }
   }
 
@@ -816,20 +881,20 @@ class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
     final dt = ts is Timestamp ? ts.toDate() : null;
     if (dt == null) return '';
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1)  return 'Just now';
+    if (diff.inMinutes < 1) return 'Just now';
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours   < 24) return '${diff.inHours}h ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
     return '${diff.inDays}d ago';
   }
 
   @override
   Widget build(BuildContext context) {
-    final category           = widget.data['category'] as String? ?? 'Unknown';
-    final details            = widget.data['details']  as String? ?? '';
+    final category = widget.data['category'] as String? ?? 'Unknown';
+    final details = widget.data['details'] as String? ?? '';
     final verificationStatus = widget.data['verificationStatus'] as String?;
-    final catColor           = _catColor(category);
-    final photos             = _photos();
-    final videoUrl           = _videoUrl();
+    final catColor = _catColor(category);
+    final photos = _photos();
+    final videoUrl = _videoUrl();
 
     return Container(
       margin: const EdgeInsets.only(top: 60),
@@ -843,7 +908,8 @@ class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
           // Drag handle
           Container(
             margin: const EdgeInsets.only(top: 12),
-            width: 40, height: 4,
+            width: 40,
+            height: 4,
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(2),
@@ -855,7 +921,6 @@ class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   // ── Photo gallery ──────────────────────────────
                   if (photos.isNotEmpty) ...[
                     ClipRRect(
@@ -865,22 +930,31 @@ class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
                         child: PageView.builder(
                           itemCount: photos.length,
                           onPageChanged: (i) => setState(() => _photoIndex = i),
-                          itemBuilder: (_, i) => CachedNetworkImage(
-                            imageUrl: photos[i],
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            placeholder: (_, __) => Container(
-                              color: Colors.white.withOpacity(0.05),
-                              child: const Center(
-                                child: CircularProgressIndicator(
-                                    color: Color(0xFFB22222), strokeWidth: 1.5)),
-                            ),
-                            errorWidget: (_, __, ___) => Container(
-                              color: Colors.white.withOpacity(0.04),
-                              child: Icon(CupertinoIcons.photo,
-                                  color: nude.withOpacity(0.3), size: 40),
-                            ),
-                          ),
+                          itemBuilder:
+                              (_, i) => CachedNetworkImage(
+                                imageUrl: photos[i],
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                placeholder:
+                                    (_, __) => Container(
+                                      color: Colors.white.withOpacity(0.05),
+                                      child: const Center(
+                                        child: CircularProgressIndicator(
+                                          color: Color(0xFFB22222),
+                                          strokeWidth: 1.5,
+                                        ),
+                                      ),
+                                    ),
+                                errorWidget:
+                                    (_, __, ___) => Container(
+                                      color: Colors.white.withOpacity(0.04),
+                                      child: Icon(
+                                        CupertinoIcons.photo,
+                                        color: nude.withOpacity(0.3),
+                                        size: 40,
+                                      ),
+                                    ),
+                              ),
                         ),
                       ),
                     ),
@@ -888,17 +962,21 @@ class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
                       const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(photos.length, (i) => Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          width: _photoIndex == i ? 16 : 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            color: _photoIndex == i
-                                ? burgundy
-                                : Colors.white.withOpacity(0.25),
-                            borderRadius: BorderRadius.circular(3),
+                        children: List.generate(
+                          photos.length,
+                          (i) => Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 3),
+                            width: _photoIndex == i ? 16 : 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color:
+                                  _photoIndex == i
+                                      ? burgundy
+                                      : Colors.white.withOpacity(0.25),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
                           ),
-                        )),
+                        ),
                       ),
                     ],
                     const SizedBox(height: 18),
@@ -919,12 +997,20 @@ class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(CupertinoIcons.play_circle_fill,
-                                color: burgundy, size: 22),
+                            Icon(
+                              CupertinoIcons.play_circle_fill,
+                              color: burgundy,
+                              size: 22,
+                            ),
                             const SizedBox(width: 8),
-                            const Text('Play Video',
-                                style: TextStyle(fontSize: 14,
-                                    fontWeight: FontWeight.w700, color: Colors.white)),
+                            const Text(
+                              'Play Video',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -933,71 +1019,128 @@ class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
                   ],
 
                   // ── Badges row ─────────────────────────────────
-                  Row(children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: catColor.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: catColor.withOpacity(0.4)),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: catColor.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: catColor.withOpacity(0.4)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(_catIcon(category), color: catColor, size: 13),
+                            const SizedBox(width: 5),
+                            Text(
+                              category.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: catColor,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        Icon(_catIcon(category), color: catColor, size: 13),
-                        const SizedBox(width: 5),
-                        Text(category.toUpperCase(),
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800,
-                                color: catColor, letterSpacing: 0.5)),
-                      ]),
-                    ),
-                    const SizedBox(width: 8),
-                    if (verificationStatus == 'VERIFIED')
-                      _chip('VERIFIED', CupertinoIcons.checkmark_shield_fill,
-                          const Color(0xFF30d158)),
-                    if (verificationStatus == 'REJECTED')
-                      _chip('FALSE ALARM', CupertinoIcons.xmark_shield_fill,
-                          Colors.redAccent),
-                    const Spacer(),
-                    Text(_timeAgo(widget.data['createdAt']),
-                        style: TextStyle(fontSize: 11, color: nude.withOpacity(0.5))),
-                  ]),
+                      const SizedBox(width: 8),
+                      if (verificationStatus == 'VERIFIED')
+                        _chip(
+                          'VERIFIED',
+                          CupertinoIcons.checkmark_shield_fill,
+                          const Color(0xFF30d158),
+                        ),
+                      if (verificationStatus == 'REJECTED')
+                        _chip(
+                          'FALSE ALARM',
+                          CupertinoIcons.xmark_shield_fill,
+                          Colors.redAccent,
+                        ),
+                      const Spacer(),
+                      Text(
+                        _timeAgo(widget.data['createdAt']),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: nude.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 16),
 
                   // ── Details ────────────────────────────────────
                   if (details.isNotEmpty) ...[
-                    Text(details,
-                        style: TextStyle(fontSize: 14,
-                            color: Colors.white.withOpacity(0.85), height: 1.6)),
+                    Text(
+                      details,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.85),
+                        height: 1.6,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                   ],
 
                   // ── Location ───────────────────────────────────
-                  Row(children: [
-                    Icon(CupertinoIcons.location_fill, color: burgundy, size: 14),
-                    const SizedBox(width: 6),
-                    Expanded(child: Text(_placeName,
-                        style: TextStyle(fontSize: 13, color: nude))),
-                  ]),
+                  Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.location_fill,
+                        color: burgundy,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          _placeName,
+                          style: TextStyle(fontSize: 13, color: nude),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 20),
 
                   // ── View on map button ─────────────────────────
                   SizedBox(
-                    width: double.infinity, height: 44,
+                    width: double.infinity,
+                    height: 44,
                     child: OutlinedButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
-                        Navigator.push(context, MaterialPageRoute(
-                          builder: (_) => IncidentMapScreen(report: widget.data)));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => IncidentMapScreen(report: widget.data),
+                          ),
+                        );
                       },
-                      icon: const Icon(CupertinoIcons.map_fill,
-                          color: Colors.white, size: 16),
-                      label: const Text('View on Map',
-                          style: TextStyle(fontSize: 13,
-                              fontWeight: FontWeight.w700, color: Colors.white)),
+                      icon: const Icon(
+                        CupertinoIcons.map_fill,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                      label: const Text(
+                        'View on Map',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
                       style: OutlinedButton.styleFrom(
-                        backgroundColor: const Color(0xFF261212).withOpacity(0.8),
+                        backgroundColor: const Color(
+                          0xFF261212,
+                        ).withOpacity(0.8),
                         side: BorderSide(color: Colors.white.withOpacity(0.12)),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                     ),
                   ),
@@ -1018,12 +1161,22 @@ class _IncidentDetailSheetState extends State<_IncidentDetailSheet> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, color: color, size: 11),
-        const SizedBox(width: 4),
-        Text(label, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800,
-            color: color, letterSpacing: 0.4)),
-      ]),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 11),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              color: color,
+              letterSpacing: 0.4,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1044,7 +1197,7 @@ class _FilterPill extends StatelessWidget {
 
   // Palette: active = nude fill + maroon text, inactive = subtle raised
   // surface (white @ 10%) + white text. Maroon / nude / white only.
-  static const Color _nude  = Color(0xFFACA494);
+  static const Color _nude = Color(0xFFACA494);
   static const Color _maroon = Color(0xFF341515);
 
   @override
