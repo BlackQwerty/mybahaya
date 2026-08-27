@@ -1,0 +1,238 @@
+{
+  "mode": "light",
+  "colors": {
+    "accent": "#0071e3",
+    "background": "#ffffff",
+    "text": "#1d1d1f"
+  },
+  "typography": {
+    "headings": {
+      "h1": {
+        "fontFamily": "SF Pro Text",
+        "fontSize": "48px",
+        "fontWeight": 700,
+        "lineHeight": "58px",
+        "letterSpacing": "0px",
+        "fontFallbacks": [
+          "SF Pro Text",
+          "SF Pro Icons",
+          "Helvetica Neue",
+          "Helvetica",
+          "Arial",
+          "sans-serif"
+        ]
+      },
+      "h2": {
+        "fontFamily": "SF Pro Display",
+        "fontSize": "40px",
+        "fontWeight": 600,
+        "lineHeight": "52.0077px",
+        "letterSpacing": "-0.096px",
+        "fontFallbacks": [
+          "SF Pro Display",
+          "SF Pro Icons",
+          "Helvetica Neue",
+          "Helvetica",
+          "Arial",
+          "sans-serif"
+        ]
+      },
+      "h3": {
+        "fontFamily": "SF Pro Display",
+        "fontSize": "34px",
+        "fontWeight": 600,
+        "lineHeight": "36px",
+        "letterSpacing": "0.064px",
+        "fontFallbacks": [
+          "SF Pro Display",
+          "SF Pro Icons",
+          "Helvetica Neue",
+          "Helvetica",
+          "Arial",
+          "sans-serif"
+        ]
+      },
+      "h4": {
+        "fontFamily": "SF Pro Text",
+        "fontSize": "29px",
+        "fontWeight": 600,
+        "lineHeight": "35px",
+        "letterSpacing": "0px",
+        "fontFallbacks": [
+          "SF Pro Text",
+          "SF Pro Icons",
+          "Helvetica Neue",
+          "Helvetica",
+          "Arial",
+          "sans-serif"
+        ]
+      }
+    },
+    "p": {
+      "fontFamily": "SF Pro Display",
+      "fontSize": "24px",
+      "fontWeight": 400,
+      "lineHeight": "36px",
+      "letterSpacing": "0.216px",
+      "fontFallbacks": [
+        "SF Pro Display",
+        "SF Pro Icons",
+        "Helvetica Neue",
+        "Helvetica",
+        "Arial",
+        "sans-serif"
+      ]
+    }
+  },
+  "elementSpacing": {
+    "xs": "8px",
+    "sm": "16px",
+    "md": "34px",
+    "lg": "48px",
+    "xl": "70px"
+  },
+  "shadows": {
+    "sm": "rgba(0, 0, 0, 0.22) 3px 5px 30px 0px",
+    "md": "none",
+    "lg": "none",
+    "xl": "none",
+    "inner": "none"
+  },
+  "components": {
+    "button": {
+      "primary": {
+        "backgroundColor": "#0071e3",
+        "color": "#ffffff",
+        "borderColor": "transparent",
+        "borderRadius": "980px",
+        "borderWidth": "1px",
+        "borderStyle": "solid",
+        "padding": "11px 21px",
+        "fontSize": "17px",
+        "fontWeight": 400,
+        "minWidth": "26px",
+        "minHeight": "44px",
+        "textDecoration": "none",
+        "boxShadow": "none",
+        "fontFallbacks": [
+          "SF Pro Text",
+          "SF Pro Icons",
+          "Helvetica Neue",
+          "Helvetica",
+          "Arial",
+          "sans-serif"
+        ],
+        "fontFamily": "SF Pro Text",
+        "css": "box-sizing: border-box; display: inline-block; min-width: 26px; min-height: 44px; background-color: #0071e3; color: #ffffff; border: 1px solid transparent; border-radius: 980px; padding: 11px 21px; font-size: 17px; font-weight: 400; font-family: \"SF Pro Text\", \"SF Pro Icons\", \"Helvetica Neue\", Helvetica, Arial, sans-serif; text-decoration: none;"
+      },
+      "secondary": {
+        "backgroundColor": "transparent",
+        "color": "#0066cc",
+        "borderColor": "#0066cc",
+        "borderRadius": "980px",
+        "borderWidth": "1px",
+        "borderStyle": "solid",
+        "padding": "11px 21px",
+        "fontSize": "17px",
+        "fontWeight": 400,
+        "minWidth": "26px",
+        "minHeight": "44px",
+        "textDecoration": "none",
+        "boxShadow": "none",
+        "fontFallbacks": [
+          "SF Pro Text",
+          "SF Pro Icons",
+          "Helvetica Neue",
+          "Helvetica",
+          "Arial",
+          "sans-serif"
+        ],
+        "fontFamily": "SF Pro Text",
+        "css": "box-sizing: border-box; display: inline-block; min-width: 26px; min-height: 44px; background-color: transparent; color: #0066cc; border: 1px solid #0066cc; border-radius: 980px; padding: 11px 21px; font-size: 17px; font-weight: 400; font-family: \"SF Pro Text\", \"SF Pro Icons\", \"Helvetica Neue\", Helvetica, Arial, sans-serif; text-decoration: none;"
+      },
+      "link": {
+        "backgroundColor": "transparent",
+        "color": "#0066cc",
+        "borderColor": "transparent",
+        "borderRadius": "0px",
+        "borderWidth": "0px",
+        "borderStyle": "none",
+        "padding": "0px",
+        "fontSize": "17px",
+        "fontWeight": 400,
+        "minWidth": "0px",
+        "minHeight": "0px",
+        "textDecoration": "underline",
+        "boxShadow": "none",
+        "fontFallbacks": [
+          "SF Pro Text",
+          "SF Pro Icons",
+          "Helvetica Neue",
+          "Helvetica",
+          "Arial",
+          "sans-serif"
+        ],
+        "fontFamily": "SF Pro Text",
+        "css": "color: #0066cc; font-size: 17px; font-weight: 400; font-family: \"SF Pro Text\", \"SF Pro Icons\", \"Helvetica Neue\", Helvetica, Arial, sans-serif; text-decoration: underline;"
+      }
+    },
+    "card": {
+      "backgroundColor": "#ffffff",
+      "borderColor": "#e5e7eb",
+      "borderRadius": "8px",
+      "borderWidth": "1px",
+      "borderStyle": "solid",
+      "padding": "16px",
+      "boxShadow": "none",
+      "textColor": "#1d1d1f",
+      "css": "background-color: #ffffff; color: #1d1d1f; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;"
+    }
+  },
+  "fontLinks": {
+    "SF Pro Text": {
+      "type": "custom",
+      "files": {
+        "100": "https://www.apple.com/wss/fonts/SF-Pro-Text/v3/sf-pro-text_ultralight.woff2",
+        "200": "https://www.apple.com/wss/fonts/SF-Pro-Text/v3/sf-pro-text_thin.woff2",
+        "300": "https://www.apple.com/wss/fonts/SF-Pro-Text/v3/sf-pro-text_light.woff2",
+        "400": "https://www.apple.com/wss/fonts/SF-Pro-Text/v3/sf-pro-text_regular.woff2",
+        "500": "https://www.apple.com/wss/fonts/SF-Pro-Text/v3/sf-pro-text_medium.woff2",
+        "600": "https://www.apple.com/wss/fonts/SF-Pro-Text/v3/sf-pro-text_semibold.woff2",
+        "700": "https://www.apple.com/wss/fonts/SF-Pro-Text/v3/sf-pro-text_bold.woff2",
+        "800": "https://www.apple.com/wss/fonts/SF-Pro-Text/v3/sf-pro-text_heavy.woff2",
+        "900": "https://www.apple.com/wss/fonts/SF-Pro-Text/v3/sf-pro-text_black.woff2"
+      },
+      "displayName": "SF Pro Text"
+    },
+    "SF Pro Icons": {
+      "type": "custom",
+      "files": {
+        "100": "https://www.apple.com/wss/fonts/SF-Pro-Icons/v3/sf-pro-icons_ultralight.woff2",
+        "200": "https://www.apple.com/wss/fonts/SF-Pro-Icons/v3/sf-pro-icons_thin.woff2",
+        "300": "https://www.apple.com/wss/fonts/SF-Pro-Icons/v3/sf-pro-icons_light.woff2",
+        "400": "https://www.apple.com/wss/fonts/SF-Pro-Icons/v3/sf-pro-icons_regular.woff2",
+        "500": "https://www.apple.com/wss/fonts/SF-Pro-Icons/v3/sf-pro-icons_medium.woff2",
+        "600": "https://www.apple.com/wss/fonts/SF-Pro-Icons/v3/sf-pro-icons_semibold.woff2",
+        "700": "https://www.apple.com/wss/fonts/SF-Pro-Icons/v3/sf-pro-icons_bold.woff2",
+        "800": "https://www.apple.com/wss/fonts/SF-Pro-Icons/v3/sf-pro-icons_heavy.woff2",
+        "900": "https://www.apple.com/wss/fonts/SF-Pro-Icons/v3/sf-pro-icons_black.woff2"
+      },
+      "displayName": "SF Pro Icons"
+    },
+    "SF Pro Display": {
+      "type": "custom",
+      "files": {
+        "100": "https://www.apple.com/wss/fonts/SF-Pro-Display/v3/sf-pro-display_ultralight.woff2",
+        "200": "https://www.apple.com/wss/fonts/SF-Pro-Display/v3/sf-pro-display_thin.woff2",
+        "300": "https://www.apple.com/wss/fonts/SF-Pro-Display/v3/sf-pro-display_light.woff2",
+        "400": "https://www.apple.com/wss/fonts/SF-Pro-Display/v3/sf-pro-display_regular.woff2",
+        "500": "https://www.apple.com/wss/fonts/SF-Pro-Display/v3/sf-pro-display_medium.woff2",
+        "600": "https://www.apple.com/wss/fonts/SF-Pro-Display/v3/sf-pro-display_semibold.woff2",
+        "700": "https://www.apple.com/wss/fonts/SF-Pro-Display/v3/sf-pro-display_bold.woff2",
+        "800": "https://www.apple.com/wss/fonts/SF-Pro-Display/v3/sf-pro-display_heavy.woff2",
+        "900": "https://www.apple.com/wss/fonts/SF-Pro-Display/v3/sf-pro-display_black.woff2"
+      },
+      "displayName": "SF Pro Display"
+    }
+  }
+}

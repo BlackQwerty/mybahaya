@@ -24,7 +24,7 @@
 .hero-eyebrow {
   display: flex; align-items: center; gap: 8px;
   font-size: var(--fs-xs); font-weight: 600;
-  color: rgba(255,255,255,0.50);
+  color: var(--accent-primary);
   text-transform: uppercase; letter-spacing: 1.2px;
   margin-bottom: 8px;
 }
@@ -41,17 +41,20 @@
 }
 .hero-sub {
   font-size: var(--fs-sm);
-  color: rgba(255,255,255,0.50);
+  color: var(--secondary-text);
   margin-bottom: 4px;
 }
 .hero-clock {
   font-size: 11px;
-  color: rgba(255,255,255,0.28);
+  color: var(--muted-text);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.3px;
 }
 
 /* ── Stats Row ── */
+.stat-label {
+  color: var(--secondary-text);
+}
 .stats-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -71,7 +74,7 @@
 }
 .stat-meta {
   font-size: 10px;
-  color: rgba(255,255,255,0.28);
+  color: var(--muted-text);
   margin-top: 4px;
 }
 
@@ -124,12 +127,13 @@
 .chart-card { padding: var(--gap-lg); margin-bottom: var(--gap-md); }
 .chart-sub {
   font-size: var(--fs-xs);
-  color: rgba(255,255,255,0.40);
+  color: var(--secondary-text);
   margin-bottom: var(--gap-md);
 }
 .chart-wrapper { height: 220px; position: relative; }
 .chart-legend { display: flex; gap: var(--gap-sm); flex-wrap: wrap; }
 .chart-legend-item {
+  color: var(--secondary-text);
   display: flex; align-items: center; gap: 5px;
   font-size: var(--fs-xs); color: rgba(255,255,255,0.55);
 }
@@ -159,22 +163,25 @@
 .activity-body { flex: 1; min-width: 0; }
 .activity-title {
   font-size: var(--fs-sm); font-weight: 600;
-  color: rgba(255,255,255,0.90);
+  color: var(--main-text);
   display: flex; align-items: center; gap: 6px;
 }
 .activity-id {
   font-size: 10px; font-weight: 500;
-  color: rgba(255,255,255,0.30);
+  color: var(--secondary-text);
   background: rgba(255,255,255,0.06);
   border-radius: 4px; padding: 1px 5px;
   font-family: monospace;
 }
 .activity-desc {
+  color: var(--secondary-text);
   font-size: var(--fs-xs); color: rgba(255,255,255,0.45);
   margin-top: 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
 .activity-time {
+  color: var(--muted-text);
   font-size: var(--fs-xs); color: rgba(255,255,255,0.35);
   flex-shrink: 0; padding-top: 2px; white-space: nowrap;
 }
@@ -192,9 +199,12 @@
 }
 
 /* ── Map Badges ── */
-.map-overlay-badges { display: flex; gap: var(--gap-sm); flex-wrap: wrap; }
+.map-overlay-badges { 
+  color: var(--secondary-text);
+  display: flex; gap: var(--gap-sm); flex-wrap: wrap; }
 
 .badge {
+  color: var(--secondary-text);
   display: inline-flex; align-items: center; gap: 5px;
   padding: 5px 12px; border-radius: 99px; font-size: 11px; font-weight: 600;
 }
