@@ -5,12 +5,12 @@
 .reports-container {
   max-width: 1440px;
   margin: 0 auto;
-  padding: var(--gap-lg) var(--gap-xl);
+  padding: 18px var(--gap-xl) var(--gap-lg);
 }
 
 /* ── Page Header ── */
 .page-header {
-  display: flex; align-items: flex-end; justify-content: space-between;
+  display: flex; align-items: flex-start; justify-content: space-between;
   margin-bottom: var(--gap-lg);
   gap: var(--gap-md);
 }
@@ -20,20 +20,20 @@
 .page-eyebrow {
   display: flex; align-items: center; gap: 8px;
   font-size: var(--fs-xs); font-weight: 600;
-  color: rgba(255,255,255,0.50); text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--secondary-text); text-transform: uppercase; letter-spacing: 1.2px;
   margin-bottom: 8px;
 }
 .page-title {
   font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; letter-spacing: -1px;
   line-height: 1.1; margin-bottom: 8px;
 }
-.page-sub { font-size: var(--fs-sm); color: rgba(255,255,255,0.50); }
+.page-sub { font-size: var(--fs-sm); color: var(--secondary-text); }
 
 .total-badge {
   display: inline-flex; align-items: center;
   padding: 6px 16px; border-radius: var(--r-full);
   background: var(--glass-2); border: 1px solid var(--glass-border);
-  font-size: var(--fs-xs); font-weight: 600; color: rgba(255,255,255,0.65);
+  font-size: var(--fs-xs); font-weight: 600; color: var(--main-text);
   white-space: nowrap;
 }
 
@@ -44,12 +44,19 @@
   margin-bottom: var(--gap-lg);
 }
 
-.filter-search { position: relative; }
+.filter-search {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
 .filter-search .search-icon {
   position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-  color: rgba(255,255,255,0.40); font-size: 16px; pointer-events: none;
+  color: var(--muted-text); font-size: 16px; pointer-events: none;
 }
-.search-input { padding-left: 40px; }
+.search-input {
+  width: 100%;
+  padding-left: 40px;
+}
 
 /* ── Filter Layers ── */
 .filter-layer {
@@ -57,7 +64,7 @@
 }
 .filter-layer-label {
   display: flex; align-items: center; gap: 5px;
-  font-size: var(--fs-xs); font-weight: 600; color: rgba(255,255,255,0.40);
+  font-size: var(--fs-xs); font-weight: 600; color: var(--secondary-text);
   text-transform: uppercase; letter-spacing: 0.8px;
   flex-shrink: 0; min-width: 80px;
 }
@@ -68,12 +75,12 @@
 .chip {
   padding: 5px 14px; border-radius: var(--r-full);
   border: 1px solid var(--glass-border);
-  background: var(--glass-1); color: rgba(255,255,255,0.65);
+  background: rgba(255,255,255,0.82); color: var(--main-text);
   font-size: var(--fs-xs); font-weight: 600; font-family: var(--font-main);
   cursor: pointer; transition: all var(--t-fast);
 }
-.chip:hover { background: var(--glass-2); color: white; border-color: rgba(255,255,255,0.20); }
-.chip.active { background: rgba(255,255,255,0.15); color: white; border-color: rgba(255,255,255,0.28); }
+.chip:hover { background: rgba(166,27,43,0.08); color: var(--accent-primary); border-color: rgba(166,27,43,0.20); }
+.chip.active { background: rgba(166,27,43,0.12); color: var(--accent-primary-dark); border-color: rgba(166,27,43,0.28); }
 
 /* Category chip colours when active */
 .chip-theft.active   { background: rgba(155,89,182,0.25); border-color: rgba(155,89,182,0.50); color: #bf8fff; }
@@ -84,24 +91,30 @@
 
 /* State select — visible when "By State" scope is chosen */
 .state-select {
-  width: 200px; flex-shrink: 0;
-  background: var(--glass-1); border-radius: var(--r-sm);
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--glass-1);
+  border-radius: var(--r-sm);
 }
 
 /* Sort row */
-.filter-sort { display: flex; justify-content: flex-end; }
-.sort-select { width: 160px; }
+.filter-sort {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+.sort-select { width: 180px; }
 
 /* ── Loading Row ── */
 .loading-row {
   display: flex; align-items: center; justify-content: center; gap: 12px;
   padding: 60px 20px;
-  color: rgba(255,255,255,0.45); font-size: var(--fs-sm);
+  color: var(--secondary-text); font-size: var(--fs-sm);
 }
 .loading-spinner {
   width: 20px; height: 20px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.15);
-  border-top-color: rgba(255,255,255,0.6);
+  border: 2px solid rgba(166,27,43,0.15);
+  border-top-color: var(--accent-primary);
   animation: spin 0.8s linear infinite; flex-shrink: 0;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -229,7 +242,7 @@
   text-align: center; padding: 60px 20px;
   display: flex; flex-direction: column; align-items: center; gap: var(--gap-md);
 }
-.empty-state p { color: rgba(255,255,255,0.6); font-size: var(--fs-sm); }
+.empty-state p { color: var(--secondary-text); }
 
 /* ══════════════════════════════════════════════════════════
    REPORT DETAIL MODAL

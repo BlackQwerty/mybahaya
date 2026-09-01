@@ -17,7 +17,7 @@ const CAT_META = {
 function catMeta(cat) { return CAT_META[cat] || CAT_META.Other; }
 
 function fmtTime(ts) {
-  if (!ts) return '—';
+  if (!ts) return '-';
   const dt   = ts.toDate ? ts.toDate() : new Date(ts);
   const diff = Date.now() - dt.getTime();
   const m = Math.floor(diff / 60000);

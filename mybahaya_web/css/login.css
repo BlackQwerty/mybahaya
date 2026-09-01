@@ -2,13 +2,25 @@
    login.css — Sign In Page
    ============================================================ */
 
+.login-body,
+html.login-body {
+  width: 100%;
+  min-height: 100%;
+}
+
 .login-body {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  overflow: hidden;
-  padding: var(--gap-lg);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: clamp(24px, 4vw, 48px);
+  background:
+    linear-gradient(180deg, rgba(166, 27, 43, 0.04) 0%, rgba(255,255,255,0.98) 36%),
+    radial-gradient(circle at 20% 18%, rgba(166, 27, 43, 0.08), transparent 22rem),
+    radial-gradient(circle at 80% 82%, rgba(245, 166, 35, 0.08), transparent 20rem),
+    #ffffff;
 }
 
 /* ── Animated Background Orbs ── */
@@ -48,7 +60,8 @@
   position: relative; z-index: 1;
   display: flex; flex-direction: column; align-items: center;
   gap: var(--gap-xl);
-  width: 100%; max-width: 420px;
+  width: min(100%, 460px);
+  margin: 0 auto;
 }
 
 /* ── Brand ── */
@@ -56,24 +69,24 @@
 .login-logo {
   width: 72px; height: 72px;
   border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px rgba(117, 19, 31, 0.18);
 }
 .login-app-name {
   font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,0.5));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  color: var(--accent-primary);
 }
-.login-tagline { font-size: var(--fs-xs); color: rgba(255,255,255,0.45); letter-spacing: 0.4px; }
+.login-tagline { font-size: var(--fs-xs); color: var(--secondary-text); letter-spacing: 0.4px; }
 
 /* ── Card ── */
 .login-card {
   width: 100%;
-  padding: var(--gap-xl) var(--gap-xl);
+  padding: var(--gap-xl);
+  border-radius: 22px;
 }
 
 .login-header { margin-bottom: var(--gap-lg); }
-.login-title   { font-size: var(--fs-xl); font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
-.login-subtitle { font-size: var(--fs-xs); color: rgba(255,255,255,0.45); }
+.login-title   { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
+.login-subtitle { font-size: var(--fs-xs); color: var(--secondary-text); }
 
 /* ── Error Banner ── */
 .login-error {
@@ -87,48 +100,48 @@
 .login-error ion-icon { font-size: 16px; flex-shrink: 0; }
 
 /* ── Form ── */
-.login-form { display: flex; flex-direction: column; gap: var(--gap-md); }
+.login-form { display: flex; flex-direction: column; gap: var(--gap-md); width: 100%; }
 
-.form-group  { display: flex; flex-direction: column; gap: 6px; }
+.form-group  { display: flex; flex-direction: column; gap: 6px; width: 100%; }
 .form-label  {
   font-size: var(--fs-xs); font-weight: 600;
-  color: rgba(255,255,255,0.55);
+  color: var(--secondary-text);
   text-transform: uppercase; letter-spacing: 0.6px;
 }
 
 .input-wrap { position: relative; }
 .input-icon {
   position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-  font-size: 17px; color: rgba(255,255,255,0.35); pointer-events: none;
+  font-size: 17px; color: var(--muted-text); pointer-events: none;
 }
-.login-input { padding-left: 42px; padding-right: 42px; }
+.login-input { padding-left: 42px; padding-right: 42px; width: 100%; }
 
 .toggle-pw {
   position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
   background: none; border: none; cursor: pointer;
-  color: rgba(255,255,255,0.35); font-size: 17px;
+  color: var(--muted-text); font-size: 17px;
   display: flex; align-items: center;
   transition: color var(--t-fast);
 }
-.toggle-pw:hover { color: rgba(255,255,255,0.7); }
+.toggle-pw:hover { color: var(--accent-primary); }
 
 /* ── Submit Button ── */
 .login-btn {
   width: 100%; justify-content: center;
   margin-top: var(--gap-sm);
-  height: 48px; font-size: var(--fs-base); font-weight: 600;
-  background: linear-gradient(135deg, var(--bg-base), var(--accent-rose));
-  box-shadow: 0 4px 20px rgba(77,10,24,0.6);
+  height: 50px; font-size: var(--fs-base); font-weight: 700;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-light));
+  box-shadow: 0 10px 28px rgba(117, 19, 31, 0.24);
   position: relative;
 }
-.login-btn:hover { box-shadow: 0 6px 28px rgba(240,95,126,0.45); }
+.login-btn:hover { box-shadow: 0 12px 32px rgba(117, 19, 31, 0.30); }
 .login-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none !important; }
 
 /* Spinner */
 .login-spinner {
   width: 18px; height: 18px; border-radius: 50%;
   border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: white;
+  border-top-color: #ffffff;
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -137,12 +150,15 @@
 .login-footer-note {
   display: flex; align-items: center; justify-content: center; gap: 6px;
   margin-top: var(--gap-md);
-  font-size: var(--fs-xs); color: rgba(255,255,255,0.30);
+  font-size: var(--fs-xs); color: var(--muted-text);
+  line-height: 1.45;
+  text-align: center;
 }
 .login-footer-note ion-icon { font-size: 14px; }
 
 /* ── Version line ── */
 .login-version {
-  font-size: var(--fs-xs); color: rgba(255,255,255,0.25);
+  font-size: var(--fs-xs); color: var(--muted-text);
   letter-spacing: 0.3px;
+  text-align: center;
 }

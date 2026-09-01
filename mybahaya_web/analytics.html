@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MyBahaya — Analytics</title>
+  <title>MyBahaya - Analytics</title>
   <meta name="description" content="Detailed incident analytics and data intelligence." />
 
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
@@ -52,14 +52,11 @@
       <!-- ── Page Header ── -->
       <div class="page-header fade-in">
         <div>
-          <p class="page-eyebrow">
-            <span class="dot" style="background:var(--accent-primary);box-shadow:0 0 8px var(--accent-primary)"></span>
-            Data Intelligence
-          </p>
-          <h1 class="page-title">System <span class="gradient-text">Analytics</span></h1>
+          <h1 class="page-title">System Analytics</h1>
+          <p class="page-sub">Data intelligence for incident trends, patterns, and response history.</p>
         </div>
         <div class="header-actions">
-          <select class="glass-input" id="timeframe-select" style="width:auto" aria-label="Timeframe">
+          <select class="glass-input" id="timeframe-select" aria-label="Timeframe">
             <option value="7">Last 7 Days</option>
             <option value="30" selected>Last 30 Days</option>
             <option value="90">Last 90 Days</option>
@@ -79,7 +76,7 @@
             <div class="glass-icon"><ion-icon name="document-text-outline"></ion-icon></div>
           </div>
           <p class="stat-label">Total Reports</p>
-          <p class="stat-value" id="kpi-total">—</p>
+          <p class="stat-value" id="kpi-total">0</p>
           <p class="kpi-meta" id="kpi-total-meta">in selected period</p>
         </div>
 
@@ -90,7 +87,7 @@
             </div>
           </div>
           <p class="stat-label">Today</p>
-          <p class="stat-value" id="kpi-today" style="color:#30D158">—</p>
+          <p class="stat-value" id="kpi-today" style="color:#30D158">0</p>
           <p class="kpi-meta">since midnight</p>
         </div>
 
@@ -101,7 +98,7 @@
             </div>
           </div>
           <p class="stat-label">Daily Average</p>
-          <p class="stat-value" id="kpi-avg" style="color:var(--accent-secondary)">—</p>
+          <p class="stat-value" id="kpi-avg" style="color:var(--accent-secondary)">0</p>
           <p class="kpi-meta">reports per day</p>
         </div>
 
@@ -112,8 +109,8 @@
             </div>
           </div>
           <p class="stat-label">Top Category</p>
-          <p class="stat-value kpi-top-cat-val" id="kpi-top-cat" style="font-size:1.4rem">—</p>
-          <p class="kpi-meta" id="kpi-top-cat-count">—</p>
+          <p class="stat-value kpi-top-cat-val" id="kpi-top-cat" style="font-size:1.4rem">0</p>
+          <p class="kpi-meta" id="kpi-top-cat-count">0</p>
         </div>
 
       </div><!-- /kpi-row -->
@@ -141,7 +138,7 @@
           <div class="donut-wrap">
             <canvas id="donutChart" aria-label="Category distribution donut chart"></canvas>
             <div class="donut-center" id="donut-center">
-              <span class="donut-total" id="donut-total">—</span>
+              <span class="donut-total" id="donut-total">0</span>
               <span class="donut-label">total</span>
             </div>
           </div>

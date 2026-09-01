@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MyBahaya — Organizations</title>
+  <title>MyBahaya - Organizations</title>
   <meta name="description" content="Manage registered response organizations and system admins." />
 
   <!-- Ionicons -->
@@ -51,8 +51,7 @@
       <!-- Page Header -->
       <div class="page-header fade-in">
         <div>
-          <p class="page-eyebrow"><span class="dot" style="background:var(--accent-secondary);box-shadow:0 0 8px var(--accent-secondary)"></span> Admin Only</p>
-          <h1 class="page-title">Organization <span class="gradient-text">Management</span></h1>
+          <h1 class="page-title">Organization Management</h1>
           <p class="page-sub">Manage registered response organizations and system administrators</p>
         </div>
         <button class="btn btn-primary" id="btn-add-primary" aria-label="Add new entry">
@@ -79,21 +78,21 @@
             <ion-icon name="business-outline"></ion-icon>
             <div>
               <p class="stat-label">Total Organizations</p>
-              <p class="stat-value" id="org-count-total">—</p>
+              <p class="stat-value" id="org-count-total">0</p>
             </div>
           </div>
           <div class="glass-card org-summary-card">
             <ion-icon name="checkmark-circle-outline" style="color:var(--accent-green)"></ion-icon>
             <div>
               <p class="stat-label">Active</p>
-              <p class="stat-value" id="org-count-active" style="color:var(--accent-green)">—</p>
+              <p class="stat-value" id="org-count-active" style="color:var(--accent-green)">0</p>
             </div>
           </div>
           <div class="glass-card org-summary-card">
-            <ion-icon name="pause-circle-outline" style="color:rgba(255,255,255,0.4)"></ion-icon>
+            <ion-icon name="pause-circle-outline" style="color:var(--muted-text)"></ion-icon>
             <div>
               <p class="stat-label">Inactive</p>
-              <p class="stat-value" id="org-count-inactive" style="color:rgba(255,255,255,0.4)">—</p>
+              <p class="stat-value" id="org-count-inactive" style="color:var(--muted-text)">0</p>
             </div>
           </div>
         </div>
@@ -154,14 +153,14 @@
             <ion-icon name="shield-outline"></ion-icon>
             <div>
               <p class="stat-label">Total Admins</p>
-              <p class="stat-value" id="admin-count-total">—</p>
+              <p class="stat-value" id="admin-count-total">0</p>
             </div>
           </div>
           <div class="glass-card org-summary-card">
             <ion-icon name="map-outline" style="color:var(--accent-primary)"></ion-icon>
             <div>
               <p class="stat-label">States Covered</p>
-              <p class="stat-value" id="admin-count-states" style="color:var(--accent-primary)">—</p>
+              <p class="stat-value" id="admin-count-states" style="color:var(--accent-primary)">0</p>
             </div>
           </div>
         </div>
@@ -285,8 +284,8 @@
         <div class="form-row" id="o-password-row">
           <div class="form-group">
             <label class="form-label" for="o-password">Login Password <span class="req">*</span></label>
-            <input class="glass-input" id="o-password" type="password" placeholder="min. 6 characters — the org uses this to log in" minlength="6" autocomplete="new-password" />
-            <span class="form-hint" style="font-size:var(--fs-xs);color:rgba(255,255,255,0.45);margin-top:4px;display:block">
+            <input class="glass-input" id="o-password" type="password" placeholder="Minimum 6 characters. The organization uses this to log in." minlength="6" autocomplete="new-password" />
+            <span class="form-hint" style="font-size:var(--fs-xs);color:var(--secondary-text);margin-top:4px;display:block">
               You set the password directly. Share the email + this password with the organization.
             </span>
           </div>

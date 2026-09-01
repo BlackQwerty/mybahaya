@@ -32,7 +32,7 @@ function renderAiBody(ai) {
       <div class="rdm-ai-item">
         <span class="rdm-ai-label">Severity</span>
         <span class="rdm-severity" style="background:${sc}22;color:${sc};border-color:${sc}55">
-          ${ai.severity}/5 — ${severityLabels[ai.severity] || 'Unknown'}
+          ${ai.severity}/5 - ${severityLabels[ai.severity] || 'Unknown'}
         </span>
       </div>
       ${ai.suggestedCategory ? `
@@ -106,7 +106,7 @@ function inState(report, stateName) {
 
 /* ── Timestamp formatting ── */
 function fmtTime(ts) {
-  if (!ts) return '—';
+  if (!ts) return '-';
   const dt = ts.toDate ? ts.toDate() : new Date(ts);
   const now = Date.now();
   const diff = now - dt.getTime();
@@ -122,7 +122,7 @@ function fmtTime(ts) {
 }
 
 function fmtFullDate(ts) {
-  if (!ts) return '—';
+  if (!ts) return '-';
   const dt = ts.toDate ? ts.toDate() : new Date(ts);
   const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const h = dt.getHours().toString().padStart(2, '0');
@@ -342,7 +342,7 @@ function openDetailModal(r) {
         </div>` : `
         <div class="rdm-verify-badge ${r.verificationStatus === 'VERIFIED' ? 'rdm-vb-verified' : 'rdm-vb-rejected'}">
           <ion-icon name="${r.verificationStatus === 'VERIFIED' ? 'shield-checkmark-outline' : 'warning-outline'}"></ion-icon>
-          ${r.verificationStatus === 'VERIFIED' ? 'Verified — Confirmed real incident' : 'False Alarm — This report was rejected'}
+          ${r.verificationStatus === 'VERIFIED' ? 'Verified - Confirmed real incident' : 'False Alarm - This report was rejected'}
         </div>`}
 
         <!-- Status Update Button -->

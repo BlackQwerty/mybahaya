@@ -372,14 +372,14 @@ function renderAdmins(admins) {
             ${(a.name || a.email || '?').charAt(0).toUpperCase()}
           </div>
           <div class="org-info">
-            <span class="org-name">${a.name || '—'}</span>
+            <span class="org-name">${a.name || '-'}</span>
             <span class="org-contact-email">${a.role === 'superadmin' ? '⭐ Super Admin' : 'Admin'}</span>
           </div>
         </div>
       </td>
-      <td style="font-size:var(--fs-xs);color:rgba(255,255,255,0.65)">${a.email || '—'}</td>
-      <td style="font-size:var(--fs-sm)">${a.coverState || '—'}</td>
-      <td style="font-size:var(--fs-sm)">${a.coverDistrict || '—'}</td>
+      <td style="font-size:var(--fs-xs);color:var(--secondary-text)">${a.email || '-'}</td>
+      <td style="font-size:var(--fs-sm)">${a.coverState || '-'}</td>
+      <td style="font-size:var(--fs-sm)">${a.coverDistrict || '-'}</td>
       <td>
         <div class="table-actions">
           <button class="btn-action delete" title="Remove Admin"

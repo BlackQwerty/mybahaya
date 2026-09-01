@@ -18,7 +18,7 @@ const MONTHS     = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct',
 function catMeta(cat) { return CAT_META[cat] || CAT_META.Other; }
 
 function fmtDatetime(ts) {
-  if (!ts) return '—';
+  if (!ts) return '-';
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   const hh = String(d.getHours()).padStart(2,'0');
   const mm = String(d.getMinutes()).padStart(2,'0');
@@ -47,21 +47,21 @@ function destroyChart(key) { if (charts[key]) { charts[key].destroy(); charts[ke
 
 /* ── Shared chart theme ── */
 const TOOLTIP = {
-  backgroundColor: 'rgba(15,15,26,0.95)',
-  borderColor: 'rgba(255,255,255,0.10)',
+  backgroundColor: 'rgba(255,255,255,0.96)',
+  borderColor: 'rgba(166,27,43,0.12)',
   borderWidth: 1,
-  titleColor: 'rgba(255,255,255,0.80)',
-  bodyColor:  'rgba(255,255,255,0.60)',
+  titleColor: '#1d1d1f',
+  bodyColor:  '#6e6e73',
   padding: 12, cornerRadius: 10,
 };
 const AXIS_X = {
   grid:   { display: false },
-  ticks:  { color: 'rgba(255,255,255,0.35)', font: { size: 10 } },
+  ticks:  { color: '#6e6e73', font: { size: 10 } },
   border: { display: false },
 };
 const AXIS_Y = {
-  grid:   { color: 'rgba(255,255,255,0.04)' },
-  ticks:  { color: 'rgba(255,255,255,0.35)', font: { size: 10 }, precision: 0 },
+  grid:   { color: 'rgba(166,27,43,0.05)' },
+  ticks:  { color: '#6e6e73', font: { size: 10 }, precision: 0 },
   border: { display: false },
   beginAtZero: true,
 };
@@ -118,7 +118,7 @@ function renderKPIs(reports) {
   const topCat = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
   const topEl  = document.getElementById('kpi-top-cat');
   const cntEl  = document.getElementById('kpi-top-cat-count');
-  if (topEl) topEl.textContent = topCat ? topCat[0] : '—';
+  if (topEl) topEl.textContent = topCat ? topCat[0] : '-';
   if (cntEl) cntEl.textContent = topCat ? `${topCat[1]} reports` : 'no data';
 }
 
@@ -246,7 +246,7 @@ function renderDonut(reports) {
       return `<div class="donut-legend-item">
         <div class="donut-legend-dot" style="background:${m.color}"></div>
         ${m.label}
-        <span class="donut-legend-right">${n} <span style="font-weight:400;color:rgba(255,255,255,0.35)">(${pct}%)</span></span>
+        <span class="donut-legend-right">${n} <span style="font-weight:400;color:#86868b">(${pct}%)</span></span>
       </div>`;
     }).join('');
   }
@@ -267,7 +267,7 @@ function renderHourly(reports) {
   });
 
   const maxH   = hourly.indexOf(Math.max(...hourly));
-  const colors = hourly.map((_, i) => i === maxH ? 'rgba(124,108,248,0.90)' : 'rgba(124,108,248,0.28)');
+  const colors = hourly.map((_, i) => i === maxH ? 'rgba(166,27,43,0.90)' : 'rgba(166,27,43,0.28)');
 
   charts.hourly = new Chart(ctx, {
     type: 'bar',
@@ -279,7 +279,7 @@ function renderHourly(reports) {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: { ...TOOLTIP, callbacks: { title: t => `${t[0].label}–${String(parseInt(t[0].label)+1).padStart(2,'0')}:00` }},
+        tooltip: { ...TOOLTIP, callbacks: { title: t => `${t[0].label} - ${String(parseInt(t[0].label)+1).padStart(2,'0')}:00` }},
       },
       scales: {
         x: { ...AXIS_X },
@@ -290,7 +290,7 @@ function renderHourly(reports) {
 
   const badge = document.getElementById('peak-hour-badge');
   if (badge) {
-    badge.innerHTML = `<ion-icon name="time-outline"></ion-icon> Peak: ${String(maxH).padStart(2,'0')}:00–${String(maxH+1).padStart(2,'0')}:00 (${hourly[maxH]} reports)`;
+    badge.innerHTML = `<ion-icon name="time-outline"></ion-icon> Peak: ${String(maxH).padStart(2,'0')}:00 - ${String(maxH+1).padStart(2,'0')}:00 (${hourly[maxH]} reports)`;
   }
 }
 
@@ -401,7 +401,7 @@ function renderTable(reports) {
 
     const detail = r.details
       ? (r.details.length > 55 ? r.details.slice(0,55) + '…' : r.details)
-      : '<span style="color:rgba(255,255,255,0.25);font-style:italic">—</span>';
+      : '<span style="color:#86868b;font-style:italic">-</span>';
 
     return `
       <tr>
@@ -411,9 +411,9 @@ function renderTable(reports) {
             <ion-icon name="${m.icon}" style="font-size:12px"></ion-icon> ${m.label}
           </span>
         </td>
-        <td style="font-size:12px;color:rgba(255,255,255,0.65);max-width:260px">${detail}</td>
+        <td style="font-size:12px;color:#1d1d1f;max-width:260px">${detail}</td>
         <td>${loc}</td>
-        <td style="font-size:11px;color:rgba(255,255,255,0.45);white-space:nowrap">${fmtDatetime(r.createdAt)}</td>
+        <td style="font-size:11px;color:#6e6e73;white-space:nowrap">${fmtDatetime(r.createdAt)}</td>
       </tr>`;
   }).join('');
 }

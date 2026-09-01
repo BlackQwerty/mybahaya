@@ -16,7 +16,7 @@ const CAT_META = {
 function catMeta(cat) { return CAT_META[cat] || CAT_META.Other; }
 
 function fmtTime(ts) {
-  if (!ts) return '—';
+  if (!ts) return '-';
   const dt   = ts.toDate ? ts.toDate() : new Date(ts);
   const diff = Date.now() - dt.getTime();
   const m = Math.floor(diff / 60000);
@@ -239,24 +239,24 @@ function updateChart(reports, counts) {
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(15,15,26,0.95)',
-          borderColor: 'rgba(255,255,255,0.10)',
+      tooltip: {
+          backgroundColor: 'rgba(255,255,255,0.96)',
+          borderColor: 'rgba(166,27,43,0.12)',
           borderWidth: 1,
-          titleColor: 'rgba(255,255,255,0.80)',
-          bodyColor:  'rgba(255,255,255,0.60)',
+          titleColor: '#1d1d1f',
+          bodyColor:  '#6e6e73',
           padding: 12, cornerRadius: 10,
         },
       },
       scales: {
         x: {
-          grid:   { color: 'rgba(255,255,255,0.04)' },
-          ticks:  { color: 'rgba(255,255,255,0.40)', font: { size: 10 } },
+          grid:   { color: 'rgba(166,27,43,0.05)' },
+          ticks:  { color: '#6e6e73', font: { size: 10 } },
           border: { display: false },
         },
         y: {
-          grid:      { color: 'rgba(255,255,255,0.04)' },
-          ticks:     { color: 'rgba(255,255,255,0.40)', font: { size: 10 }, precision: 0 },
+          grid:      { color: 'rgba(166,27,43,0.05)' },
+          ticks:     { color: '#6e6e73', font: { size: 10 }, precision: 0 },
           border:    { display: false },
           beginAtZero: true,
         },

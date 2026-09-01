@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MyBahaya — Home</title>
+  <title>MyBahaya - Home</title>
   <meta name="description"
-    content="MyBahaya incident monitoring dashboard — real-time overview of active reports, emergencies, and analytics." />
+    content="MyBahaya incident monitoring dashboard. Real time overview of active reports, emergencies, and analytics." />
 
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
@@ -51,11 +51,7 @@
   <main class="page-wrapper" id="main-content">
     <div class="home-container">
 
-      <!-- ═══════════════════════════════════
-           HERO — full-width banner at top
-           ═══════════════════════════════════ -->
       <div class="hero-section fade-in">
-        <p class="hero-eyebrow"><span class="dot"></span> Live Monitoring</p>
         <h1 class="hero-title" id="hero-greeting">Good Morning, Admin</h1>
         <p class="hero-sub" id="hero-sub">Live situational awareness · Malaysia</p>
         <p class="hero-clock" id="hero-clock"></p>
@@ -74,7 +70,7 @@
               <div class="glass-icon"><ion-icon name="document-text-outline"></ion-icon></div>
             </div>
             <p class="stat-label">Total Reports</p>
-            <p class="stat-value" id="val-total">—</p>
+            <p class="stat-value" id="val-total">0</p>
             <p class="stat-meta">All time from Firestore</p>
           </div>
 
@@ -85,7 +81,7 @@
               </div>
             </div>
             <p class="stat-label">Reports Today</p>
-            <p class="stat-value" id="val-today" style="color:#30D158">—</p>
+            <p class="stat-value" id="val-today" style="color:#30D158">0</p>
             <p class="stat-meta">Since midnight</p>
           </div>
 
@@ -96,13 +92,13 @@
               </div>
             </div>
             <p class="stat-label">Active Organizations</p>
-            <p class="stat-value" id="val-orgs" style="color:var(--accent-secondary)">—</p>
+            <p class="stat-value" id="val-orgs" style="color:var(--accent-secondary)">0</p>
             <p class="stat-meta">Status: active</p>
           </div>
 
         </div><!-- /stats-row -->
 
-        <!-- Category Breakdown — 5 mini cards -->
+        <!-- Category Breakdown -->
         <div class="cat-breakdown-row fade-in fade-in-delay-3" id="cat-breakdown">
           <!-- Populated by home.js -->
         </div>
@@ -138,7 +134,7 @@
       </div><!-- /home-left -->
 
       <!-- ═══════════════════════════════════
-           RIGHT COLUMN — sticky map
+           RIGHT COLUMN
            ═══════════════════════════════════ -->
       <div class="home-right">
         <div class="glass-card map-preview-card fade-in fade-in-delay-2">
