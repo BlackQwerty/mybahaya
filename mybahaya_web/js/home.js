@@ -334,9 +334,9 @@ function initHomeMap() {
       version: 8,
       sources: { osm: {
         type: 'raster',
-        tiles: ['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'],
+        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
         tileSize: 256,
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        attribution: '&copy; OpenStreetMap contributors'
       }},
       layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
     },

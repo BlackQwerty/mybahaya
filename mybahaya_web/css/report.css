@@ -3,15 +3,17 @@
    ============================================================ */
 
 .reports-container {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 18px var(--gap-xl) var(--gap-lg);
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 var(--gap-xl) var(--gap-lg);
 }
 
 /* ── Page Header ── */
 .page-header {
   display: flex; align-items: flex-start; justify-content: space-between;
   margin-bottom: var(--gap-lg);
+  padding-top: var(--gap-md);
   gap: var(--gap-md);
 }
 @media (max-width: 600px) {

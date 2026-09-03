@@ -57,9 +57,9 @@ function initMap() {
       version: 8,
       sources: { osm: {
         type: 'raster',
-        tiles: ['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'],
+        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
         tileSize: 256,
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        attribution: '&copy; OpenStreetMap contributors'
       }},
       layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
     },
@@ -415,21 +415,6 @@ function setupControls() {
       pos => map.flyTo({ center: [pos.coords.longitude, pos.coords.latitude], zoom: 14 }),
       ()  => map.flyTo({ center: [109.0, 3.8], zoom: 6 })
     );
-  });
-
-  let is3D = false;
-  const btn3D = document.getElementById('toggle-3d');
-  btn3D.addEventListener('click', () => {
-    is3D = !is3D;
-    if (is3D) {
-      map.flyTo({ pitch: 60, bearing: -20 });
-      btn3D.innerHTML = '<ion-icon name="map-outline"></ion-icon> 2D View';
-      btn3D.classList.replace('btn-primary', 'btn-glass');
-    } else {
-      map.flyTo({ pitch: 0, bearing: 0 });
-      btn3D.innerHTML = '<ion-icon name="layers-outline"></ion-icon> 3D View';
-      btn3D.classList.replace('btn-glass', 'btn-primary');
-    }
   });
 
   /* Legend items as category filters */

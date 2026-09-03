@@ -9,11 +9,11 @@
   --bg-deep: #ffffff;
   --bg-base: #f5f5f7;
   --bg-surface: #ffffff;
-
-  /* --accent-primary: #a61b2b; */
-  --accent-primary: #752536;
-  --accent-primary-light: #c94f60;
-  --accent-primary-dark: #75131f;
+  --page-background: #ffffff;
+  --shell-background: #581a27;
+  --accent-primary: #581a27;
+  --accent-primary-light: #8a3b4d;
+  --accent-primary-dark: #3d111b;
   --accent-secondary: #6e6e73;
 
   --main-text: #1d1d1f;
@@ -168,24 +168,33 @@ html {
   font-size: 16px;
   scroll-behavior: smooth;
   width: 100%;
-  overflow-x: hidden;
+  max-width: 100vw;
+  overflow-x: clip;
+  scrollbar-width: none;
 }
 
 body {
+  margin: 0 !important;
+  padding: 0 !important;
   color: var(--main-text);
-  background: 
-  radial-gradient(
-    circle at 10% 5%,
-    rgba(166, 27, 43, 0.08),
-    transparent 30rem
-  ),
-  #ffffff;
+  background: var(--shell-background);
   font-family: var(--font-main);
   min-height: 100vh;
   width: 100%;
+  max-width: 100vw;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Radial maroon glow as a separate fixed layer so it stays inside the viewport */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--shell-background);
 }
 
 /* ── Animated Mesh Background ── */
@@ -399,9 +408,14 @@ ion-icon {
 .page-wrapper {
   position: relative;
   z-index: 1;
+  margin: 0 !important;
+  background: var(--page-background);
+  width: 100%;
+  max-width: 100%;
   padding-top: 64px;
   padding-bottom: 96px;
   min-height: 100vh;
+  overflow-x: clip;
 }
 
 /* ── Floating Action Button ── */
@@ -660,8 +674,8 @@ h4,
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 0;
+  height: 0;
 }
 
 ::-webkit-scrollbar-track {

@@ -25,7 +25,7 @@
     <section class="login-welcome fade-in" aria-label="About MyBahaya">
       <img src="assets/logo_icon/officialMyBahayaIcon.png" alt="MyBahaya mascot" class="login-logo" />
       <div class="welcome-copy">
-        <h1>Hello, I'm MyBahaya!</h1>
+        <h1 class="typing-title" data-text="Hello, I'm MyBahaya!" aria-label="Hello, I'm MyBahaya!">Hello, I'm MyBahaya!</h1>
         <p>I will help all people who are in danger anytime, anywhere and everywhere.</p>
       </div>
     </section>
@@ -46,14 +46,14 @@
       <form class="login-form" id="login-form" novalidate>
 
         <div class="form-group">
-          <label class="form-label" for="login-email">Email Address</label>
           <div class="input-wrap">
+            <label class="form-label" for="login-email">Email Address</label>
             <ion-icon name="mail-outline" class="input-icon"></ion-icon>
             <input
               class="glass-input login-input"
               id="login-email"
               type="email"
-              placeholder="your@email.com"
+              placeholder="Email Address"
               autocomplete="email"
               required
             />
@@ -61,14 +61,14 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="login-password">Password</label>
           <div class="input-wrap">
+            <label class="form-label" for="login-password">Password</label>
             <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
             <input
               class="glass-input login-input"
               id="login-password"
               type="password"
-              placeholder="••••••••"
+              placeholder="Password"
               autocomplete="current-password"
               required
             />
@@ -92,6 +92,31 @@
 
   <script>
     'use strict';
+
+    // Continuously type, pause, erase, and repeat the welcome message.
+    const typingTitle = document.querySelector('.typing-title');
+    if (typingTitle && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const text = typingTitle.dataset.text;
+      let index = 0;
+      let deleting = false;
+      const animateTyping = function () {
+        typingTitle.textContent = deleting ? text.slice(0, index--) : text.slice(0, index++);
+
+        if (!deleting && index > text.length) {
+          deleting = true;
+          window.setTimeout(animateTyping, 1400);
+        } else if (deleting && index < 0) {
+          deleting = false;
+          index = 0;
+          window.setTimeout(animateTyping, 500);
+        } else {
+          window.setTimeout(animateTyping, deleting ? 45 : 75);
+        }
+      };
+      animateTyping();
+    } else if (typingTitle) {
+      typingTitle.textContent = typingTitle.dataset.text;
+    }
 
     // If already signed in, redirect to home
     firebase.auth().onAuthStateChanged(function (user) {
