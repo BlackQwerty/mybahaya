@@ -31,6 +31,7 @@
 }
 .page-sub { font-size: var(--fs-sm); color: var(--secondary-text); }
 
+
 .total-badge {
   display: inline-flex; align-items: center;
   padding: 6px 16px; border-radius: var(--r-full);
@@ -105,7 +106,22 @@
   justify-content: flex-end;
   width: 100%;
 }
-.sort-select { width: 180px; }
+.sort-control {
+  position: relative;
+  width: 180px;
+}
+.sort-select {
+  width: 100%;
+  padding-right: 34px;
+}
+.sort-control > ion-icon {
+  position: absolute;
+  top: 50%;
+  right: 11px;
+  transform: translateY(-50%);
+  color: var(--secondary-text);
+  pointer-events: none;
+}
 
 /* ── Loading Row ── */
 .loading-row {
@@ -491,6 +507,12 @@ video.rdm-main-media { object-fit: contain; background: #000; }
   background: rgba(48,209,88,0.08); border: 1px solid rgba(48,209,88,0.2);
   color: #30d158; font-size: 13px; font-weight: 600;
   margin-top: auto;
+}
+.timeframe-chevron {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: var(--secondary-text);
 }
 
 @media (max-width: 700px) {

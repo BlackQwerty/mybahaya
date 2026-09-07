@@ -33,9 +33,7 @@
       </li>
     </ul>
     <div class="navbar-right">
-      <div class="avatar-btn" role="button" aria-label="User profile" tabindex="0">
-        <ion-icon name="person-circle-outline"></ion-icon>
-      </div>
+      <div class="settings-menu-wrap"><button class="avatar-btn settings-btn" id="settings-btn" aria-label="Open settings" aria-expanded="false" aria-controls="settings-menu"><ion-icon name="settings-outline"></ion-icon></button><div class="settings-menu" id="settings-menu" role="menu"><a href="#" class="settings-account" role="menuitem"><ion-icon name="person-outline"></ion-icon> Account</a><button type="button" class="settings-logout" role="menuitem"><ion-icon name="log-out-outline"></ion-icon> Log Out</button></div></div>
     </div>
   </nav>
 
@@ -110,10 +108,13 @@
 
         <!-- Sort -->
         <div class="filter-sort">
-          <select class="glass-input sort-select" id="report-sort" aria-label="Sort reports">
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-          </select>
+          <div class="sort-control">
+            <select class="glass-input sort-select" id="report-sort" aria-label="Sort reports">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
+            <ion-icon name="chevron-down-outline" aria-hidden="true"></ion-icon>
+          </div>
         </div>
 
       </div>
@@ -140,19 +141,6 @@
   </main>
 
   <!-- FAB -->
-  <div class="fab-container">
-    <div class="fab-menu" id="fab-menu" role="menu">
-      <a href="#" class="fab-menu-item" id="fab-settings" role="menuitem">
-        <ion-icon name="settings-outline"></ion-icon> Settings
-      </a>
-      <button class="fab-menu-item danger" id="fab-logout" role="menuitem">
-        <ion-icon name="log-out-outline"></ion-icon> Log Out
-      </button>
-    </div>
-    <button class="fab-btn" id="fab-btn" aria-label="Open menu" aria-expanded="false">
-      <ion-icon name="menu-outline"></ion-icon>
-    </button>
-  </div>
 
   <script src="js/shared.js"></script>
   <script src="js/report.js"></script>

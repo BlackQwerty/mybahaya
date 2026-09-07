@@ -4,28 +4,28 @@
 
 'use strict';
 
-/* ── FAB Hamburger Menu ── */
-function initFAB() {
-  const fabBtn  = document.getElementById('fab-btn');
-  const fabMenu = document.getElementById('fab-menu');
-  if (!fabBtn || !fabMenu) return;
+/* ── Top Settings Menu ── */
+function initSettingsMenu() {
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsMenu = document.getElementById('settings-menu');
+  if (!settingsBtn || !settingsMenu) return;
 
-  fabBtn.addEventListener('click', () => {
-    const isOpen = fabMenu.classList.toggle('open');
-    fabBtn.classList.toggle('active', isOpen);
-    fabBtn.setAttribute('aria-expanded', isOpen);
+  settingsBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const isOpen = settingsMenu.classList.toggle('open');
+    settingsBtn.classList.toggle('active', isOpen);
+    settingsBtn.setAttribute('aria-expanded', isOpen);
   });
 
-  // Close when clicking outside
   document.addEventListener('click', (e) => {
-    if (!fabBtn.contains(e.target) && !fabMenu.contains(e.target)) {
-      fabMenu.classList.remove('open');
-      fabBtn.classList.remove('active');
+    if (!settingsBtn.contains(e.target) && !settingsMenu.contains(e.target)) {
+      settingsMenu.classList.remove('open');
+      settingsBtn.classList.remove('active');
+      settingsBtn.setAttribute('aria-expanded', 'false');
     }
   });
 
-  // Logout action
-  const logoutBtn = document.getElementById('fab-logout');
+  const logoutBtn = settingsMenu.querySelector('.settings-logout');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
       if (confirm('Are you sure you want to log out?')) {
@@ -40,13 +40,34 @@ function initFAB() {
     });
   }
 
-  // Settings action
-  const settingsBtn = document.getElementById('fab-settings');
-  if (settingsBtn) {
-    settingsBtn.addEventListener('click', () => {
-      alert('Settings panel coming soon!');
+  const accountBtn = settingsMenu.querySelector('.settings-account');
+  if (accountBtn) {
+    accountBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      settingsMenu.classList.remove('open');
+      settingsBtn.classList.remove('active');
+      settingsBtn.setAttribute('aria-expanded', 'false');
+
+      const user = window.currentUser;
+      const organization = window.currentUserOrg;
+      const modal = document.createElement('div');
+      modal.className = 'account-modal-backdrop';
+      modal.innerHTML = `
+        <section class="account-modal" role="dialog" aria-modal="true" aria-labelledby="account-modal-title">
+          <button class="account-modal-close" type="button" aria-label="Close account dialog">&times;</button>
+          <h2 id="account-modal-title">Account</h2>
+          <div class="account-detail"><span>Email</span><strong>${user?.email || 'Unavailable'}</strong></div>
+          <div class="account-detail"><span>Role</span><strong>${window.currentUserRole || 'User'}</strong></div>
+          ${organization?.name ? `<div class="account-detail"><span>Organization</span><strong>${organization.name}</strong></div>` : ''}
+        </section>`;
+      document.body.appendChild(modal);
+
+      const closeModal = () => modal.remove();
+      modal.querySelector('.account-modal-close').addEventListener('click', closeModal);
+      modal.addEventListener('click', event => { if (event.target === modal) closeModal(); });
     });
   }
+
 }
 
 /* ── Mark Active Nav Link ── */
@@ -98,7 +119,7 @@ window.showToast = showToast;
 
 /* ── Init on DOM ready ── */
 document.addEventListener('DOMContentLoaded', () => {
-  initFAB();
+  initSettingsMenu();
   initNav();
   initFadeIn();
 });

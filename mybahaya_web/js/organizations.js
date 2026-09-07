@@ -373,7 +373,7 @@ function renderAdmins(admins) {
           </div>
           <div class="org-info">
             <span class="org-name">${a.name || '-'}</span>
-            <span class="org-contact-email">${a.role === 'superadmin' ? '⭐ Super Admin' : 'Admin'}</span>
+            <span class="org-contact-email">${a.role === 'superadmin' ? 'Super Admin' : 'Admin'}</span>
           </div>
         </div>
       </td>

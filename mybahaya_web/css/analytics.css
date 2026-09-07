@@ -32,6 +32,44 @@
   flex-wrap: wrap;
   justify-content: flex-start;
 }
+
+.timeframe-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 190px;
+  color: var(--accent-primary);
+}
+
+.timeframe-control > ion-icon:first-child {
+  position: absolute;
+  left: 13px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.timeframe-control .glass-input {
+  width: 100%;
+  padding-left: 39px;
+  padding-right: 34px;
+}
+
+.timeframe-chevron {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: var(--secondary-text);
+}
+
+#export-btn {
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  background: #ffffff;
+}
+
+#export-btn:hover {
+  background: rgba(88, 26, 39, 0.08);
+}
 @media (max-width: 700px) {
   .header-actions {
     width: 100%;
@@ -44,6 +82,8 @@
   .header-actions .btn {
     width: 100%;
   }
+
+  .timeframe-control { width: 100%; }
 
   .page-header {
     flex-direction: column;
