@@ -465,6 +465,17 @@ function applyFilters() {
   renderReports(list);
 }
 
+// play alert sound function for new reports entered
+function playAlertSound(){
+
+  //declare sounds
+  const alertSoundChime = new Audio('mybahaya_web/assets/sounds/chime-sounds.mp3');
+
+  alertSoundChime.play().catch(error => {
+    console.warn('Browser blocked audio playback: ', error);
+  });
+}
+
 /* ── Firestore listener ── */
 function listenReports() {
   const loading = document.getElementById('reports-loading');
@@ -476,9 +487,25 @@ function listenReports() {
     query = query.where('assignedOrgId', '==', org.id);
   }
 
+  //track id that already rendered - prevents the sound from firing initial load or duplicate events
+  const seenIds = new Set();
+
   query.onSnapshot(snap => {
     loading.classList.add('hidden');
+
+    //docChanges() tells us exactly what changed
+    //filter only to genuinely new documents
+    const newDocs = snap.docChanges().filter(change => change.type == 'added');
+
     allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if(newDocs.length > 0){
+      playAlertSound();
+    }
+
+    //mark these IDs as seen so we never re-alert for them
+    newDocs.forEach(change => seenIds.add(change.doc.id));
+    
     applyFilters();
   }, err => {
     loading.innerHTML = `<ion-icon name="alert-circle-outline" style="font-size:20px;color:var(--accent-rose)"></ion-icon>
