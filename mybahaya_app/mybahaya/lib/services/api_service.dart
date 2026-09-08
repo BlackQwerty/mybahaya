@@ -24,7 +24,7 @@ class ApiService {
       return configuredBaseUrl;
     }
 
-    return 'http://192.168.0.34:8080/api';
+    return 'http://Shukri-Mac.local:8080/api';
   }
 
   /// Submits a report with 1–3 photos (multipart/form-data) to the backend.

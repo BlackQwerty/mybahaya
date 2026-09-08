@@ -5,9 +5,9 @@
 'use strict';
 
 // const API_BASE = 'https://api.mybahaya.com/api';
-const API_BASE = 'http://192.168.0.34:8080/api';
+const API_BASE = 'http://Shukri-Mac.local:8080/api';
 const OLD_MINIO_URL = 'http://178.105.158.80:9000';
-const MINIO_BASE_URL = 'http://192.168.0.34:9000';
+const MINIO_BASE_URL = 'http://Shukri-Mac.local:9000';
 
 function safeImageUrl(url) {
   if (!url) return '';
