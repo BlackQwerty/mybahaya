@@ -375,6 +375,90 @@ body::before {
   border: 1px solid rgba(255, 255, 255, 0.30);
 }
 
+.sound-toggle-btn {
+  font-size: 18px;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  transition: background var(--t-fast), border-color var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+}
+
+.sound-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: scale(1.05);
+}
+
+.sound-toggle-btn.playing {
+  background: rgba(255, 59, 48, 0.35);
+  border-color: rgba(255, 59, 48, 0.8);
+  animation: sound-pulse 0.6s ease infinite alternate;
+}
+
+@keyframes sound-pulse {
+  from { transform: scale(1); box-shadow: 0 0 0 rgba(255, 59, 48, 0); }
+  to { transform: scale(1.12); box-shadow: 0 0 14px rgba(255, 59, 48, 0.7); }
+}
+
+/* Audio unlock floating banner */
+.audio-unlock-banner {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+.audio-unlock-banner.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.audio-unlock-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: rgba(30, 20, 25, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 59, 48, 0.5);
+  border-radius: var(--r-md);
+  color: #ffffff;
+  font-size: var(--fs-sm);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+.audio-unlock-content ion-icon {
+  font-size: 22px;
+  color: var(--accent-primary);
+}
+
+.audio-unlock-content .btn-unlock-audio {
+  padding: 6px 14px;
+  background: var(--accent-primary);
+  border: 0;
+  border-radius: var(--r-sm);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: opacity var(--t-fast);
+}
+
+.audio-unlock-banner.alert-pulse .audio-unlock-content {
+  border-color: #FF3B30;
+  animation: unlock-pulse 0.8s ease infinite alternate;
+}
+
+@keyframes unlock-pulse {
+  from { box-shadow: 0 0 10px rgba(255, 59, 48, 0.3); }
+  to { box-shadow: 0 0 24px rgba(255, 59, 48, 0.85); }
+}
+
 .settings-menu {
   position: absolute;
   top: calc(100% + 10px);

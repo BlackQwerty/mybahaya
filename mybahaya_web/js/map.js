@@ -105,14 +105,67 @@ function listenReports() {
     query = query.where('assignedOrgId', '==', org.id);
   }
 
+  // Track IDs and statuses that are already known — prevents sound from firing on initial load or duplicate events
+  const seenIds = new Set();
+  const seenStatusUpdates = new Set();
+  let initialLoadDone = false;
+
   query.onSnapshot(snap => {
     allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     if (loadEl) loadEl.classList.add('hidden');
+    console.log(`[MyBahaya Map] Snapshot received: ${snap.docs.length} docs, ${snap.docChanges().length} doc changes`);
+
+    const docChanges = snap.docChanges();
+
+    if (!initialLoadDone) {
+      // First snapshot: mark all existing documents as seen, don't play sound
+      snap.docs.forEach(d => {
+        seenIds.add(d.id);
+        const data = d.data() || {};
+        seenStatusUpdates.add(`${d.id}_${data.status}`);
+      });
+      initialLoadDone = true;
+      console.log(`[MyBahaya Map] Initial snapshot recorded with ${seenIds.size} existing reports.`);
+    } else {
+      // Find newly added reports OR existing reports whose status changed to RECEIVED or NEW
+      const newDocs = [];
+
+      docChanges.forEach(change => {
+        const id = change.doc.id;
+        const data = change.doc.data() || {};
+
+        if (change.type === 'added' && !seenIds.has(id)) {
+          seenIds.add(id);
+          seenStatusUpdates.add(`${id}_${data.status}`);
+          newDocs.push({ id, data, isNew: true });
+        } else if (change.type === 'modified') {
+          const statusKey = `${id}_${data.status}`;
+          if ((data.status === 'RECEIVED' || data.status === 'NEW') && !seenStatusUpdates.has(statusKey)) {
+            seenStatusUpdates.add(statusKey);
+            newDocs.push({ id, data, isNew: false });
+          }
+        }
+      });
+
+      if (newDocs.length > 0) {
+        console.log(`[MyBahaya Map] 🚨 ${newDocs.length} real-time report event(s) detected! Triggering alert sound...`);
+        if (typeof window.playAlertSound === 'function') {
+          window.playAlertSound(3);
+        }
+        const first = newDocs[0].data;
+        const cat = first.category || 'Incident';
+        const actionWord = newDocs[0].isNew ? 'received' : 'updated to Received';
+        if (typeof showToast === 'function') {
+          showToast(`🚨 New ${cat} report ${actionWord} in real time!`, 'info', 5000);
+        }
+      }
+    }
+
     renderMarkers();
     updatePanel();
   }, err => {
     if (loadEl) loadEl.querySelector('.map-loading-label').textContent = 'Failed to load';
-    console.error('Firestore:', err);
+    console.error('[MyBahaya Map] Listener error:', err);
   });
 }
 

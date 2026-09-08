@@ -430,10 +430,63 @@ function listenReports() {
     query = query.where('assignedOrgId', '==', org.id);
   }
 
+  // Track IDs and statuses that are already known — prevents sound from firing on initial load or duplicate events
+  const seenIds = new Set();
+  const seenStatusUpdates = new Set();
+  let initialLoadDone = false;
+
   query.onSnapshot(snap => {
+    console.log(`[MyBahaya Home] Snapshot received: ${snap.docs.length} docs, ${snap.docChanges().length} doc changes`);
+
     const reports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const docChanges = snap.docChanges();
+
+    if (!initialLoadDone) {
+      // First snapshot: mark all existing documents as seen, don't play sound
+      snap.docs.forEach(d => {
+        seenIds.add(d.id);
+        const data = d.data() || {};
+        seenStatusUpdates.add(`${d.id}_${data.status}`);
+      });
+      initialLoadDone = true;
+      console.log(`[MyBahaya Home] Initial snapshot recorded with ${seenIds.size} existing reports.`);
+    } else {
+      // Find newly added reports OR existing reports whose status changed to RECEIVED or NEW
+      const newDocs = [];
+
+      docChanges.forEach(change => {
+        const id = change.doc.id;
+        const data = change.doc.data() || {};
+
+        if (change.type === 'added' && !seenIds.has(id)) {
+          seenIds.add(id);
+          seenStatusUpdates.add(`${id}_${data.status}`);
+          newDocs.push({ id, data, isNew: true });
+        } else if (change.type === 'modified') {
+          const statusKey = `${id}_${data.status}`;
+          if ((data.status === 'RECEIVED' || data.status === 'NEW') && !seenStatusUpdates.has(statusKey)) {
+            seenStatusUpdates.add(statusKey);
+            newDocs.push({ id, data, isNew: false });
+          }
+        }
+      });
+
+      if (newDocs.length > 0) {
+        console.log(`[MyBahaya Home] 🚨 ${newDocs.length} real-time report event(s) detected! Triggering alert sound...`);
+        if (typeof window.playAlertSound === 'function') {
+          window.playAlertSound(3);
+        }
+        const first = newDocs[0].data;
+        const cat = first.category || 'Incident';
+        const actionWord = newDocs[0].isNew ? 'received' : 'updated to Received';
+        if (typeof showToast === 'function') {
+          showToast(`🚨 New ${cat} report ${actionWord} in real time!`, 'info', 5000);
+        }
+      }
+    }
+
     processReports(reports);
-  }, err => console.error('Reports listener:', err));
+  }, err => console.error('[MyBahaya Home] Reports listener error:', err));
 }
 
 /* ══════════════════════════════════════════════════════════

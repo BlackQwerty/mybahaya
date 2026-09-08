@@ -68,6 +68,90 @@ function initSettingsMenu() {
     });
   }
 
+  // Sound settings in settings menu
+  let soundMenuBtn = settingsMenu.querySelector('.settings-sound');
+  if (!soundMenuBtn) {
+    soundMenuBtn = document.createElement('button');
+    soundMenuBtn.type = 'button';
+    soundMenuBtn.className = 'settings-sound';
+    soundMenuBtn.setAttribute('role', 'menuitem');
+    if (logoutBtn) {
+      settingsMenu.insertBefore(soundMenuBtn, logoutBtn);
+    } else {
+      settingsMenu.appendChild(soundMenuBtn);
+    }
+  }
+
+  function updateSoundMenuUI() {
+    const isMuted = localStorage.getItem('mybahaya_sound_muted') === 'true';
+    const repeats = localStorage.getItem('mybahaya_sound_repeats') || '3';
+    if (soundMenuBtn) {
+      if (isMuted) {
+        soundMenuBtn.innerHTML = `<ion-icon name="volume-mute-outline"></ion-icon> Sound: Muted`;
+      } else {
+        soundMenuBtn.innerHTML = `<ion-icon name="volume-high-outline"></ion-icon> Sound: ${repeats}x Chime`;
+      }
+    }
+    const navBtn = document.getElementById('sound-toggle-btn');
+    if (navBtn) {
+      navBtn.innerHTML = `<ion-icon name="${isMuted ? 'volume-mute-outline' : 'volume-high-outline'}"></ion-icon>`;
+      navBtn.title = isMuted ? 'Alert sound: Muted (Click to enable)' : `Alert sound: Active (${repeats}x chime) (Click to test)`;
+    }
+  }
+
+  updateSoundMenuUI();
+
+  soundMenuBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (typeof window.unlockAudio === 'function') window.unlockAudio();
+    const isMuted = localStorage.getItem('mybahaya_sound_muted') === 'true';
+    let repeats = parseInt(localStorage.getItem('mybahaya_sound_repeats') || '3', 10);
+
+    // Cycle through: 3x -> 2x -> 1x -> Muted -> 3x
+    if (isMuted) {
+      localStorage.setItem('mybahaya_sound_muted', 'false');
+      localStorage.setItem('mybahaya_sound_repeats', '3');
+      showToast('🔊 Alert sound enabled (3x chime)', 'success');
+      if (typeof window.playAlertSound === 'function') window.playAlertSound(3);
+    } else if (repeats === 3) {
+      localStorage.setItem('mybahaya_sound_repeats', '2');
+      showToast('🔊 Alert sound set to 2x chime', 'info');
+      if (typeof window.playAlertSound === 'function') window.playAlertSound(2);
+    } else if (repeats === 2) {
+      localStorage.setItem('mybahaya_sound_repeats', '1');
+      showToast('🔊 Alert sound set to 1x chime', 'info');
+      if (typeof window.playAlertSound === 'function') window.playAlertSound(1);
+    } else {
+      localStorage.setItem('mybahaya_sound_muted', 'true');
+      showToast('🔇 Alert sound muted', 'info');
+    }
+    updateSoundMenuUI();
+  });
+
+  // Test Real-Time Alert simulation button in settings menu
+  let testSimBtn = settingsMenu.querySelector('.settings-sim-report');
+  if (!testSimBtn) {
+    testSimBtn = document.createElement('button');
+    testSimBtn.type = 'button';
+    testSimBtn.className = 'settings-sim-report';
+    testSimBtn.setAttribute('role', 'menuitem');
+    testSimBtn.innerHTML = `<ion-icon name="notifications-outline"></ion-icon> Test Real-Time Alert`;
+    if (logoutBtn) {
+      settingsMenu.insertBefore(testSimBtn, logoutBtn);
+    } else {
+      settingsMenu.appendChild(testSimBtn);
+    }
+    testSimBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      settingsMenu.classList.remove('open');
+      settingsBtn.classList.remove('active');
+      settingsBtn.setAttribute('aria-expanded', 'false');
+      if (typeof window.unlockAudio === 'function') window.unlockAudio();
+      showToast('🚨 [TEST] New Assault report received in real time!', 'info', 5000);
+      if (typeof window.playAlertSound === 'function') window.playAlertSound(3);
+    });
+  }
+
 }
 
 /* ── Mark Active Nav Link ── */
@@ -117,9 +201,327 @@ function showToast(message, type = 'success', duration = 3500) {
 // Expose globally so page scripts can call it
 window.showToast = showToast;
 
+/* ============================================================
+   REAL-TIME ALERT AUDIO MANAGER (Multi-Tier Resilient Player)
+   ============================================================ */
+let audioCtx = null;
+let audioBuffer = null;
+let isAudioUnlocked = false;
+let isCurrentlyPlaying = false;
+let persistentAudioEl = null;
+
+function getAudioContext() {
+  if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+    const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioCtxClass();
+  }
+  return audioCtx;
+}
+
+// Get or create persistent DOM audio element (reused across plays to keep permission blessed)
+function getPersistentAudioElement() {
+  if (!persistentAudioEl) {
+    persistentAudioEl = document.getElementById('mybahaya-persistent-audio');
+    if (!persistentAudioEl) {
+      persistentAudioEl = document.createElement('audio');
+      persistentAudioEl.id = 'mybahaya-persistent-audio';
+      persistentAudioEl.src = 'assets/sounds/chime-sounds.mp3';
+      persistentAudioEl.preload = 'auto';
+      persistentAudioEl.style.display = 'none';
+      document.body.appendChild(persistentAudioEl);
+    }
+  }
+  return persistentAudioEl;
+}
+
+// Safely decode audio data supporting both Promise & callback signatures
+function decodeAudioDataSafe(ctx, arrayBuffer) {
+  return new Promise((resolve, reject) => {
+    try {
+      const copy = arrayBuffer.slice(0);
+      const res = ctx.decodeAudioData(copy, (decoded) => {
+        resolve(decoded);
+      }, (err) => {
+        reject(err);
+      });
+      if (res && typeof res.then === 'function') {
+        res.then(resolve).catch(reject);
+      }
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+// Preload audio buffer and persistent audio element
+async function preloadAlertAudio() {
+  const el = getPersistentAudioElement();
+  if (el) el.load();
+
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const response = await fetch('assets/sounds/chime-sounds.mp3');
+    if (!response.ok) return;
+    const arrayBuffer = await response.arrayBuffer();
+    audioBuffer = await decodeAudioDataSafe(ctx, arrayBuffer);
+    console.log('[MyBahaya Audio] Audio buffer preloaded successfully');
+  } catch (err) {
+    console.warn('[MyBahaya Audio] Buffer preload failed, DOM audio will be used:', err);
+  }
+}
+
+// Unlock audio on first user gesture anywhere
+async function unlockAudio() {
+  const ctx = getAudioContext();
+  if (ctx && ctx.state !== 'running') {
+    try {
+      await ctx.resume();
+    } catch (e) {}
+  }
+
+  // Also bless the persistent DOM audio element with a silent warm-up
+  const el = getPersistentAudioElement();
+  if (el) {
+    try {
+      const origVol = el.volume;
+      el.volume = 0.001;
+      const p = el.play();
+      if (p !== undefined) {
+        p.then(() => {
+          el.pause();
+          el.currentTime = 0;
+          el.volume = origVol || 1.0;
+        }).catch(() => {});
+      }
+    } catch (_) {}
+  }
+
+  isAudioUnlocked = true;
+  hideUnlockBanner();
+}
+
+// Register unlock on any user gestures
+['click', 'keydown', 'touchstart', 'pointerdown'].forEach(event => {
+  document.addEventListener(event, () => unlockAudio(), { capture: true });
+});
+
+// Synthesizer emergency chime using Web Audio oscillators (guaranteed zero external dependencies)
+function playSynthBeep() {
+  return new Promise(async resolve => {
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return resolve();
+      if (ctx.state !== 'running') {
+        try { await ctx.resume(); } catch (_) {}
+      }
+
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, now); // A5 note
+      osc.frequency.exponentialRampToValueAtTime(1174.66, now + 0.15); // D6 note
+
+      gain.gain.setValueAtTime(0.5, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.55);
+
+      setTimeout(resolve, 550);
+    } catch (_) {
+      resolve();
+    }
+  });
+}
+
+// Show visual unlock banner if autoplay is blocked or before initial interaction
+function showAutoplayNotice(isBlockedAlert = false) {
+  let banner = document.getElementById('mybahaya-audio-unlock-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'mybahaya-audio-unlock-banner';
+    banner.className = 'audio-unlock-banner';
+    banner.innerHTML = `
+      <div class="audio-unlock-content">
+        <ion-icon name="volume-high-outline"></ion-icon>
+        <span><strong>Real-time Alert:</strong> Click here to enable audio alerts</span>
+        <button type="button" class="btn-unlock-audio">Enable Sound</button>
+      </div>`;
+    banner.addEventListener('click', async () => {
+      await unlockAudio();
+      playAlertSound(1);
+      showToast('🔊 Real-time audio alerts are now active!', 'success');
+    });
+    document.body.appendChild(banner);
+  }
+  banner.classList.add('visible');
+  if (isBlockedAlert) {
+    banner.classList.add('alert-pulse');
+  }
+}
+
+function hideUnlockBanner() {
+  const banner = document.getElementById('mybahaya-audio-unlock-banner');
+  if (banner) {
+    banner.classList.remove('visible', 'alert-pulse');
+  }
+}
+
+// Play a single chime with 3 fallback tiers
+async function playSingleChime() {
+  const ctx = getAudioContext();
+
+  // Tier 1: Web Audio Buffer Source (zero lag, volume amplified)
+  if (ctx) {
+    if (ctx.state === 'suspended') {
+      try { await ctx.resume(); } catch (_) {}
+    }
+    if (ctx.state === 'running' && audioBuffer) {
+      return new Promise(resolve => {
+        try {
+          const source = ctx.createBufferSource();
+          source.buffer = audioBuffer;
+          const gainNode = ctx.createGain();
+          gainNode.gain.value = 1.5;
+          source.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          source.onended = () => resolve();
+          source.start(0);
+          setTimeout(resolve, 2000);
+          return;
+        } catch (err) {
+          console.warn('[MyBahaya Audio] WebAudio buffer play error:', err);
+        }
+      });
+    }
+  }
+
+  // Tier 2: Persistent Blessed DOM Audio Element
+  const el = getPersistentAudioElement();
+  if (el) {
+    try {
+      el.currentTime = 0;
+      el.volume = 1.0;
+      const playPromise = el.play();
+      if (playPromise !== undefined) {
+        await playPromise;
+        return new Promise(resolve => {
+          el.onended = () => resolve();
+          setTimeout(resolve, 1800);
+        });
+      }
+    } catch (err) {
+      console.warn('[MyBahaya Audio] DOM audio play blocked by browser:', err);
+    }
+  }
+
+  // Tier 3: Web Audio Oscillator Synthesizer
+  if (ctx) {
+    if (ctx.state === 'suspended') {
+      try { await ctx.resume(); } catch (_) {}
+    }
+    if (ctx.state === 'running') {
+      return playSynthBeep();
+    }
+  }
+
+  // If all failed because browser blocked autoplay (no gesture yet):
+  showAutoplayNotice(true);
+}
+
+/**
+ * Play alert sound repeating `times` times (defaults to saved setting or 3)
+ */
+async function playAlertSound(times) {
+  const isMuted = localStorage.getItem('mybahaya_sound_muted') === 'true';
+  if (isMuted) {
+    console.log('[MyBahaya Audio] Sound is muted in settings, skipping.');
+    return;
+  }
+
+  let count = typeof times === 'number' ? times : parseInt(localStorage.getItem('mybahaya_sound_repeats') || '3', 10);
+  if (isNaN(count) || count < 1) count = 3;
+
+  if (isCurrentlyPlaying) return;
+  isCurrentlyPlaying = true;
+
+  console.log(`[MyBahaya Audio] 🔔 Playing alert sound ${count}x...`);
+
+  const btn = document.getElementById('sound-toggle-btn');
+  if (btn) btn.classList.add('playing');
+
+  try {
+    for (let i = 0; i < count; i++) {
+      if (localStorage.getItem('mybahaya_sound_muted') === 'true') break;
+      await playSingleChime();
+      if (i < count - 1) {
+        await new Promise(r => setTimeout(r, 220)); // Pause between chimes
+      }
+    }
+  } catch (e) {
+    console.error('[MyBahaya Audio] Error during playback loop:', e);
+  } finally {
+    isCurrentlyPlaying = false;
+    if (btn) btn.classList.remove('playing');
+  }
+}
+
+function initSoundNavButton() {
+  const navRight = document.querySelector('.navbar-right');
+  if (!navRight || document.getElementById('sound-toggle-btn')) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'sound-toggle-btn';
+  btn.className = 'avatar-btn sound-toggle-btn';
+  btn.type = 'button';
+  btn.setAttribute('aria-label', 'Alert sound test and toggle');
+
+  const isMuted = localStorage.getItem('mybahaya_sound_muted') === 'true';
+  const repeats = localStorage.getItem('mybahaya_sound_repeats') || '3';
+  btn.title = isMuted ? 'Alert sound: Muted (Click to enable)' : `Alert sound: Active (${repeats}x chime) (Click to test)`;
+  btn.innerHTML = `<ion-icon name="${isMuted ? 'volume-mute-outline' : 'volume-high-outline'}"></ion-icon>`;
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    unlockAudio();
+    const currentlyMuted = localStorage.getItem('mybahaya_sound_muted') === 'true';
+    if (currentlyMuted) {
+      localStorage.setItem('mybahaya_sound_muted', 'false');
+      showToast('🔊 Alert sound enabled', 'success');
+      btn.innerHTML = `<ion-icon name="volume-high-outline"></ion-icon>`;
+      playAlertSound(3);
+    } else {
+      const rep = parseInt(localStorage.getItem('mybahaya_sound_repeats') || '3', 10);
+      showToast(`🔔 Testing alert sound (${rep}x chime)`, 'info');
+      playAlertSound(rep);
+    }
+  });
+
+  navRight.insertBefore(btn, navRight.firstChild);
+}
+
+// Expose globally
+window.playAlertSound = playAlertSound;
+window.unlockAudio = unlockAudio;
+
 /* ── Init on DOM ready ── */
 document.addEventListener('DOMContentLoaded', () => {
   initSettingsMenu();
   initNav();
   initFadeIn();
+  initSoundNavButton();
+  preloadAlertAudio();
+
+  // If user has not interacted yet, show subtle unlock banner
+  setTimeout(() => {
+    if (!isAudioUnlocked && !(navigator.userActivation && navigator.userActivation.hasBeenActive)) {
+      showAutoplayNotice(false);
+    }
+  }, 1000);
 });

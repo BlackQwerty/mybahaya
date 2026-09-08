@@ -466,14 +466,16 @@ function applyFilters() {
 }
 
 // play alert sound function for new reports entered
-function playAlertSound(){
-
-  //declare sounds
-  const alertSoundChime = new Audio('mybahaya_web/assets/sounds/chime-sounds.mp3');
-
-  alertSoundChime.play().catch(error => {
-    console.warn('Browser blocked audio playback: ', error);
-  });
+function playAlertSound(times = 3) {
+  if (typeof window.playAlertSound === 'function') {
+    window.playAlertSound(times);
+  } else {
+    const audio = new Audio('assets/sounds/chime-sounds.mp3');
+    audio.volume = 1;
+    audio.play().catch(error => {
+      console.warn('Browser blocked audio playback: ', error);
+    });
+  }
 }
 
 /* ── Firestore listener ── */
@@ -487,29 +489,65 @@ function listenReports() {
     query = query.where('assignedOrgId', '==', org.id);
   }
 
-  //track id that already rendered - prevents the sound from firing initial load or duplicate events
+  // Track IDs and statuses that are already known — prevents sound from firing on initial load or duplicate events
   const seenIds = new Set();
+  const seenStatusUpdates = new Set();
+  let initialLoadDone = false;
 
   query.onSnapshot(snap => {
     loading.classList.add('hidden');
-
-    //docChanges() tells us exactly what changed
-    //filter only to genuinely new documents
-    const newDocs = snap.docChanges().filter(change => change.type == 'added');
+    console.log(`[MyBahaya ReportCentre] Snapshot received: ${snap.docs.length} docs, ${snap.docChanges().length} doc changes`);
 
     allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const docChanges = snap.docChanges();
 
-    if(newDocs.length > 0){
-      playAlertSound();
+    if (!initialLoadDone) {
+      // First snapshot: mark all existing documents as seen, don't play sound
+      snap.docs.forEach(d => {
+        seenIds.add(d.id);
+        const data = d.data() || {};
+        seenStatusUpdates.add(`${d.id}_${data.status}`);
+      });
+      initialLoadDone = true;
+      console.log(`[MyBahaya ReportCentre] Initial snapshot recorded with ${seenIds.size} existing reports.`);
+    } else {
+      // Find newly added reports OR existing reports whose status changed to RECEIVED or NEW
+      const newDocs = [];
+
+      docChanges.forEach(change => {
+        const id = change.doc.id;
+        const data = change.doc.data() || {};
+
+        if (change.type === 'added' && !seenIds.has(id)) {
+          seenIds.add(id);
+          seenStatusUpdates.add(`${id}_${data.status}`);
+          newDocs.push({ id, data, isNew: true });
+        } else if (change.type === 'modified') {
+          const statusKey = `${id}_${data.status}`;
+          if ((data.status === 'RECEIVED' || data.status === 'NEW') && !seenStatusUpdates.has(statusKey)) {
+            seenStatusUpdates.add(statusKey);
+            newDocs.push({ id, data, isNew: false });
+          }
+        }
+      });
+
+      if (newDocs.length > 0) {
+        console.log(`[MyBahaya ReportCentre] 🚨 ${newDocs.length} real-time report event(s) detected! Triggering alert sound...`);
+        playAlertSound(3);
+        const first = newDocs[0].data;
+        const cat = first.category || 'Incident';
+        const actionWord = newDocs[0].isNew ? 'received' : 'updated to Received';
+        if (typeof showToast === 'function') {
+          showToast(`🚨 New ${cat} report ${actionWord} in real time!`, 'info', 5000);
+        }
+      }
     }
 
-    //mark these IDs as seen so we never re-alert for them
-    newDocs.forEach(change => seenIds.add(change.doc.id));
-    
     applyFilters();
   }, err => {
     loading.innerHTML = `<ion-icon name="alert-circle-outline" style="font-size:20px;color:var(--accent-rose)"></ion-icon>
       <span style="color:var(--accent-rose)">Failed to load: ${err.message}</span>`;
+    console.error('[MyBahaya ReportCentre] Listener error:', err);
   });
 }
 
