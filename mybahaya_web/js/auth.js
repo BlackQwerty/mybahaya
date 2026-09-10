@@ -32,28 +32,26 @@ firebase.auth().onAuthStateChanged(async function (user) {
 
   window.currentUser = user;
 
-  // Force a token refresh so any custom claims set server-side
-  // (role: admin/org, orgId) are present on this session's token.
-  try { await user.getIdToken(true); } catch (e) { /* non-fatal */ }
+  // Use the cached token during normal navigation. Forcing a network refresh
+  // here made every page wait for Firebase before rendering.
+  try { await user.getIdToken(); } catch (e) { /* non-fatal */ }
 
   let isAdmin = false;
   let org     = null;
 
   try {
-    // 1. Admin? — presence in /admins collection
-    const adminSnap = await db.collection('admins').doc(user.uid).get();
+    // Read both role sources together so navigation does not incur two
+    // sequential Firestore round trips. Admin still takes precedence.
+    const [adminSnap, orgQuery] = await Promise.all([
+      db.collection('admins').doc(user.uid).get(),
+      db.collection('organizations').where('authUid', '==', user.uid).limit(1).get(),
+    ]);
     isAdmin = adminSnap.exists;
 
-    // 2. Org? — only check if not admin. Match /organizations by authUid.
-    if (!isAdmin) {
-      const orgQuery = await db.collection('organizations')
-        .where('authUid', '==', user.uid)
-        .limit(1)
-        .get();
-      if (!orgQuery.empty) {
-        const doc = orgQuery.docs[0];
-        org = { id: doc.id, ...doc.data() };
-      }
+    // 2. Org? Match /organizations by authUid.
+    if (!orgQuery.empty && !isAdmin) {
+      const doc = orgQuery.docs[0];
+      org = { id: doc.id, ...doc.data() };
     }
   } catch (err) {
     console.error('Role check failed:', err);

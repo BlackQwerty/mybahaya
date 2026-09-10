@@ -59,9 +59,11 @@ const STATUS_META = {
   NEW:         { label: 'Pending',     color: '#aca494', icon: 'time-outline' },
   RECEIVED:    { label: 'Received',    color: '#5b8dee', icon: 'checkmark-circle-outline' },
   IN_PROGRESS: { label: 'En Route',    color: '#f5a623', icon: 'car-outline' },
-  RESOLVED:    { label: 'Resolved',    color: '#30d158', icon: 'checkmark-done-outline' },
+  RESOLVED:    { label: 'Solved',      color: '#30d158', icon: 'checkmark-done-outline' },
 };
-const NEXT_STATUS = { NEW: 'RECEIVED', RECEIVED: 'IN_PROGRESS', IN_PROGRESS: 'RESOLVED' };
+// The report workflow has three user-facing stages. Keep the backend values
+// unchanged while moving reports out of Active as soon as they are dispatched.
+const NEXT_STATUS = { NEW: 'IN_PROGRESS', RECEIVED: 'IN_PROGRESS', IN_PROGRESS: 'RESOLVED' };
 
 /* ── Category metadata ── */
 const CAT_META = {
@@ -411,7 +413,7 @@ function renderReports(reports) {
       ${unopened ? '<div class="rc-unopened-badge"><span class="unopened-dot"></span>NEW</div>' : ''}
       <div class="rc-image-bg">
         ${r.imageUrl
-          ? `<img src="${safeImageUrl(r.imageUrl)}" alt="${m.label}" loading="lazy" />`
+          ? `<img src="${safeImageUrl(r.imageUrl)}" alt="${m.label}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'rc-image-placeholder rc-media-unavailable',innerHTML:'<ion-icon name=\'image-outline\'></ion-icon><span>Media unavailable</span>'}))" />`
           : `<div class="rc-image-placeholder"><ion-icon name="${m.icon}" class="cat-icon-${r.category || 'Other'}"></ion-icon></div>`
         }
       </div>
@@ -456,6 +458,7 @@ let currentState = '';
 let currentCat   = 'all';
 let currentSearch = '';
 let currentSort  = 'newest';
+let currentStatus = 'active';
 
 function applyFilters() {
   let list = allReports.filter(r => {
@@ -463,6 +466,10 @@ function applyFilters() {
       if (!inState(r, currentState)) return false;
     }
     if (currentCat !== 'all' && r.category !== currentCat) return false;
+    const status = r.status || 'NEW';
+    if (currentStatus === 'active' && (status === 'IN_PROGRESS' || status === 'RESOLVED')) return false;
+    if (currentStatus === 'enroute' && status !== 'IN_PROGRESS') return false;
+    if (currentStatus === 'solved' && status !== 'RESOLVED') return false;
     if (currentSearch) {
       const q = currentSearch.toLowerCase();
       const hay = [r.category, r.details, r.reportId, r.id].join(' ').toLowerCase();
@@ -607,6 +614,15 @@ function initFilters() {
     });
   });
 
+  document.querySelectorAll('[data-status]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-status]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentStatus = btn.dataset.status;
+      applyFilters();
+    });
+  });
+
   document.getElementById('report-sort').addEventListener('change', e => {
     currentSort = e.target.value;
     applyFilters();
@@ -614,12 +630,14 @@ function initFilters() {
 
   document.getElementById('btn-clear-filter').addEventListener('click', () => {
     document.getElementById('report-search').value = '';
-    currentSearch = ''; currentCat = 'all'; currentScope = 'malaysia';
+    currentSearch = ''; currentCat = 'all'; currentScope = 'malaysia'; currentStatus = 'active';
     currentState  = ''; currentSort = 'newest';
     document.querySelectorAll('[data-scope]').forEach(b => b.classList.remove('active'));
     document.querySelector('[data-scope="malaysia"]').classList.add('active');
     document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
     document.querySelector('[data-cat="all"]').classList.add('active');
+    document.querySelectorAll('[data-status]').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-status="active"]').classList.add('active');
     document.getElementById('state-select').classList.add('hidden');
     document.getElementById('state-select').value = '';
     document.getElementById('report-sort').value = 'newest';

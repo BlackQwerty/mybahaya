@@ -91,6 +91,8 @@
 .chip-fire.active    { background: rgba(255,107,53,0.20); border-color: rgba(255,107,53,0.45); color: #ff8c5a; }
 .chip-medical.active { background: rgba(48,209,88,0.20);  border-color: rgba(48,209,88,0.45);  color: var(--accent-green); }
 .chip-other.active   { background: rgba(172,164,148,0.22);border-color: rgba(172,164,148,0.45);color: var(--accent-primary); }
+.rc-media-unavailable { flex-direction: column; gap: 8px; color: var(--muted-text); font-size: 13px; }
+.rc-media-unavailable ion-icon { font-size: 30px; }
 
 /* State select — visible when "By State" scope is chosen */
 .state-select {

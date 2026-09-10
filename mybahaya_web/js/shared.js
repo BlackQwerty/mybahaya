@@ -141,14 +141,19 @@ function initSettingsMenu() {
     } else {
       settingsMenu.appendChild(testSimBtn);
     }
-    testSimBtn.addEventListener('click', (e) => {
+    testSimBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       settingsMenu.classList.remove('open');
       settingsBtn.classList.remove('active');
       settingsBtn.setAttribute('aria-expanded', 'false');
-      if (typeof window.unlockAudio === 'function') window.unlockAudio();
-      showToast('🚨 [TEST] New Assault report received in real time!', 'info', 5000);
-      if (typeof window.playAlertSound === 'function') window.playAlertSound(3);
+      try {
+        if (typeof window.unlockAudio === 'function') await window.unlockAudio();
+        showToast('🚨 [TEST] New Assault report received in real time!', 'info', 5000);
+        if (typeof window.playAlertSound === 'function') await window.playAlertSound(3);
+      } catch (error) {
+        console.error('[MyBahaya Audio] Test playback failed:', error);
+        showToast('Alert sound could not be played. Check browser sound permissions.', 'error');
+      }
     });
   }
 
