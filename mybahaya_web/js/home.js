@@ -486,6 +486,11 @@ function listenReports() {
     }
 
     processReports(reports);
+
+    // Update navbar badge for unopened reports
+    if (typeof window.updateNavbarReportsBadge === 'function') {
+      window.updateNavbarReportsBadge(reports);
+    }
   }, err => console.error('[MyBahaya Home] Reports listener error:', err));
 }
 

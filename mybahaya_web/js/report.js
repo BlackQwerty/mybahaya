@@ -403,9 +403,12 @@ function renderReports(reports) {
   grid.innerHTML = reports.map((r, i) => {
     const m = catMeta(r.category);
     const s = STATUS_META[r.status] || STATUS_META.NEW;
+    const repId = r.id || r.reportId;
+    const unopened = typeof window.isReportOpened === 'function' ? !window.isReportOpened(repId) : false;
 
     return `
-    <div class="glass-card report-card fade-in" style="animation-delay:${i * 0.04}s;cursor:pointer" role="listitem" data-idx="${i}">
+    <div class="glass-card report-card fade-in${unopened ? ' unopened' : ''}" style="animation-delay:${i * 0.04}s;cursor:pointer" role="listitem" data-idx="${i}" data-id="${repId}">
+      ${unopened ? '<div class="rc-unopened-badge"><span class="unopened-dot"></span>NEW</div>' : ''}
       <div class="rc-image-bg">
         ${r.imageUrl
           ? `<img src="${safeImageUrl(r.imageUrl)}" alt="${m.label}" loading="lazy" />`
@@ -429,7 +432,19 @@ function renderReports(reports) {
   grid.querySelectorAll('.report-card').forEach(card => {
     card.addEventListener('click', () => {
       const idx = parseInt(card.dataset.idx);
-      openDetailModal(reports[idx]);
+      const report = reports[idx];
+
+      // Mark report as opened
+      const repId = report.id || report.reportId;
+      if (typeof window.markReportAsOpened === 'function') {
+        window.markReportAsOpened(repId, allReports);
+      }
+
+      // Immediately clear unopened UI styling on this card
+      card.classList.remove('unopened');
+      card.querySelector('.rc-unopened-badge')?.remove();
+
+      openDetailModal(report);
     });
   });
 }
@@ -499,6 +514,10 @@ function listenReports() {
     console.log(`[MyBahaya ReportCentre] Snapshot received: ${snap.docs.length} docs, ${snap.docChanges().length} doc changes`);
 
     allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    window.allReports = allReports;
+    if (typeof window.updateNavbarReportsBadge === 'function') {
+      window.updateNavbarReportsBadge(allReports);
+    }
     const docChanges = snap.docChanges();
 
     if (!initialLoadDone) {

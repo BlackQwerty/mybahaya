@@ -155,6 +155,45 @@
               box-shadow var(--t-base) var(--ease-smooth);
 }
 .report-card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,0.55); }
+/* ── Unopened Card Indicator & Border Glow ── */
+.report-card.unopened {
+  border: 1.5px solid rgba(255, 59, 48, 0.55);
+  box-shadow: 0 0 14px rgba(255, 59, 48, 0.25);
+}
+
+.rc-unopened-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: rgba(255, 59, 48, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.unopened-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  animation: dot-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+}
 
 /* Full-card image fills entire background */
 .rc-image-bg {

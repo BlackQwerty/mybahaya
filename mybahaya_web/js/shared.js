@@ -525,3 +525,111 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 1000);
 });
+
+
+// Unopened reports tracker
+const OPENED_REPORTS_KEY = 'mybahaya_opened_reports';
+
+/**
+ * 1. Reads the list of opened report IDs from localStorage.
+ * Using a Set gives us O(1) lookup time when checking reports.
+ */
+function getOpenedReportIds() {
+  try {
+    const raw = localStorage.getItem(OPENED_REPORTS_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch (e) {
+    return new Set();
+  }
+}
+
+/**
+ * 2. Checks if a specific report ID has already been opened.
+ */
+function isReportOpened(reportId) {
+  if (!reportId) return true;
+  return getOpenedReportIds().has(String(reportId));
+}
+
+/**
+ * 3. Marks a report ID as opened in localStorage and updates the badge.
+ */
+function markReportAsOpened(reportId, currentReportsList) {
+  if (!reportId) return;
+  const opened = getOpenedReportIds();
+  const idStr = String(reportId);
+  if (!opened.has(idStr)) {
+    opened.add(idStr);
+    try {
+      localStorage.setItem(OPENED_REPORTS_KEY, JSON.stringify([...opened]));
+    } catch (e) {
+      console.warn('Failed to save opened reports to localStorage:', e);
+    }
+    // Instantly update the counter in the navbar
+    updateNavbarReportsBadge(currentReportsList);
+  }
+}
+
+/**
+ * 4. Marks all given reports as opened.
+ */
+function markAllReportsAsOpened(reportsList) {
+  const list = reportsList || window.allReports || [];
+  const opened = getOpenedReportIds();
+  list.forEach(r => {
+    const id = r.id || r.reportId;
+    if (id) opened.add(String(id));
+  });
+  try {
+    localStorage.setItem(OPENED_REPORTS_KEY, JSON.stringify([...opened]));
+  } catch (e) {
+    console.warn('Failed to save opened reports to localStorage:', e);
+  }
+  updateNavbarReportsBadge(list);
+}
+
+/**
+ * 5. Calculates how many reports are unopened and renders
+ *    the red badge on the navbar "Reports" link and browser title.
+ */
+function updateNavbarReportsBadge(reportsList) {
+  const reportsNavLinks = document.querySelectorAll('.nav-links a[href*="report.html"]');
+  if (!reportsNavLinks.length) return;
+
+  const opened = getOpenedReportIds();
+  const list = reportsList || window.allReports || [];
+  
+  // Count how many reports are NOT in the opened Set
+  const unopenedCount = list.filter(r => !opened.has(String(r.id || r.reportId))).length;
+
+  reportsNavLinks.forEach(link => {
+    let badge = link.querySelector('.nav-badge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'nav-badge';
+      link.appendChild(badge);
+    }
+
+    if (unopenedCount > 0) {
+      badge.textContent = unopenedCount > 99 ? '99+' : unopenedCount;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  });
+
+  // Also update browser tab title: e.g. "(3) MyBahaya - Reports"
+  const baseTitle = document.title.replace(/^\(\d+\+?\)\s*/, '');
+  if (unopenedCount > 0) {
+    document.title = `(${unopenedCount > 99 ? '99+' : unopenedCount}) ${baseTitle}`;
+  } else {
+    document.title = baseTitle;
+  }
+}
+
+// Expose helpers globally so page scripts can call them
+window.getOpenedReportIds = getOpenedReportIds;
+window.isReportOpened = isReportOpened;
+window.markReportAsOpened = markReportAsOpened;
+window.markAllReportsAsOpened = markAllReportsAsOpened;
+window.updateNavbarReportsBadge = updateNavbarReportsBadge;

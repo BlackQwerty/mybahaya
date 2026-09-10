@@ -46,7 +46,10 @@
           <h1 class="page-title">Reports Centre</h1>
           <p class="page-sub">All incidents from across Malaysia. Real time from Firestore.</p>
         </div>
-        <div class="header-meta">
+        <div class="header-meta" style="display:flex;align-items:center;gap:10px">
+          <button class="btn btn-glass" id="mark-all-read-btn" style="font-size:12px;padding:6px 14px;display:inline-flex;align-items:center;gap:6px;cursor:pointer" title="Mark all reports as opened">
+            <ion-icon name="checkmark-done-outline"></ion-icon> Mark All Opened
+          </button>
           <span class="total-badge" id="total-count-badge">Loading…</span>
         </div>
       </div>

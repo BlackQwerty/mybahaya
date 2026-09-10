@@ -333,7 +333,32 @@ body::before {
 
 /* Nav links — absolutely centered in the bar */
 /* Bottom navigation override */
+.nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight:700;
+  line-height: 1;
+  border-radius: 10px;
+  background: #FF3B30;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.45);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  animation: badge-pop 0.3s cubic-bezier(0.175, 0.885,0.32,1.275);
+}
 
+.nav-badge.hidden{
+  display: none !important;
+}
+
+@keyframes badge-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 .nav-links li a ion-icon {
   font-size: 17px;
