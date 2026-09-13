@@ -490,13 +490,14 @@ function applyFilters() {
 // play alert sound function for new reports entered
 function playAlertSound(times = 3) {
   if (typeof window.playAlertSound === 'function') {
-    window.playAlertSound(times);
+    return window.playAlertSound(times);
   } else {
     const audio = new Audio('assets/sounds/chime-sounds.mp3');
     audio.volume = 1;
     audio.play().catch(error => {
       console.warn('Browser blocked audio playback: ', error);
     });
+    return Promise.resolve(true);
   }
 }
 

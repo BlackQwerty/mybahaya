@@ -111,7 +111,8 @@ async function _registerOrgPush(orgId) {
   if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
 
   // Register the service worker that handles background notifications
-  const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+  // The dashboard is served from /mybahaya_web/, not from the host root.
+  const reg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
 
   const messaging = firebase.messaging();
 

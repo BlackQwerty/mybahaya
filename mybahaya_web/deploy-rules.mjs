@@ -35,9 +35,12 @@ service cloud.firestore {
       );
     }
 
-    // Org accounts use custom claims populated from their organization record.
-    function isOrg() {
-      return isAuth() && request.auth.token.role == 'org';
+    // The organization document is the source of truth for account ownership.
+    // This also supports existing records whose document ID is not the Auth UID.
+    function isAssignedOrg(orgId) {
+      return isAuth()
+        && exists(/databases/$(database)/documents/organizations/$(orgId))
+        && get(/databases/$(database)/documents/organizations/$(orgId)).data.authUid == request.auth.uid;
     }
 
     // ── users (mobile app) ────────────────────────────────────
@@ -51,13 +54,13 @@ service cloud.firestore {
     // ── reports (LOCKED case records) ─────────────────────────
     // Full report with reporter identity, assignment, status, AI analysis.
     //  • admin   → every report
-    //  • org     → only reports assigned to that org (assignedOrgId == token.orgId)
+    //  • org     → only reports assigned to their organization record
     //  • citizen → only reports they filed themselves (userId == their uid)
     // Writes are backend-only: the Spring Boot server uses the Admin SDK, which
     // bypasses these rules. No client (mobile or web) writes reports directly.
     match /reports/{reportId} {
       allow read: if isAdmin()
-                  || (isOrg() && resource.data.assignedOrgId == request.auth.token.orgId)
+                  || isAssignedOrg(resource.data.assignedOrgId)
                   || (isAuth() && resource.data.userId == request.auth.uid);
       allow write: if false;
     }

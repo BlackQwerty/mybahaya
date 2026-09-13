@@ -447,13 +447,13 @@ async function playAlertSound(times) {
   const isMuted = localStorage.getItem('mybahaya_sound_muted') === 'true';
   if (isMuted) {
     console.log('[MyBahaya Audio] Sound is muted in settings, skipping.');
-    return;
+    return false;
   }
 
   let count = typeof times === 'number' ? times : parseInt(localStorage.getItem('mybahaya_sound_repeats') || '3', 10);
   if (isNaN(count) || count < 1) count = 3;
 
-  if (isCurrentlyPlaying) return;
+  if (isCurrentlyPlaying) return false;
   isCurrentlyPlaying = true;
 
   console.log(`[MyBahaya Audio] 🔔 Playing alert sound ${count}x...`);
@@ -469,8 +469,10 @@ async function playAlertSound(times) {
         await new Promise(r => setTimeout(r, 220)); // Pause between chimes
       }
     }
+    return true;
   } catch (e) {
     console.error('[MyBahaya Audio] Error during playback loop:', e);
+    return false;
   } finally {
     isCurrentlyPlaying = false;
     if (btn) btn.classList.remove('playing');
@@ -492,19 +494,22 @@ function initSoundNavButton() {
   btn.title = isMuted ? 'Alert sound: Muted (Click to enable)' : `Alert sound: Active (${repeats}x chime) (Click to test)`;
   btn.innerHTML = `<ion-icon name="${isMuted ? 'volume-mute-outline' : 'volume-high-outline'}"></ion-icon>`;
 
-  btn.addEventListener('click', (e) => {
+  btn.addEventListener('click', async (e) => {
     e.stopPropagation();
-    unlockAudio();
+    await unlockAudio();
     const currentlyMuted = localStorage.getItem('mybahaya_sound_muted') === 'true';
     if (currentlyMuted) {
       localStorage.setItem('mybahaya_sound_muted', 'false');
       showToast('🔊 Alert sound enabled', 'success');
       btn.innerHTML = `<ion-icon name="volume-high-outline"></ion-icon>`;
-      playAlertSound(3);
+      await playAlertSound(3);
     } else {
       const rep = parseInt(localStorage.getItem('mybahaya_sound_repeats') || '3', 10);
-      showToast(`🔔 Testing alert sound (${rep}x chime)`, 'info');
-      playAlertSound(rep);
+      const played = await playAlertSound(rep);
+      showToast(
+        played ? `🔔 Alert sound played (${rep}x chime)` : 'Alert sound is muted or already playing.',
+        played ? 'success' : 'info'
+      );
     }
   });
 
