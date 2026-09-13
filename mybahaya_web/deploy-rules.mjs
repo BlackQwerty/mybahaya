@@ -35,7 +35,7 @@ service cloud.firestore {
       );
     }
 
-    // Org = has the 'org' custom claim; token.orgId is their organization doc id.
+    // Org accounts use custom claims populated from their organization record.
     function isOrg() {
       return isAuth() && request.auth.token.role == 'org';
     }

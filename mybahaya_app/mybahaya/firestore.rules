@@ -85,9 +85,9 @@ service cloud.firestore {
 
     // ── reports/{reportId} ───────────────────────────────────────
     match /reports/{reportId} {
-      // Any authenticated user can read any report (needed for home feed)
-      // This is intentional — incident reports are public safety information
-      allow read: if isAuthenticated();
+      // Admin web accounts use the locked rules in the web deployment. Mobile
+      // users should only read the public_incidents collection for the feed.
+      allow read: if false;
       // Reports are created only via backend (Admin SDK bypasses rules)
       allow write: if false;
     }

@@ -32,9 +32,9 @@ firebase.auth().onAuthStateChanged(async function (user) {
 
   window.currentUser = user;
 
-  // Use the cached token during normal navigation. Forcing a network refresh
-  // here made every page wait for Firebase before rendering.
-  try { await user.getIdToken(); } catch (e) { /* non-fatal */ }
+  // Refresh once so role/org claims are available to Firestore security rules.
+  // The claims are required for organisation report queries.
+  try { await user.getIdToken(true); } catch (e) { /* non-fatal */ }
 
   let isAdmin = false;
   let org     = null;
