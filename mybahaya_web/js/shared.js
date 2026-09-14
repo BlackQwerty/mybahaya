@@ -516,9 +516,13 @@ function initSoundNavButton() {
   navRight.insertBefore(btn, navRight.firstChild);
 }
 
-// Expose globally
-window.playAlertSound = playAlertSound;
-window.unlockAudio = unlockAudio;
+// Keep a namespaced API so page-specific scripts cannot replace the player.
+window.MyBahayaAudio = Object.freeze({
+  play: playAlertSound,
+  unlock: unlockAudio,
+});
+window.playAlertSound = (...args) => window.MyBahayaAudio.play(...args);
+window.unlockAudio = (...args) => window.MyBahayaAudio.unlock(...args);
 
 /* ── Init on DOM ready ── */
 document.addEventListener('DOMContentLoaded', () => {

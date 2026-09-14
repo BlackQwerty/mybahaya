@@ -487,10 +487,11 @@ function applyFilters() {
   renderReports(list);
 }
 
-// play alert sound function for new reports entered
-function playAlertSound(times = 3) {
-  if (typeof window.playAlertSound === 'function') {
-    return window.playAlertSound(times);
+// Report-page wrapper. Keep this name distinct from shared.js's global player.
+// A duplicate global playAlertSound() made the navbar button recurse on this page.
+function playReportAlertSound(times = 3) {
+  if (typeof window.MyBahayaAudio?.play === 'function') {
+    return window.MyBahayaAudio.play(times);
   } else {
     const audio = new Audio('assets/sounds/chime-sounds.mp3');
     audio.volume = 1;
@@ -560,7 +561,7 @@ function listenReports() {
 
       if (newDocs.length > 0) {
         console.log(`[MyBahaya ReportCentre] 🚨 ${newDocs.length} real-time report event(s) detected! Triggering alert sound...`);
-        playAlertSound(3);
+        playReportAlertSound(3);
         const first = newDocs[0].data;
         const cat = first.category || 'Incident';
         const actionWord = newDocs[0].isNew ? 'received' : 'updated to Received';
