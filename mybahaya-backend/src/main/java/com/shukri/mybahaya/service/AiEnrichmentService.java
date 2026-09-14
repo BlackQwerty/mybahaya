@@ -23,6 +23,12 @@ public class AiEnrichmentService {
     @Value("${gemini.api.key}")
     private String geminiApiKey;
 
+    @Value("${minio.url}")
+    private String minioInternalUrl;
+
+    @Value("${minio.public-url}")
+    private String minioPublicUrl;
+
     // NOTE: gemini-2.0-flash had its free-tier quota set to 0 by Google.
     // Free quota now lives on gemini-2.5-flash, which also supports vision.
     private static final String GEMINI_URL =
@@ -35,7 +41,11 @@ public class AiEnrichmentService {
     public void enrichReport(String reportId, String imageUrl, String category, String details) {
         System.out.println("[AI] Starting enrichment for report " + reportId + " imageUrl=" + imageUrl);
         try {
-            HttpURLConnection conn = (HttpURLConnection) URI.create(imageUrl).toURL().openConnection();
+            // Report documents store a browser-reachable URL (for example
+            // Shukri-Mac.local:9000). From inside Docker, use MinIO's service
+            // hostname so image analysis does not depend on host networking.
+            String analysisImageUrl = toInternalMinioUrl(imageUrl);
+            HttpURLConnection conn = (HttpURLConnection) URI.create(analysisImageUrl).toURL().openConnection();
             conn.setConnectTimeout(10_000);
             conn.setReadTimeout(30_000);
             InputStream is = conn.getInputStream();
@@ -114,6 +124,24 @@ public class AiEnrichmentService {
             return (String) parts.get(0).get("text");
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    private String toInternalMinioUrl(String imageUrl) {
+        try {
+            URI source = URI.create(imageUrl);
+            URI publicMinio = URI.create(minioPublicUrl);
+            if (source.getHost() == null || publicMinio.getHost() == null
+                || !source.getHost().equalsIgnoreCase(publicMinio.getHost())
+                || source.getPort() != publicMinio.getPort()) {
+                return imageUrl;
+            }
+
+            String path = source.getRawPath() == null ? "" : source.getRawPath();
+            String query = source.getRawQuery() == null ? "" : "?" + source.getRawQuery();
+            return minioInternalUrl.replaceAll("/+$", "") + path + query;
+        } catch (Exception ignored) {
+            return imageUrl;
         }
     }
 }
