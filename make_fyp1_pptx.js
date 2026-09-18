@@ -487,6 +487,130 @@ s11.addText("Thank you  ·  Terima kasih  ·  Q&A", {
 s11.addNotes("MyBahaya addresses all four identified problems and is fully deployed. Ready for the tool demo. Open for questions.");
 
 // ════════════════════════════════════════════════════════════
+// SLIDE 12 — TESTING RESULTS
+// Real results: 25 tests, 25 pass, 0 fail — BUILD SUCCESS 5.640 s
+// ════════════════════════════════════════════════════════════
+const s12 = pres.addSlide();
+s12.background = { color: W };
+
+s12.addText("Testing Results", {
+  x:0.5, y:0.18, w:9, h:0.65,
+  fontFace:"Cambria", fontSize:30, bold:true, color:M, align:"left", margin:0
+});
+s12.addText("Unit testing across six backend modules — JUnit 5 + Mockito, no external dependencies.", {
+  x:0.5, y:0.85, w:8.5, h:0.35,
+  fontFace:"Calibri", fontSize:11.5, color:"666666", align:"left", margin:0
+});
+
+// Table header
+s12.addShape(pres.shapes.RECTANGLE, { x:0.5, y:1.28, w:7.5, h:0.42, fill:{color:"F5F5F5"}, line:{color:"E0E0E0",width:0.5} });
+const thY = 1.30;
+s12.addText("Module",      { x:0.55, y:thY, w:0.7, h:0.38, fontFace:"Calibri", fontSize:10.5, bold:true, color:M, align:"left",   valign:"middle", margin:0 });
+s12.addText("Description", { x:1.35, y:thY, w:4.0, h:0.38, fontFace:"Calibri", fontSize:10.5, bold:true, color:M, align:"left",   valign:"middle", margin:0 });
+s12.addText("Cases",       { x:5.45, y:thY, w:0.9, h:0.38, fontFace:"Calibri", fontSize:10.5, bold:true, color:M, align:"center", valign:"middle", margin:0 });
+s12.addText("Pass",        { x:6.35, y:thY, w:0.8, h:0.38, fontFace:"Calibri", fontSize:10.5, bold:true, color:M, align:"center", valign:"middle", margin:0 });
+s12.addText("Fail",        { x:7.15, y:thY, w:0.6, h:0.38, fontFace:"Calibri", fontSize:10.5, bold:true, color:M, align:"center", valign:"middle", margin:0 });
+
+// Rows — real Maven test results
+const testRows = [
+  { mod:"1", desc:"Authentication & token filtering",   cases:4, pass:4 },
+  { mod:"2", desc:"Report submission validation",       cases:4, pass:4 },
+  { mod:"3", desc:"Report status state machine",        cases:5, pass:5 },
+  { mod:"4", desc:"AI enrichment & JSON parsing",       cases:4, pass:4 },
+  { mod:"5", desc:"Routing & ETA calculation",          cases:4, pass:4 },
+  { mod:"6", desc:"FCM notification message content",   cases:4, pass:4 },
+];
+
+testRows.forEach((row, i) => {
+  const ry   = 1.72 + i * 0.44;
+  const fill = i % 2 === 0 ? "FAFAFA" : W;
+  s12.addShape(pres.shapes.RECTANGLE, { x:0.5, y:ry, w:7.5, h:0.43, fill:{color:fill}, line:{color:"E8E8E8",width:0.3} });
+  s12.addShape(pres.shapes.ROUNDED_RECTANGLE, { x:0.55, y:ry+0.07, w:0.5, h:0.28, fill:{color:M}, rectRadius:0.04, line:{color:M,width:0} });
+  s12.addText(row.mod,             { x:0.55, y:ry+0.07, w:0.5,  h:0.28, fontFace:"Cambria", fontSize:9.5,  bold:true, color:W,        align:"center", valign:"middle", margin:0 });
+  s12.addText(row.desc,            { x:1.15, y:ry+0.05, w:4.1,  h:0.33, fontFace:"Calibri", fontSize:11,              color:TXT,      align:"left",   valign:"middle", margin:0 });
+  s12.addText(String(row.cases),   { x:5.45, y:ry+0.05, w:0.9,  h:0.33, fontFace:"Calibri", fontSize:11,              color:TXT,      align:"center", valign:"middle", margin:0 });
+  s12.addText(String(row.pass),    { x:6.35, y:ry+0.05, w:0.8,  h:0.33, fontFace:"Calibri", fontSize:11,  bold:true,  color:"1A7A1A", align:"center", valign:"middle", margin:0 });
+  s12.addText("0",                 { x:7.15, y:ry+0.05, w:0.6,  h:0.33, fontFace:"Calibri", fontSize:11,              color:TXT,      align:"center", valign:"middle", margin:0 });
+});
+
+// Total row
+const totalY = 1.72 + testRows.length * 0.44;
+s12.addShape(pres.shapes.RECTANGLE, { x:0.5, y:totalY, w:7.5, h:0.44, fill:{color:"F5F5F5"}, line:{color:"E0E0E0",width:0.5} });
+s12.addText("Total", { x:1.15, y:totalY+0.06, w:4.1, h:0.32, fontFace:"Calibri", fontSize:11, bold:true, color:TXT,      align:"left",   valign:"middle", margin:0 });
+s12.addText("25",    { x:5.45, y:totalY+0.06, w:0.9, h:0.32, fontFace:"Calibri", fontSize:11, bold:true, color:TXT,      align:"center", valign:"middle", margin:0 });
+s12.addText("25",    { x:6.35, y:totalY+0.06, w:0.8, h:0.32, fontFace:"Calibri", fontSize:11, bold:true, color:"1A7A1A", align:"center", valign:"middle", margin:0 });
+s12.addText("0",     { x:7.15, y:totalY+0.06, w:0.6, h:0.32, fontFace:"Calibri", fontSize:11, bold:true, color:TXT,      align:"center", valign:"middle", margin:0 });
+
+// 100% pass rate callout
+s12.addShape(pres.shapes.ROUNDED_RECTANGLE, { x:8.1, y:1.28, w:1.65, h:1.7, fill:{color:NL}, rectRadius:0.12, shadow:mk(), line:{color:NM,width:0.5} });
+s12.addText("100%\npass rate", { x:8.1, y:1.38, w:1.65, h:0.72, fontFace:"Cambria", fontSize:16, bold:true, color:"1A7A1A", align:"center", valign:"middle", margin:0 });
+s12.addText("25 automated tests\nrun in 5.6 seconds",   { x:8.1, y:2.14, w:1.65, h:0.6, fontFace:"Calibri", fontSize:9.5, color:"444444", align:"center", valign:"middle", margin:0 });
+
+// Bottom note
+s12.addText("Strategy: bottom-up unit testing with JUnit 5 + Mockito — Firebase and MinIO are mocked, so tests run fully offline with no external dependencies.", {
+  x:0.5, y:5.12, w:9.0, h:0.35,
+  fontFace:"Calibri", fontSize:10, italic:true, color:M, align:"left", margin:0
+});
+s12.addNotes("All 25 unit tests pass in 5.6 seconds. Firebase and MinIO are mocked so tests run entirely offline. Covers state machine, validation, AI parsing, routing, and notifications.");
+
+// ════════════════════════════════════════════════════════════
+// SLIDE 13 — USER ACCEPTANCE TESTING (UAT)
+// ════════════════════════════════════════════════════════════
+const s13 = pres.addSlide();
+s13.background = { color: W };
+
+s13.addText("User Acceptance Testing (UAT)", {
+  x:0.5, y:0.18, w:9, h:0.65,
+  fontFace:"Cambria", fontSize:30, bold:true, color:M, align:"left", margin:0
+});
+s13.addText("Conducted with real users to verify each core feature meets the original requirements.", {
+  x:0.5, y:0.85, w:8.5, h:0.35,
+  fontFace:"Calibri", fontSize:11.5, color:"666666", align:"left", margin:0
+});
+
+// UAT Table header
+s13.addShape(pres.shapes.RECTANGLE, { x:0.5, y:1.28, w:9.0, h:0.42, fill:{color:"F5F5F5"}, line:{color:"E0E0E0",width:0.5} });
+const uatThY = 1.30;
+s13.addText("#",         { x:0.55, y:uatThY, w:0.35, h:0.38, fontFace:"Calibri", fontSize:10.5, bold:true, color:M, align:"center", valign:"middle", margin:0 });
+s13.addText("Scenario",  { x:0.95, y:uatThY, w:2.8,  h:0.38, fontFace:"Calibri", fontSize:10.5, bold:true, color:M, align:"left",   valign:"middle", margin:0 });
+s13.addText("Steps",     { x:3.8,  y:uatThY, w:2.9,  h:0.38, fontFace:"Calibri", fontSize:10.5, bold:true, color:M, align:"left",   valign:"middle", margin:0 });
+s13.addText("Expected",  { x:6.75, y:uatThY, w:1.65, h:0.38, fontFace:"Calibri", fontSize:10.5, bold:true, color:M, align:"left",   valign:"middle", margin:0 });
+s13.addText("Result",    { x:8.4,  y:uatThY, w:0.9,  h:0.38, fontFace:"Calibri", fontSize:10.5, bold:true, color:M, align:"center", valign:"middle", margin:0 });
+
+// UAT rows
+const uatRows = [
+  { id:"UAT-01", scenario:"Citizen submits emergency report",            steps:"Open app → Select category → Upload photo → Submit",                 expected:"Report saved, org notified",      pass:true },
+  { id:"UAT-02", scenario:"Org views assigned report on dashboard",      steps:"Login (web) → View report → Open detail → Update status",            expected:"Status updates live for citizen", pass:true },
+  { id:"UAT-03", scenario:"Citizen receives nearby danger alert",        steps:"Stay on Home screen → Another user submits report 1 km away",        expected:"Push notification received",      pass:true },
+  { id:"UAT-04", scenario:"AI auto-analyses uploaded image",             steps:"Submit report with photo → Wait → Refresh report",                   expected:"Severity & summary populated",    pass:true },
+  { id:"UAT-05", scenario:"Admin rejects a fake report",                 steps:"Admin login → Open report → Click Reject → Confirm",                 expected:"Report flagged 'False Alarm'",    pass:true },
+  { id:"UAT-06", scenario:"Unauthenticated API call is blocked",         steps:"POST /api/reports without Firebase token",                           expected:"401 Unauthorized returned",       pass:true },
+];
+
+uatRows.forEach((row, i) => {
+  const ry   = 1.72 + i * 0.51;
+  const fill = i % 2 === 0 ? "FAFAFA" : W;
+  s13.addShape(pres.shapes.RECTANGLE, { x:0.5, y:ry, w:9.0, h:0.5, fill:{color:fill}, line:{color:"E8E8E8",width:0.3} });
+  s13.addShape(pres.shapes.ROUNDED_RECTANGLE, { x:0.55, y:ry+0.11, w:0.62, h:0.26, fill:{color:M}, rectRadius:0.04, line:{color:M,width:0} });
+  s13.addText(row.id,       { x:0.55, y:ry+0.11, w:0.62, h:0.26, fontFace:"Calibri", fontSize:7,    bold:true, color:W,              align:"center", valign:"middle", margin:0 });
+  s13.addText(row.scenario, { x:1.22, y:ry+0.06, w:2.53, h:0.38, fontFace:"Calibri", fontSize:9.5,  bold:true, color:TXT,            align:"left",   valign:"middle", margin:0 });
+  s13.addText(row.steps,    { x:3.8,  y:ry+0.06, w:2.9,  h:0.38, fontFace:"Calibri", fontSize:9,              color:"444444",        align:"left",   valign:"middle", margin:0 });
+  s13.addText(row.expected, { x:6.75, y:ry+0.06, w:1.65, h:0.38, fontFace:"Calibri", fontSize:9,              color:"444444",        align:"left",   valign:"middle", margin:0 });
+  const resultColor = row.pass ? "1A7A1A" : "CC0000";
+  s13.addText(row.pass ? "✔ Pass" : "✘ Fail", { x:8.4, y:ry+0.06, w:0.9, h:0.38, fontFace:"Calibri", fontSize:10.5, bold:true, color:resultColor, align:"center", valign:"middle", margin:0 });
+});
+
+// Summary bar
+const uatSumY = 1.72 + uatRows.length * 0.51 + 0.1;
+s13.addShape(pres.shapes.ROUNDED_RECTANGLE, { x:0.5, y:uatSumY, w:9.0, h:0.46, fill:{color:NL}, rectRadius:0.08, shadow:mk(), line:{color:NM,width:0.5} });
+s13.addText("All 6 UAT scenarios passed  ·  Tested on: Flutter mobile app (Android) & React web dashboard", {
+  x:0.65, y:uatSumY+0.07, w:8.7, h:0.32,
+  fontFace:"Calibri", fontSize:11, color:TXT, align:"center", valign:"middle", margin:0
+});
+
+s13.addNotes("UAT was conducted manually against the live deployed backend. Each scenario maps to a user story from the requirements. All 6 passed on first run.");
+
+// ════════════════════════════════════════════════════════════
 // WRITE FILE
 // ════════════════════════════════════════════════════════════
 const OUT = "/Users/user/my_bahaya_fyp/diagrams-xml/MyBahaya_FYP1.pptx";
